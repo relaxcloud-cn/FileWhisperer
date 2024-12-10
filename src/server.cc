@@ -22,12 +22,33 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
     whisper::Node *node = reply->add_tree();
     node->set_id(boost::uuids::to_string(uuid));
 
-    mio::mmap_source mmap(request->path());
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(mmap.data());
-    auto data_size = mmap.size();
+    const uint8_t *data = nullptr;
+    size_t data_size = 0;
+    std::string file_path;
+
+    std::unique_ptr<mio::mmap_source> mmap;
+
+    if (request->has_file_path())
+    {
+      file_path = request->file_path();
+      mmap = std::make_unique<mio::mmap_source>(file_path);
+      data = reinterpret_cast<const uint8_t *>(mmap->data());
+      data_size = mmap->size();
+    }
+    else if (request->has_file_content())
+    {
+      const std::string &content = request->file_content();
+      data = reinterpret_cast<const uint8_t *>(content.data());
+      data_size = content.size();
+      file_path = "memory_file";
+    }
+    else
+    {
+      return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "No file data provided");
+    }
 
     whisper::File *file = node->mutable_file();
-    file->set_path(request->path());
+    file->set_path(file_path);
     file->set_size(data_size);
     file->set_md5(calculate_md5(data, data_size));
     file->set_sha256(calculate_sha256(data, data_size));
@@ -50,19 +71,23 @@ void RunServer(int port)
   server->Wait();
 }
 
-int main(int argc, char **argv) {
-    CLI::App app{"FileWhisperer server"};
-    
-    int port = 50051;
-    app.add_option("-p,--port", port, "Port to listen on")
-        ->check(CLI::Range(1, 65535));
+int main(int argc, char **argv)
+{
+  CLI::App app{"FileWhisperer server"};
 
-    try {
-        app.parse(argc, argv);
-    } catch(const CLI::ParseError &e) {
-        return app.exit(e);
-    }
+  int port = 50051;
+  app.add_option("-p,--port", port, "Port to listen on")
+      ->check(CLI::Range(1, 65535));
 
-    RunServer(port);
-    return 0;
+  try
+  {
+    app.parse(argc, argv);
+  }
+  catch (const CLI::ParseError &e)
+  {
+    return app.exit(e);
+  }
+
+  RunServer(port);
+  return 0;
 }

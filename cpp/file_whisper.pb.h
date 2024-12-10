@@ -144,6 +144,11 @@ class WhisperRequest final : public ::google::protobuf::Message
   static const WhisperRequest& default_instance() {
     return *internal_default_instance();
   }
+  enum DataCase {
+    kFilePath = 1,
+    kFileContent = 2,
+    DATA_NOT_SET = 0,
+  };
   static inline const WhisperRequest* internal_default_instance() {
     return reinterpret_cast<const WhisperRequest*>(
         &_WhisperRequest_default_instance_);
@@ -234,31 +239,56 @@ class WhisperRequest final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kPathFieldNumber = 1,
+    kFilePathFieldNumber = 1,
+    kFileContentFieldNumber = 2,
   };
-  // string path = 1;
-  void clear_path() ;
-  const std::string& path() const;
+  // string file_path = 1;
+  bool has_file_path() const;
+  void clear_file_path() ;
+  const std::string& file_path() const;
   template <typename Arg_ = const std::string&, typename... Args_>
-  void set_path(Arg_&& arg, Args_... args);
-  std::string* mutable_path();
-  PROTOBUF_NODISCARD std::string* release_path();
-  void set_allocated_path(std::string* value);
+  void set_file_path(Arg_&& arg, Args_... args);
+  std::string* mutable_file_path();
+  PROTOBUF_NODISCARD std::string* release_file_path();
+  void set_allocated_file_path(std::string* value);
 
   private:
-  const std::string& _internal_path() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_path(
+  const std::string& _internal_file_path() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_file_path(
       const std::string& value);
-  std::string* _internal_mutable_path();
+  std::string* _internal_mutable_file_path();
 
   public:
+  // bytes file_content = 2;
+  bool has_file_content() const;
+  void clear_file_content() ;
+  const std::string& file_content() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_file_content(Arg_&& arg, Args_... args);
+  std::string* mutable_file_content();
+  PROTOBUF_NODISCARD std::string* release_file_content();
+  void set_allocated_file_content(std::string* value);
+
+  private:
+  const std::string& _internal_file_content() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_file_content(
+      const std::string& value);
+  std::string* _internal_mutable_file_content();
+
+  public:
+  void clear_data();
+  DataCase data_case() const;
   // @@protoc_insertion_point(class_scope:whisper.WhisperRequest)
  private:
   class _Internal;
+  void set_has_file_path();
+  void set_has_file_content();
+  inline bool has_data() const;
+  inline void clear_has_data();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 0,
-      35, 2>
+      0, 2, 0,
+      40, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -278,8 +308,14 @@ class WhisperRequest final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const WhisperRequest& from_msg);
-    ::google::protobuf::internal::ArenaStringPtr path_;
+    union DataUnion {
+      constexpr DataUnion() : _constinit_{} {}
+      ::google::protobuf::internal::ConstantInitialized _constinit_;
+      ::google::protobuf::internal::ArenaStringPtr file_path_;
+      ::google::protobuf::internal::ArenaStringPtr file_content_;
+    } data_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::uint32_t _oneof_case_[1];
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1675,56 +1711,185 @@ class WhisperReply final : public ::google::protobuf::Message
 
 // WhisperRequest
 
-// string path = 1;
-inline void WhisperRequest::clear_path() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.path_.ClearToEmpty();
+// string file_path = 1;
+inline bool WhisperRequest::has_file_path() const {
+  return data_case() == kFilePath;
 }
-inline const std::string& WhisperRequest::path() const
+inline void WhisperRequest::set_has_file_path() {
+  _impl_._oneof_case_[0] = kFilePath;
+}
+inline void WhisperRequest::clear_file_path() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (data_case() == kFilePath) {
+    _impl_.data_.file_path_.Destroy();
+    clear_has_data();
+  }
+}
+inline const std::string& WhisperRequest::file_path() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:whisper.WhisperRequest.path)
-  return _internal_path();
+  // @@protoc_insertion_point(field_get:whisper.WhisperRequest.file_path)
+  return _internal_file_path();
 }
 template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void WhisperRequest::set_path(Arg_&& arg,
+inline PROTOBUF_ALWAYS_INLINE void WhisperRequest::set_file_path(Arg_&& arg,
                                                      Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.path_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:whisper.WhisperRequest.path)
+  if (data_case() != kFilePath) {
+    clear_data();
+
+    set_has_file_path();
+    _impl_.data_.file_path_.InitDefault();
+  }
+  _impl_.data_.file_path_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:whisper.WhisperRequest.file_path)
 }
-inline std::string* WhisperRequest::mutable_path() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_path();
-  // @@protoc_insertion_point(field_mutable:whisper.WhisperRequest.path)
+inline std::string* WhisperRequest::mutable_file_path() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_file_path();
+  // @@protoc_insertion_point(field_mutable:whisper.WhisperRequest.file_path)
   return _s;
 }
-inline const std::string& WhisperRequest::_internal_path() const {
+inline const std::string& WhisperRequest::_internal_file_path() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.path_.Get();
+  if (data_case() != kFilePath) {
+    return ::google::protobuf::internal::GetEmptyStringAlreadyInited();
+  }
+  return _impl_.data_.file_path_.Get();
 }
-inline void WhisperRequest::_internal_set_path(const std::string& value) {
+inline void WhisperRequest::_internal_set_file_path(const std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.path_.Set(value, GetArena());
+  if (data_case() != kFilePath) {
+    clear_data();
+
+    set_has_file_path();
+    _impl_.data_.file_path_.InitDefault();
+  }
+  _impl_.data_.file_path_.Set(value, GetArena());
 }
-inline std::string* WhisperRequest::_internal_mutable_path() {
+inline std::string* WhisperRequest::_internal_mutable_file_path() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.path_.Mutable( GetArena());
+  if (data_case() != kFilePath) {
+    clear_data();
+
+    set_has_file_path();
+    _impl_.data_.file_path_.InitDefault();
+  }
+  return _impl_.data_.file_path_.Mutable( GetArena());
 }
-inline std::string* WhisperRequest::release_path() {
+inline std::string* WhisperRequest::release_file_path() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:whisper.WhisperRequest.path)
-  return _impl_.path_.Release();
+  // @@protoc_insertion_point(field_release:whisper.WhisperRequest.file_path)
+  if (data_case() != kFilePath) {
+    return nullptr;
+  }
+  clear_has_data();
+  return _impl_.data_.file_path_.Release();
 }
-inline void WhisperRequest::set_allocated_path(std::string* value) {
+inline void WhisperRequest::set_allocated_file_path(std::string* value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.path_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.path_.IsDefault()) {
-          _impl_.path_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:whisper.WhisperRequest.path)
+  if (has_data()) {
+    clear_data();
+  }
+  if (value != nullptr) {
+    set_has_file_path();
+    _impl_.data_.file_path_.InitAllocated(value, GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:whisper.WhisperRequest.file_path)
 }
 
+// bytes file_content = 2;
+inline bool WhisperRequest::has_file_content() const {
+  return data_case() == kFileContent;
+}
+inline void WhisperRequest::set_has_file_content() {
+  _impl_._oneof_case_[0] = kFileContent;
+}
+inline void WhisperRequest::clear_file_content() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (data_case() == kFileContent) {
+    _impl_.data_.file_content_.Destroy();
+    clear_has_data();
+  }
+}
+inline const std::string& WhisperRequest::file_content() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:whisper.WhisperRequest.file_content)
+  return _internal_file_content();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void WhisperRequest::set_file_content(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (data_case() != kFileContent) {
+    clear_data();
+
+    set_has_file_content();
+    _impl_.data_.file_content_.InitDefault();
+  }
+  _impl_.data_.file_content_.SetBytes(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:whisper.WhisperRequest.file_content)
+}
+inline std::string* WhisperRequest::mutable_file_content() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_file_content();
+  // @@protoc_insertion_point(field_mutable:whisper.WhisperRequest.file_content)
+  return _s;
+}
+inline const std::string& WhisperRequest::_internal_file_content() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  if (data_case() != kFileContent) {
+    return ::google::protobuf::internal::GetEmptyStringAlreadyInited();
+  }
+  return _impl_.data_.file_content_.Get();
+}
+inline void WhisperRequest::_internal_set_file_content(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (data_case() != kFileContent) {
+    clear_data();
+
+    set_has_file_content();
+    _impl_.data_.file_content_.InitDefault();
+  }
+  _impl_.data_.file_content_.Set(value, GetArena());
+}
+inline std::string* WhisperRequest::_internal_mutable_file_content() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (data_case() != kFileContent) {
+    clear_data();
+
+    set_has_file_content();
+    _impl_.data_.file_content_.InitDefault();
+  }
+  return _impl_.data_.file_content_.Mutable( GetArena());
+}
+inline std::string* WhisperRequest::release_file_content() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:whisper.WhisperRequest.file_content)
+  if (data_case() != kFileContent) {
+    return nullptr;
+  }
+  clear_has_data();
+  return _impl_.data_.file_content_.Release();
+}
+inline void WhisperRequest::set_allocated_file_content(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (has_data()) {
+    clear_data();
+  }
+  if (value != nullptr) {
+    set_has_file_content();
+    _impl_.data_.file_content_.InitAllocated(value, GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:whisper.WhisperRequest.file_content)
+}
+
+inline bool WhisperRequest::has_data() const {
+  return data_case() != DATA_NOT_SET;
+}
+inline void WhisperRequest::clear_has_data() {
+  _impl_._oneof_case_[0] = DATA_NOT_SET;
+}
+inline WhisperRequest::DataCase WhisperRequest::data_case() const {
+  return WhisperRequest::DataCase(_impl_._oneof_case_[0]);
+}
 // -------------------------------------------------------------------
 
 // WhisperReply
