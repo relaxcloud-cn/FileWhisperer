@@ -7,7 +7,10 @@ service Whisper {
 }
 
 message WhisperRequest {
-  string path = 1;
+  oneof data {
+    string file_path = 1;
+    bytes file_content = 2;
+  }
 }
 
 message WhisperReply {

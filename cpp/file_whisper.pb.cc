@@ -27,10 +27,9 @@ namespace whisper {
 
 inline constexpr WhisperRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : path_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        _cached_size_{0} {}
+      : data_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR WhisperRequest::WhisperRequest(::_pbi::ConstantInitialized)
@@ -278,12 +277,14 @@ const ::uint32_t
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::whisper::WhisperRequest, _internal_metadata_),
         ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
+        PROTOBUF_FIELD_OFFSET(::whisper::WhisperRequest, _impl_._oneof_case_[0]),
         ~0u,  // no _weak_field_map_
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::whisper::WhisperRequest, _impl_.path_),
+        ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
+        PROTOBUF_FIELD_OFFSET(::whisper::WhisperRequest, _impl_.data_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::whisper::WhisperReply, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -400,14 +401,14 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::whisper::WhisperRequest)},
-        {9, -1, -1, sizeof(::whisper::WhisperReply)},
-        {18, 28, -1, sizeof(::whisper::Meta_MapStringEntry_DoNotUse)},
-        {30, 40, -1, sizeof(::whisper::Meta_MapNumberEntry_DoNotUse)},
-        {42, 52, -1, sizeof(::whisper::Meta_MapBoolEntry_DoNotUse)},
-        {54, -1, -1, sizeof(::whisper::Meta)},
-        {65, 80, -1, sizeof(::whisper::Node)},
-        {86, 102, -1, sizeof(::whisper::File)},
-        {110, -1, -1, sizeof(::whisper::Data)},
+        {11, -1, -1, sizeof(::whisper::WhisperReply)},
+        {20, 30, -1, sizeof(::whisper::Meta_MapStringEntry_DoNotUse)},
+        {32, 42, -1, sizeof(::whisper::Meta_MapNumberEntry_DoNotUse)},
+        {44, 54, -1, sizeof(::whisper::Meta_MapBoolEntry_DoNotUse)},
+        {56, -1, -1, sizeof(::whisper::Meta)},
+        {67, 82, -1, sizeof(::whisper::Node)},
+        {88, 104, -1, sizeof(::whisper::File)},
+        {112, -1, -1, sizeof(::whisper::Data)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::whisper::_WhisperRequest_default_instance_._instance,
@@ -422,34 +423,35 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_file_5fwhisper_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\022file_whisper.proto\022\007whisper\"\036\n\016Whisper"
-    "Request\022\014\n\004path\030\001 \001(\t\"+\n\014WhisperReply\022\033\n"
-    "\004tree\030\001 \003(\0132\r.whisper.Node\"\254\002\n\004Meta\0220\n\nm"
-    "ap_string\030\001 \003(\0132\034.whisper.Meta.MapString"
-    "Entry\0220\n\nmap_number\030\002 \003(\0132\034.whisper.Meta"
-    ".MapNumberEntry\022,\n\010map_bool\030\003 \003(\0132\032.whis"
-    "per.Meta.MapBoolEntry\0320\n\016MapStringEntry\022"
-    "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0320\n\016MapNu"
-    "mberEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\003:\0028"
-    "\001\032.\n\014MapBoolEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030"
-    "\002 \001(\010:\0028\001\"\235\001\n\004Node\022\n\n\002id\030\001 \001(\t\022\021\n\tparent"
-    "_id\030\002 \001(\t\022\020\n\010children\030\003 \003(\t\022\035\n\004file\030\004 \001("
-    "\0132\r.whisper.FileH\000\022\035\n\004data\030\005 \001(\0132\r.whisp"
-    "er.DataH\000\022\033\n\004meta\030\006 \001(\0132\r.whisper.MetaB\t"
-    "\n\007content\"\225\001\n\004File\022\014\n\004path\030\001 \001(\t\022\014\n\004name"
-    "\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\022\021\n\tmime_type\030\004 \001(\t\022"
-    "\021\n\textension\030\005 \001(\t\022\013\n\003md5\030\006 \001(\t\022\016\n\006sha25"
-    "6\030\007 \001(\t\022\024\n\007content\030\010 \001(\014H\000\210\001\001B\n\n\010_conten"
-    "t\"%\n\004Data\022\014\n\004type\030\001 \001(\t\022\017\n\007content\030\002 \001(\014"
-    "2I\n\007Whisper\022>\n\nWhispering\022\027.whisper.Whis"
-    "perRequest\032\025.whisper.WhisperReply\"\000b\006pro"
-    "to3"
+    "\n\022file_whisper.proto\022\007whisper\"E\n\016Whisper"
+    "Request\022\023\n\tfile_path\030\001 \001(\tH\000\022\026\n\014file_con"
+    "tent\030\002 \001(\014H\000B\006\n\004data\"+\n\014WhisperReply\022\033\n\004"
+    "tree\030\001 \003(\0132\r.whisper.Node\"\254\002\n\004Meta\0220\n\nma"
+    "p_string\030\001 \003(\0132\034.whisper.Meta.MapStringE"
+    "ntry\0220\n\nmap_number\030\002 \003(\0132\034.whisper.Meta."
+    "MapNumberEntry\022,\n\010map_bool\030\003 \003(\0132\032.whisp"
+    "er.Meta.MapBoolEntry\0320\n\016MapStringEntry\022\013"
+    "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0320\n\016MapNum"
+    "berEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\003:\0028\001"
+    "\032.\n\014MapBoolEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002"
+    " \001(\010:\0028\001\"\235\001\n\004Node\022\n\n\002id\030\001 \001(\t\022\021\n\tparent_"
+    "id\030\002 \001(\t\022\020\n\010children\030\003 \003(\t\022\035\n\004file\030\004 \001(\013"
+    "2\r.whisper.FileH\000\022\035\n\004data\030\005 \001(\0132\r.whispe"
+    "r.DataH\000\022\033\n\004meta\030\006 \001(\0132\r.whisper.MetaB\t\n"
+    "\007content\"\225\001\n\004File\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030"
+    "\002 \001(\t\022\014\n\004size\030\003 \001(\003\022\021\n\tmime_type\030\004 \001(\t\022\021"
+    "\n\textension\030\005 \001(\t\022\013\n\003md5\030\006 \001(\t\022\016\n\006sha256"
+    "\030\007 \001(\t\022\024\n\007content\030\010 \001(\014H\000\210\001\001B\n\n\010_content"
+    "\"%\n\004Data\022\014\n\004type\030\001 \001(\t\022\017\n\007content\030\002 \001(\0142"
+    "I\n\007Whisper\022>\n\nWhispering\022\027.whisper.Whisp"
+    "erRequest\032\025.whisper.WhisperReply\"\000b\006prot"
+    "o3"
 };
 static ::absl::once_flag descriptor_table_file_5fwhisper_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_file_5fwhisper_2eproto = {
     false,
     false,
-    843,
+    882,
     descriptor_table_protodef_file_5fwhisper_2eproto,
     "file_whisper.proto",
     &descriptor_table_file_5fwhisper_2eproto_once,
@@ -467,6 +469,8 @@ namespace whisper {
 
 class WhisperRequest::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+      PROTOBUF_FIELD_OFFSET(::whisper::WhisperRequest, _impl_._oneof_case_);
 };
 
 WhisperRequest::WhisperRequest(::google::protobuf::Arena* arena)
@@ -481,8 +485,9 @@ WhisperRequest::WhisperRequest(::google::protobuf::Arena* arena)
 inline PROTOBUF_NDEBUG_INLINE WhisperRequest::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
     const Impl_& from, const ::whisper::WhisperRequest& from_msg)
-      : path_(arena, from.path_),
-        _cached_size_{0} {}
+      : data_{},
+        _cached_size_{0},
+        _oneof_case_{from._oneof_case_[0]} {}
 
 WhisperRequest::WhisperRequest(
     ::google::protobuf::Arena* arena,
@@ -497,14 +502,25 @@ WhisperRequest::WhisperRequest(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  switch (data_case()) {
+    case DATA_NOT_SET:
+      break;
+      case kFilePath:
+        new (&_impl_.data_.file_path_) decltype(_impl_.data_.file_path_){arena, from._impl_.data_.file_path_};
+        break;
+      case kFileContent:
+        new (&_impl_.data_.file_content_) decltype(_impl_.data_.file_content_){arena, from._impl_.data_.file_content_};
+        break;
+  }
 
   // @@protoc_insertion_point(copy_constructor:whisper.WhisperRequest)
 }
 inline PROTOBUF_NDEBUG_INLINE WhisperRequest::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : path_(arena),
-        _cached_size_{0} {}
+      : data_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
 
 inline void WhisperRequest::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -516,9 +532,31 @@ WhisperRequest::~WhisperRequest() {
 }
 inline void WhisperRequest::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.path_.Destroy();
+  if (has_data()) {
+    clear_data();
+  }
   _impl_.~Impl_();
 }
+
+void WhisperRequest::clear_data() {
+// @@protoc_insertion_point(one_of_clear_start:whisper.WhisperRequest)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  switch (data_case()) {
+    case kFilePath: {
+      _impl_.data_.file_path_.Destroy();
+      break;
+    }
+    case kFileContent: {
+      _impl_.data_.file_content_.Destroy();
+      break;
+    }
+    case DATA_NOT_SET: {
+      break;
+    }
+  }
+  _impl_._oneof_case_[0] = DATA_NOT_SET;
+}
+
 
 PROTOBUF_CONSTINIT
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
@@ -549,15 +587,15 @@ const ::google::protobuf::MessageLite::ClassData* WhisperRequest::GetClassData()
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 35, 2> WhisperRequest::_table_ = {
+const ::_pbi::TcParseTable<0, 2, 0, 40, 2> WhisperRequest::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
+    2, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
+    4294967292,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
+    2,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -567,21 +605,22 @@ const ::_pbi::TcParseTable<0, 1, 0, 35, 2> WhisperRequest::_table_ = {
     ::_pbi::TcParser::GetTable<::whisper::WhisperRequest>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string path = 1;
-    {::_pbi::TcParser::FastUS1,
-     {10, 63, 0, PROTOBUF_FIELD_OFFSET(WhisperRequest, _impl_.path_)}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
-    // string path = 1;
-    {PROTOBUF_FIELD_OFFSET(WhisperRequest, _impl_.path_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string file_path = 1;
+    {PROTOBUF_FIELD_OFFSET(WhisperRequest, _impl_.data_.file_path_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bytes file_content = 2;
+    {PROTOBUF_FIELD_OFFSET(WhisperRequest, _impl_.data_.file_content_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kBytes | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\26\4\0\0\0\0\0\0"
+    "\26\11\0\0\0\0\0\0"
     "whisper.WhisperRequest"
-    "path"
+    "file_path"
   }},
 };
 
@@ -592,7 +631,7 @@ PROTOBUF_NOINLINE void WhisperRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.path_.ClearToEmpty();
+  clear_data();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -611,14 +650,22 @@ PROTOBUF_NOINLINE void WhisperRequest::Clear() {
           ::uint32_t cached_has_bits = 0;
           (void)cached_has_bits;
 
-          // string path = 1;
-          if (!this_._internal_path().empty()) {
-            const std::string& _s = this_._internal_path();
-            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "whisper.WhisperRequest.path");
-            target = stream->WriteStringMaybeAliased(1, _s, target);
+          switch (this_.data_case()) {
+            case kFilePath: {
+              const std::string& _s = this_._internal_file_path();
+              ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                  _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "whisper.WhisperRequest.file_path");
+              target = stream->WriteStringMaybeAliased(1, _s, target);
+              break;
+            }
+            case kFileContent: {
+              const std::string& _s = this_._internal_file_content();
+              target = stream->WriteBytesMaybeAliased(2, _s, target);
+              break;
+            }
+            default:
+              break;
           }
-
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
             target =
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -642,11 +689,21 @@ PROTOBUF_NOINLINE void WhisperRequest::Clear() {
           // Prevent compiler warnings about cached_has_bits being unused
           (void)cached_has_bits;
 
-           {
-            // string path = 1;
-            if (!this_._internal_path().empty()) {
+          switch (this_.data_case()) {
+            // string file_path = 1;
+            case kFilePath: {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                              this_._internal_path());
+                                              this_._internal_file_path());
+              break;
+            }
+            // bytes file_content = 2;
+            case kFileContent: {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
+                                              this_._internal_file_content());
+              break;
+            }
+            case DATA_NOT_SET: {
+              break;
             }
           }
           return this_.MaybeComputeUnknownFieldsSize(total_size,
@@ -656,13 +713,40 @@ PROTOBUF_NOINLINE void WhisperRequest::Clear() {
 void WhisperRequest::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
   auto* const _this = static_cast<WhisperRequest*>(&to_msg);
   auto& from = static_cast<const WhisperRequest&>(from_msg);
+  ::google::protobuf::Arena* arena = _this->GetArena();
   // @@protoc_insertion_point(class_specific_merge_from_start:whisper.WhisperRequest)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (!from._internal_path().empty()) {
-    _this->_internal_set_path(from._internal_path());
+  if (const uint32_t oneof_from_case = from._impl_._oneof_case_[0]) {
+    const uint32_t oneof_to_case = _this->_impl_._oneof_case_[0];
+    const bool oneof_needs_init = oneof_to_case != oneof_from_case;
+    if (oneof_needs_init) {
+      if (oneof_to_case != 0) {
+        _this->clear_data();
+      }
+      _this->_impl_._oneof_case_[0] = oneof_from_case;
+    }
+
+    switch (oneof_from_case) {
+      case kFilePath: {
+        if (oneof_needs_init) {
+          _this->_impl_.data_.file_path_.InitDefault();
+        }
+        _this->_impl_.data_.file_path_.Set(from._internal_file_path(), arena);
+        break;
+      }
+      case kFileContent: {
+        if (oneof_needs_init) {
+          _this->_impl_.data_.file_content_.InitDefault();
+        }
+        _this->_impl_.data_.file_content_.Set(from._internal_file_content(), arena);
+        break;
+      }
+      case DATA_NOT_SET:
+        break;
+    }
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -677,10 +761,9 @@ void WhisperRequest::CopyFrom(const WhisperRequest& from) {
 
 void WhisperRequest::InternalSwap(WhisperRequest* PROTOBUF_RESTRICT other) {
   using std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.path_, &other->_impl_.path_, arena);
+  swap(_impl_.data_, other->_impl_.data_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
 ::google::protobuf::Metadata WhisperRequest::GetMetadata() const {
