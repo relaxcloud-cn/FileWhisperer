@@ -5,6 +5,9 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <mio/mmap.hpp>
+#include <iostream>
+#include "common.hpp"
 #include "cpp/file_whisper.grpc.pb.h"
 
 class GreeterServiceImpl final : public whisper::Whisper::Service
@@ -19,8 +22,15 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
     whisper::Node *node = reply->add_tree();
     node->set_id(boost::uuids::to_string(uuid));
 
+    mio::mmap_source mmap(request->path());
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(mmap.data());
+    auto data_size = mmap.size();
+
     whisper::File *file = node->mutable_file();
     file->set_path(request->path());
+    file->set_size(data_size);
+    file->set_md5(calculate_md5(data, data_size));
+    file->set_sha256(calculate_sha256(data, data_size));
 
     return grpc::Status::OK;
   }
