@@ -1,7 +1,10 @@
 {
   "dependencies": [
+    "boost-uuid",
     "cli11",
     "grpc",
-    "boost-uuid"
+    "gtest",
+    "mio",
+    "openssl"
   ]
 }
