@@ -5,6 +5,7 @@
     "grpc",
     "gtest",
     "mio",
-    "openssl"
+    "openssl",
+    "libmagic"
   ]
 }

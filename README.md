@@ -4,6 +4,32 @@ FileWhisperer 是一个专注于将多种文件类型解析为 LLM 友好 结构
 
 ---
 
+# 环境变量
+
+## libmagic 魔术文件路径
+
+```sh
+MAGIC_MGC_PATH
+```
+
+---
+
+# 测试
+
+## 启用单元测试
+
+```sh
+cmake -DBUILD_TESTING=ON build
+```
+
+## 测试命令
+
+```sh
+ctest --test-dir build
+```
+
+---
+
 # 开发环境
 
 ## gRPC

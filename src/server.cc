@@ -50,6 +50,7 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
     whisper::File *file = node->mutable_file();
     file->set_path(file_path);
     file->set_size(data_size);
+    file->set_mime_type(get_buffer_mime_type(data, data_size));
     file->set_md5(calculate_md5(data, data_size));
     file->set_sha256(calculate_sha256(data, data_size));
 
