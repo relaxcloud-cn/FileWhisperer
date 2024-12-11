@@ -28,5 +28,9 @@ ENV VCPKG_ROOT=/opt/vcpkg
 WORKDIR /app
 COPY . .
 
+RUN cd fixtures && tar -zxvf file-5.45.tar.gz && cd file-5.45 && ./configure --prefix=/usr && make && sudo make install
+
+WORKDIR /app
+
 RUN cmake -B build -S . --preset=vcpkg
 RUN cmake --build build
