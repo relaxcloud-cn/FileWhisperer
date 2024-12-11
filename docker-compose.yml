@@ -5,6 +5,8 @@ services:
     container_name: filewhisperer
     network_mode: "host"
     command: /app/build/FileWhisperer
+    environment: 
+      MAGIC_MGC_PATH: /usr/share/misc/magic.mgc
     restart: always
     logging:
       driver: fluentd
