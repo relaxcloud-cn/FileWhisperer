@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+  filewhisperer:
+    image: ghcr.io/relaxcloud-cn/filewhisperer:main
+    container_name: filewhisperer
+    network_mode: "host"
+    command: /app/build/FileWhisperer
+    restart: always
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:54324
+        tag: docker.fuglu
+        fluentd-max-retries: 3
+        fluentd-buffer-limit: 100
+        fluentd-retry-wait: 3s
+        fluentd-async: "true"
+    mem_limit: 20g
