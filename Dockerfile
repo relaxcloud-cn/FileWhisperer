@@ -26,5 +26,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN cmake --preset=default
+RUN cmake --preset=vcpkg
+RUN vcpkg install
 RUN cmake --build build
