@@ -16,45 +16,54 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
                           const whisper::WhisperRequest *request,
                           whisper::WhisperReply *reply) override
   {
-    boost::uuids::random_generator generator;
-    boost::uuids::uuid uuid = generator();
+    try {
+      boost::uuids::random_generator generator;
+      boost::uuids::uuid uuid = generator();
 
-    whisper::Node *node = reply->add_tree();
-    node->set_id(boost::uuids::to_string(uuid));
+      whisper::Node *node = reply->add_tree();
+      node->set_id(boost::uuids::to_string(uuid));
 
-    const uint8_t *data = nullptr;
-    size_t data_size = 0;
-    std::string file_path;
+      const uint8_t *data = nullptr;
+      size_t data_size = 0;
+      std::string file_path;
 
-    std::unique_ptr<mio::mmap_source> mmap;
+      std::unique_ptr<mio::mmap_source> mmap;
 
-    if (request->has_file_path())
-    {
-      file_path = request->file_path();
-      mmap = std::make_unique<mio::mmap_source>(file_path);
-      data = reinterpret_cast<const uint8_t *>(mmap->data());
-      data_size = mmap->size();
+      if (request->has_file_path())
+      {
+        file_path = request->file_path();
+        mmap = std::make_unique<mio::mmap_source>(file_path);
+        data = reinterpret_cast<const uint8_t *>(mmap->data());
+        data_size = mmap->size();
+      }
+      else if (request->has_file_content())
+      {
+        const std::string &content = request->file_content();
+        data = reinterpret_cast<const uint8_t *>(content.data());
+        data_size = content.size();
+        file_path = "memory_file";
+      }
+      else
+      {
+        const std::string error_msg = "No file data provided";
+        std::cerr << error_msg << std::endl;
+        return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, error_msg);
+      }
+
+      whisper::File *file = node->mutable_file();
+      file->set_path(file_path);
+      file->set_size(data_size);
+      file->set_mime_type(get_buffer_mime_type(data, data_size));
+      file->set_md5(calculate_md5(data, data_size));
+      file->set_sha256(calculate_sha256(data, data_size));
+
+      return grpc::Status::OK;
+      
+    } catch (const std::exception& e) {
+      std::string error_msg = std::string("Error processing request: ") + e.what();
+      std::cerr << error_msg << std::endl;
+      return grpc::Status(grpc::StatusCode::INTERNAL, error_msg);
     }
-    else if (request->has_file_content())
-    {
-      const std::string &content = request->file_content();
-      data = reinterpret_cast<const uint8_t *>(content.data());
-      data_size = content.size();
-      file_path = "memory_file";
-    }
-    else
-    {
-      return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "No file data provided");
-    }
-
-    whisper::File *file = node->mutable_file();
-    file->set_path(file_path);
-    file->set_size(data_size);
-    file->set_mime_type(get_buffer_mime_type(data, data_size));
-    file->set_md5(calculate_md5(data, data_size));
-    file->set_sha256(calculate_sha256(data, data_size));
-
-    return grpc::Status::OK;
   }
 };
 
