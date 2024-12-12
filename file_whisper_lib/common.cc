@@ -197,11 +197,12 @@ std::string decode_to_string(const std::vector<uint8_t>& data, const std::string
 }
 
 std::string decode_binary(const std::vector<uint8_t>& data) {
-    auto encoding_result = detect_encoding(data);
-    if (encoding_result.encoding.empty() || encoding_result.confidence < 10) {
-        return "";
-    }
+    // auto encoding_result = detect_encoding(data);
+    // if (encoding_result.encoding.empty() || encoding_result.confidence < 10) {
+    //     return "";
+    // }
     
-    return decode_to_string(data, encoding_result.encoding);
+    // return decode_to_string(data, encoding_result.encoding);
+    return decode_to_string(data, "UTF-8");
 }
 
