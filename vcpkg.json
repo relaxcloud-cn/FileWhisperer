@@ -4,8 +4,9 @@
     "cli11",
     "grpc",
     "gtest",
+    "libmagic",
     "mio",
     "openssl",
-    "libmagic"
+    "icu"
   ]
 }

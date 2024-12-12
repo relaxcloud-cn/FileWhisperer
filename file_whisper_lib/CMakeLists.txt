@@ -11,6 +11,7 @@ target_include_directories(file_whisper_lib
 find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS uuid)
 find_package(unofficial-libmagic REQUIRED)
+find_package(ICU COMPONENTS data uc i18n io REQUIRED)
 
 target_link_libraries(file_whisper_lib
     PUBLIC
@@ -18,4 +19,8 @@ target_link_libraries(file_whisper_lib
     OpenSSL::Crypto
     Boost::uuid
     unofficial::libmagic::libmagic
+    ICU::data 
+    ICU::uc 
+    ICU::i18n 
+    ICU::io
 )

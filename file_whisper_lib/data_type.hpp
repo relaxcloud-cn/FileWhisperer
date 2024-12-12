@@ -78,4 +78,6 @@ namespace whisper_data_type
         }
     };
 
+    void meta_detect_encoding(Meta &meta, const std::vector<uint8_t> &data);
+
 } // namespace whisper
