@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     icu-devtools \
     libicu-dev \ 
-    libicu74 \
+    libicu70 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
@@ -39,6 +39,8 @@ RUN cd fixtures && tar -zxvf file-5.45.tar.gz && cd file-5.45 && ./configure --p
 
 WORKDIR /app
 
+RUN mkdir -p /usr/local/share/icu
+RUN cp /usr/share/icu/*/icudt*.dat /usr/local/share/icu/ || true
 RUN vcpkg install icu:x64-linux
 RUN cmake -B build -S . --preset=vcpkg
 RUN cmake --build build
