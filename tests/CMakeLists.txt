@@ -2,6 +2,7 @@ add_executable(
     hello_test
     hello_test.cc
     mime_type_test.cc
+    url_extract_test.cc
 )
 
 target_link_libraries(

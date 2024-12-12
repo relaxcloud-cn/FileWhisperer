@@ -26,7 +26,43 @@ def run(host, port, binary, path):
             
         response = stub.Whispering(request)
         
-    print(response)
+        for node in response.tree:
+            print(f"Node ID: {node.id}")
+            print(f"Parent ID: {node.parent_id}")
+            print(f"Children: {node.children}")
+            
+            if node.HasField('file'):
+                file = node.file
+                print(f"File: {file.path}")
+                print(f"Name: {file.name}")
+                print(f"Size: {file.size}")
+                print(f"MIME Type: {file.mime_type}")
+                print(f"Extension: {file.extension}")
+                print(f"MD5: {file.md5}")
+                print(f"SHA256: {file.sha256}")
+                if file.HasField('content'):
+                    print(f"Content length: {len(file.content)}")
+            elif node.HasField('data'):
+                data = node.data
+                print(f"Data type: {data.type}")
+                print(f"Content length: {len(data.content)}")
+            
+            if node.HasField('meta'):
+                meta = node.meta
+                if meta.map_string:
+                    print("Meta Strings:")
+                    for key, value in meta.map_string.items():
+                        print(f"  {key}: {value}")
+                if meta.map_number:
+                    print("Meta Numbers:")
+                    for key, value in meta.map_number.items():
+                        print(f"  {key}: {value}")
+                if meta.map_bool:
+                    print("Meta Booleans:")
+                    for key, value in meta.map_bool.items():
+                        print(f"  {key}: {value}")
+            
+            print("---")
 
 if __name__ == "__main__":
     cli()

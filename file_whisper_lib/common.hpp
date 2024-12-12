@@ -7,6 +7,7 @@
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 #include <unicode/unistr.h>
+#include <spdlog/spdlog.h>
 
 std::string calculate_md5(const uint8_t *data, size_t length);
 std::string calculate_sha256(const uint8_t *data, size_t length);
@@ -21,3 +22,5 @@ struct EncodingResult {
 };
 EncodingResult detect_encoding(const std::vector<uint8_t> &data);
 std::vector<EncodingResult> detect_encodings(const std::vector<uint8_t>& data, int32_t max_matches = 3);
+std::string decode_binary(const std::vector<uint8_t>& data);
+std::vector<uint8_t> encode_binary(const std::string& str);
