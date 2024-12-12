@@ -2,13 +2,37 @@
 #include <grpcpp/grpcpp.h>
 #include <iostream>
 #include <string>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <mio/mmap.hpp>
 #include <iostream>
-#include "common.hpp"
+#include "data_type.hpp"
 #include "cpp/file_whisper.grpc.pb.h"
+#include <queue>
+
+void make_whisper_reply(whisper::WhisperReply *, whisper_data_type::Tree *);
+void bfs(whisper::WhisperReply *, whisper_data_type::Node *);
+void bsf_process_whisper_reply_node(whisper::WhisperReply *, whisper_data_type::Node *);
+void RunServer(int);
+
+int main(int argc, char **argv)
+{
+  CLI::App app{"FileWhisperer server"};
+
+  int port = 50051;
+  app.add_option("-p,--port", port, "Port to listen on")
+      ->check(CLI::Range(1, 65535));
+
+  try
+  {
+    app.parse(argc, argv);
+  }
+  catch (const CLI::ParseError &e)
+  {
+    return app.exit(e);
+  }
+
+  RunServer(port);
+  return 0;
+}
 
 class GreeterServiceImpl final : public whisper::Whisper::Service
 {
@@ -16,12 +40,11 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
                           const whisper::WhisperRequest *request,
                           whisper::WhisperReply *reply) override
   {
-    try {
-      boost::uuids::random_generator generator;
-      boost::uuids::uuid uuid = generator();
-
-      whisper::Node *node = reply->add_tree();
-      node->set_id(boost::uuids::to_string(uuid));
+    try
+    {
+      std::unique_ptr<whisper_data_type::Tree> tree = std::make_unique<whisper_data_type::Tree>();
+      tree->root = nullptr;
+      whisper_data_type::Node *node = new whisper_data_type::Node{.content = whisper_data_type::File{}};
 
       const uint8_t *data = nullptr;
       size_t data_size = 0;
@@ -50,22 +73,68 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, error_msg);
       }
 
-      whisper::File *file = node->mutable_file();
-      file->set_path(file_path);
-      file->set_size(data_size);
-      file->set_mime_type(get_buffer_mime_type(data, data_size));
-      file->set_md5(calculate_md5(data, data_size));
-      file->set_sha256(calculate_sha256(data, data_size));
-
+      std::vector<uint8_t> file_content(data, data + data_size);
+      whisper_data_type::File &file = std::get<whisper_data_type::File>(node->content);
+      file.path = file_path;
+      file.content = std::move(file_content);
+      tree->digest(node);
+      make_whisper_reply(reply, tree.get());
       return grpc::Status::OK;
-      
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
       std::string error_msg = std::string("Error processing request: ") + e.what();
       std::cerr << error_msg << std::endl;
       return grpc::Status(grpc::StatusCode::INTERNAL, error_msg);
     }
   }
 };
+
+void make_whisper_reply(whisper::WhisperReply *reply, whisper_data_type::Tree *tree)
+{
+  bfs(reply, tree->root);
+}
+
+void bfs(whisper::WhisperReply *reply, whisper_data_type::Node *root)
+{
+  if (!root)
+    return;
+
+  std::queue<whisper_data_type::Node *> q;
+  q.push(root);
+
+  while (!q.empty())
+  {
+    whisper_data_type::Node *curr = q.front();
+    q.pop();
+
+    bsf_process_whisper_reply_node(reply, curr);
+
+    for (whisper_data_type::Node *child : curr->children)
+    {
+      q.push(child);
+    }
+  }
+}
+
+void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_type::Node *root)
+{
+  whisper::Node *node = reply->add_tree();
+  node->set_id(root->id);
+  if (std::holds_alternative<whisper_data_type::File>(root->content))
+  {
+    whisper_data_type::File &root_file = std::get<whisper_data_type::File>(root->content);
+    whisper::File *file = node->mutable_file();
+    file->set_path(root_file.path);
+    file->set_size(root_file.size);
+    file->set_mime_type(root_file.mime_type);
+    file->set_md5(root_file.md5);
+    file->set_sha256(root_file.sha256);
+  }
+  else if (std::holds_alternative<whisper_data_type::Data>(root->content))
+  {
+  }
+}
 
 void RunServer(int port)
 {
@@ -79,25 +148,4 @@ void RunServer(int port)
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << server_address << std::endl;
   server->Wait();
-}
-
-int main(int argc, char **argv)
-{
-  CLI::App app{"FileWhisperer server"};
-
-  int port = 50051;
-  app.add_option("-p,--port", port, "Port to listen on")
-      ->check(CLI::Range(1, 65535));
-
-  try
-  {
-    app.parse(argc, argv);
-  }
-  catch (const CLI::ParseError &e)
-  {
-    return app.exit(e);
-  }
-
-  RunServer(port);
-  return 0;
 }

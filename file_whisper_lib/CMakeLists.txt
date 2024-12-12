@@ -1,5 +1,6 @@
 add_library(file_whisper_lib
     common.cc
+    data_type.cc
 )
 
 target_include_directories(file_whisper_lib
@@ -8,11 +9,13 @@ target_include_directories(file_whisper_lib
 )
 
 find_package(OpenSSL REQUIRED)
+find_package(Boost REQUIRED COMPONENTS uuid)
 find_package(unofficial-libmagic REQUIRED)
 
 target_link_libraries(file_whisper_lib
     PUBLIC
     OpenSSL::SSL
     OpenSSL::Crypto
+    Boost::uuid
     unofficial::libmagic::libmagic
 )
