@@ -7,7 +7,9 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <spdlog/spdlog.h>
 #include "common.hpp"
+#include "extractor.hpp"
 
 namespace whisper_data_type
 {
@@ -79,5 +81,6 @@ namespace whisper_data_type
     };
 
     void meta_detect_encoding(Meta &meta, const std::vector<uint8_t> &data);
+    std::vector<Node *> file_extract(Node *node);
 
 } // namespace whisper

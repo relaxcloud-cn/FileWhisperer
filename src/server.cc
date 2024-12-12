@@ -3,10 +3,10 @@
 #include <iostream>
 #include <string>
 #include <mio/mmap.hpp>
-#include <iostream>
 #include "data_type.hpp"
 #include "cpp/file_whisper.grpc.pb.h"
 #include <queue>
+#include <spdlog/spdlog.h>
 
 void make_whisper_reply(whisper::WhisperReply *, whisper_data_type::Tree *);
 void bfs(whisper::WhisperReply *, whisper_data_type::Node *);
@@ -18,12 +18,32 @@ int main(int argc, char **argv)
   CLI::App app{"FileWhisperer server"};
 
   int port = 50051;
+  std::string log_level = "debug";
+
   app.add_option("-p,--port", port, "Port to listen on")
       ->check(CLI::Range(1, 65535));
+
+  app.add_option("-l,--log-level", log_level, "Log level (trace, debug, info, warn, error, critical)")
+      ->check(CLI::IsMember({"trace", "debug", "info", "warn", "error", "critical"}));
 
   try
   {
     app.parse(argc, argv);
+
+    spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%t] %v");
+
+    if (log_level == "trace")
+      spdlog::set_level(spdlog::level::trace);
+    else if (log_level == "debug")
+      spdlog::set_level(spdlog::level::debug);
+    else if (log_level == "info")
+      spdlog::set_level(spdlog::level::info);
+    else if (log_level == "warn")
+      spdlog::set_level(spdlog::level::warn);
+    else if (log_level == "error")
+      spdlog::set_level(spdlog::level::err);
+    else if (log_level == "critical")
+      spdlog::set_level(spdlog::level::critical);
   }
   catch (const CLI::ParseError &e)
   {
@@ -141,9 +161,14 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
     file->set_mime_type(root_file.mime_type);
     file->set_md5(root_file.md5);
     file->set_sha256(root_file.sha256);
+    file->set_content(std::string(root_file.content.begin(), root_file.content.end()));
   }
   else if (std::holds_alternative<whisper_data_type::Data>(root->content))
   {
+    whisper_data_type::Data &root_data = std::get<whisper_data_type::Data>(root->content);
+    whisper::Data *data = node->mutable_data();
+    data->set_type(root_data.type);
+    data->set_content(std::string(root_data.content.begin(), root_data.content.end()));
   }
 
   whisper::Meta *node_meta = node->mutable_meta();
@@ -174,6 +199,6 @@ void RunServer(int port)
   builder.RegisterService(&service);
 
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
+  spdlog::info("Server listening on {} ", server_address);
   server->Wait();
 }

@@ -206,3 +206,39 @@ std::string decode_binary(const std::vector<uint8_t>& data) {
     return decode_to_string(data, "UTF-8");
 }
 
+std::vector<uint8_t> encode_to_binary(const std::string& str, const std::string& encoding) {
+    UErrorCode status = U_ZERO_ERROR;
+    
+    UConverter* converter = ucnv_open(encoding.c_str(), &status);
+    if (U_FAILURE(status) || !converter) {
+        return {};
+    }
+
+    struct ConverterGuard {
+        UConverter* conv;
+        ~ConverterGuard() { if (conv) ucnv_close(conv); }
+    } guard{converter};
+    
+    icu::UnicodeString ustr = icu::UnicodeString::fromUTF8(str);
+    
+    std::vector<char> buffer;
+    buffer.resize(ustr.length() * 4);
+    
+    int32_t len = ucnv_fromUChars(converter, 
+                                 buffer.data(), 
+                                 buffer.size(),
+                                 ustr.getBuffer(), 
+                                 ustr.length(), 
+                                 &status);
+    
+    if (U_FAILURE(status)) {
+        return {};
+    }
+    
+    std::vector<uint8_t> result(buffer.begin(), buffer.begin() + len);
+    return result;
+}
+
+std::vector<uint8_t> encode_binary(const std::string& str) {
+    return encode_to_binary(str, "UTF-8");
+}

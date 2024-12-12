@@ -2,6 +2,7 @@
 
 void whisper_data_type::Tree::digest(Node *node)
 {
+    std::vector<Node *> extracted_nodes;
     if (this->root == nullptr)
     {
         this->root = node;
@@ -18,6 +19,10 @@ void whisper_data_type::Tree::digest(Node *node)
         file.md5 = calculate_md5(file.content.data(), file.size);
         file.sha256 = calculate_sha256(file.content.data(), file.size);
         meta_detect_encoding(meta, file.content);
+
+        auto nodes = file_extract(node);
+
+        extracted_nodes.insert(extracted_nodes.end(), nodes.begin(), nodes.end());
     }
     else if (std::holds_alternative<Data>(root->content))
     {
@@ -25,6 +30,12 @@ void whisper_data_type::Tree::digest(Node *node)
         meta_detect_encoding(meta, data.content);
     }
     node->meta = meta;
+    node->children = extracted_nodes;
+
+    for (auto &t_node : extracted_nodes)
+    {
+        this->digest(t_node);
+    }
     return;
 }
 
@@ -47,5 +58,36 @@ namespace whisper_data_type
                 meta.map_number[conf_key] = er[i].confidence;
             }
         }
+    }
+}
+
+namespace whisper_data_type
+{
+    std::vector<Node *> file_extract(Node *node)
+    {
+        spdlog::debug("Inter file_extract");
+        std::vector<Node *> nodes;
+        File &file = std::get<File>(node->content);
+        if (file.mime_type == "text/plain")
+        {
+            auto urls = extract_urls(decode_binary(file.content));
+            spdlog::debug("Number of urls: {}", urls.size());
+            for (auto &item : urls)
+            {
+                Node *node = new whisper_data_type::Node{.content = whisper_data_type::Data{
+                                                             .type = "URL",
+                                                             .content = encode_binary(item)}};
+                node->prev = node;
+                nodes.push_back(node);
+            }
+        }
+        else if (file.mime_type == "some")
+        {
+        }
+        else
+        {
+        }
+
+        return nodes;
     }
 }
