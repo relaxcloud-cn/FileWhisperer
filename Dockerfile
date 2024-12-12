@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
     automake \
     autoconf-archive \
     libtool \
+    g++ \
+    gcc \
+    python3 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
