@@ -121,6 +121,17 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
 {
   whisper::Node *node = reply->add_tree();
   node->set_id(root->id);
+  if (root->prev)
+  {
+    node->set_parent_id(root->prev->id);
+  }
+  if (!root->children.empty())
+  {
+    for (const auto &child : root->children)
+    {
+      node->add_children(child->id);
+    }
+  }
   if (std::holds_alternative<whisper_data_type::File>(root->content))
   {
     whisper_data_type::File &root_file = std::get<whisper_data_type::File>(root->content);
