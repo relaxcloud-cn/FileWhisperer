@@ -41,6 +41,6 @@ WORKDIR /app
 
 RUN mkdir -p /usr/local/share/icu
 RUN cp /usr/share/icu/*/icudt*.dat /usr/local/share/icu/ || true
-RUN vcpkg install icu:x64-linux
+# RUN vcpkg install icu:x64-linux
 RUN cmake -B build -S . --preset=vcpkg
 RUN cmake --build build
