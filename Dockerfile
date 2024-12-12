@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     python3 \
+    icu-devtools \
+    libicu-dev \ 
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
