@@ -134,6 +134,23 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
   else if (std::holds_alternative<whisper_data_type::Data>(root->content))
   {
   }
+
+  whisper::Meta *node_meta = node->mutable_meta();
+
+  for (const auto &[key, value] : root->meta.map_string)
+  {
+    (*node_meta->mutable_map_string())[key] = value;
+  }
+
+  for (const auto &[key, value] : root->meta.map_number)
+  {
+    (*node_meta->mutable_map_number())[key] = value;
+  }
+
+  for (const auto &[key, value] : root->meta.map_bool)
+  {
+    (*node_meta->mutable_map_bool())[key] = value;
+  }
 }
 
 void RunServer(int port)
