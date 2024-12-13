@@ -6,6 +6,8 @@ option(BUILD_TESTING "Build the testing tree." OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_definitions(-DU_STATIC_IMPLEMENTATION)
+
 add_subdirectory(file_whisper_lib)
 
 find_package(gRPC CONFIG REQUIRED)

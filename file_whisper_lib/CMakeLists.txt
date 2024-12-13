@@ -9,6 +9,8 @@ target_include_directories(file_whisper_lib
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+add_definitions(-DU_STATIC_IMPLEMENTATION)
+
 find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS uuid)
 find_package(unofficial-libmagic REQUIRED)

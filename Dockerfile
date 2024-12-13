@@ -20,9 +20,6 @@ RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     python3 \
-    icu-devtools \
-    libicu-dev \ 
-    libicu70 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
@@ -32,6 +29,8 @@ RUN git clone https://github.com/Microsoft/vcpkg.git && \
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
 
+ENV VCPKG_DEFAULT_LIBRARY_TYPE=dynamic
+
 WORKDIR /app
 COPY . .
 
@@ -39,8 +38,7 @@ RUN cd fixtures && tar -zxvf file-5.45.tar.gz && cd file-5.45 && ./configure --p
 
 WORKDIR /app
 
-RUN mkdir -p /usr/local/share/icu
-RUN cp /usr/share/icu/*/icudt*.dat /usr/local/share/icu/ || true
-# RUN vcpkg install icu:x64-linux
+RUN vcpkg install icu:x64-linux
+
 RUN cmake -B build -S . --preset=vcpkg
 RUN cmake --build build
