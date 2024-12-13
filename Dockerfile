@@ -38,7 +38,5 @@ RUN cd fixtures && tar -zxvf file-5.45.tar.gz && cd file-5.45 && ./configure --p
 
 WORKDIR /app
 
-RUN vcpkg install icu:x64-linux
-
 RUN cmake -B build -S . --preset=vcpkg
 RUN cmake --build build
