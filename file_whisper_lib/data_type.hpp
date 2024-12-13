@@ -9,9 +9,9 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <spdlog/spdlog.h>
 #include "common.hpp"
-#include "extractor.hpp"
-#include "mime_type_enum.hpp"
+#include "types.hpp"
 
+#pragma once
 namespace whisper_data_type
 {
 
@@ -21,24 +21,10 @@ namespace whisper_data_type
         std::string name;
         int64_t size;
         std::string mime_type;
-        MimeType mime_type_enum;
         std::string extension;
         std::string md5;
         std::string sha256;
         std::vector<uint8_t> content;
-
-        void set_mime_type(std::string mime_type)
-        {
-            this->mime_type = mime_type;
-            if (MimeTypeMap__1.count(mime_type))
-            {
-                this->mime_type_enum = MimeTypeMap__1.at(mime_type);
-            }
-            else
-            {
-                this->mime_type_enum = MimeType::OTHER;
-            }
-        }
     };
 
     struct Data
@@ -62,11 +48,24 @@ namespace whisper_data_type
         // std::vector<std::string> children;
         std::vector<Node *> children;
         std::variant<File, Data> content;
+        Types type;
         Meta meta;
 
         void add_child(Node *child)
         {
             children.push_back(child);
+        }
+
+        void set_type(std::string key)
+        {
+            if (Types__1.count(key))
+            {
+                this->type = Types__1.at(key);
+            }
+            else
+            {
+                this->type = Types::OTHER;
+            }
         }
     };
 

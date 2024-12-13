@@ -1,4 +1,5 @@
 #include "data_type.hpp"
+#include "flavors.hpp"
 
 void whisper_data_type::Tree::digest(Node *node)
 {
@@ -15,23 +16,25 @@ void whisper_data_type::Tree::digest(Node *node)
     {
         File &file = std::get<File>(node->content);
         file.size = file.content.size();
-        file.set_mime_type(get_buffer_mime_type(file.content.data(), file.size));
+        file.mime_type = get_buffer_mime_type(file.content.data(), file.size);
         file.md5 = calculate_md5(file.content.data(), file.size);
         file.sha256 = calculate_sha256(file.content.data(), file.size);
+        node->set_type(file.mime_type);
         meta_detect_encoding(meta, file.content);
-
-        auto nodes = file_extract(node);
-
-        extracted_nodes.insert(extracted_nodes.end(), nodes.begin(), nodes.end());
     }
-    else if (std::holds_alternative<Data>(root->content))
+    else if (std::holds_alternative<Data>(node->content))
     {
         Data &data = std::get<Data>(node->content);
         meta_detect_encoding(meta, data.content);
+        node->set_type(data.type);
     }
     node->meta = meta;
-    node->children = extracted_nodes;
 
+    auto nodes = flavors::extract(node);
+    extracted_nodes.insert(extracted_nodes.end(), nodes.begin(), nodes.end());
+
+    node->children = extracted_nodes;
+    
     for (auto &t_node : extracted_nodes)
     {
         this->digest(t_node);
@@ -58,37 +61,5 @@ namespace whisper_data_type
                 meta.map_number[conf_key] = er[i].confidence;
             }
         }
-    }
-}
-
-namespace whisper_data_type
-{
-    std::vector<Node *> file_extract(Node *node)
-    {
-        std::vector<Node *> nodes;
-        File &file = std::get<File>(node->content);
-        spdlog::debug("Node[{}] inter file_extract.", node->id);
-        spdlog::debug("Node[{}] mime_type {}.", node->id, file.mime_type);
-        switch (file.mime_type_enum)
-        {
-        default:
-            spdlog::debug("Node[{}] no actions.", node->id);
-            break;
-        case TEXT_PLAIN:
-            spdlog::debug("Node[{}] text/plain.", node->id);
-            auto urls = extract_urls(decode_binary(file.content));
-            spdlog::debug("Node[{}] Number of urls: {}", node->id, urls.size());
-            for (auto &item : urls)
-            {
-                Node *node = new whisper_data_type::Node{.content = whisper_data_type::Data{
-                                                             .type = "URL",
-                                                             .content = encode_binary(item)}};
-                node->prev = node;
-                nodes.push_back(node);
-            }
-            break;
-        }
-
-        return nodes;
     }
 }

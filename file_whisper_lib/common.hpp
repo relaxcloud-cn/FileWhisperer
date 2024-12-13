@@ -9,6 +9,8 @@
 #include <unicode/unistr.h>
 #include <spdlog/spdlog.h>
 
+#pragma once
+
 std::string calculate_md5(const uint8_t *data, size_t length);
 std::string calculate_sha256(const uint8_t *data, size_t length);
 std::string get_file_mime_type(const char *file);
