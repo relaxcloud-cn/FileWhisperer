@@ -15,7 +15,7 @@ void whisper_data_type::Tree::digest(Node *node)
     {
         File &file = std::get<File>(node->content);
         file.size = file.content.size();
-        file.mime_type = get_buffer_mime_type(file.content.data(), file.size);
+        file.set_mime_type(get_buffer_mime_type(file.content.data(), file.size));
         file.md5 = calculate_md5(file.content.data(), file.size);
         file.sha256 = calculate_sha256(file.content.data(), file.size);
         meta_detect_encoding(meta, file.content);
@@ -65,13 +65,19 @@ namespace whisper_data_type
 {
     std::vector<Node *> file_extract(Node *node)
     {
-        spdlog::debug("Inter file_extract");
         std::vector<Node *> nodes;
         File &file = std::get<File>(node->content);
-        if (file.mime_type == "text/plain")
+        spdlog::debug("Node[{}] inter file_extract.", node->id);
+        spdlog::debug("Node[{}] mime_type {}.", node->id, file.mime_type);
+        switch (file.mime_type_enum)
         {
+        default:
+            spdlog::debug("Node[{}] no actions.", node->id);
+            break;
+        case TEXT_PLAIN:
+            spdlog::debug("Node[{}] text/plain.", node->id);
             auto urls = extract_urls(decode_binary(file.content));
-            spdlog::debug("Number of urls: {}", urls.size());
+            spdlog::debug("Node[{}] Number of urls: {}", node->id, urls.size());
             for (auto &item : urls)
             {
                 Node *node = new whisper_data_type::Node{.content = whisper_data_type::Data{
@@ -80,12 +86,7 @@ namespace whisper_data_type
                 node->prev = node;
                 nodes.push_back(node);
             }
-        }
-        else if (file.mime_type == "some")
-        {
-        }
-        else
-        {
+            break;
         }
 
         return nodes;

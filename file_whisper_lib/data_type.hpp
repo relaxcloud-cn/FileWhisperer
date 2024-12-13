@@ -10,6 +10,7 @@
 #include <spdlog/spdlog.h>
 #include "common.hpp"
 #include "extractor.hpp"
+#include "mime_type_enum.hpp"
 
 namespace whisper_data_type
 {
@@ -20,10 +21,24 @@ namespace whisper_data_type
         std::string name;
         int64_t size;
         std::string mime_type;
+        MimeType mime_type_enum;
         std::string extension;
         std::string md5;
         std::string sha256;
         std::vector<uint8_t> content;
+
+        void set_mime_type(std::string mime_type)
+        {
+            this->mime_type = mime_type;
+            if (MimeTypeMap__1.count(mime_type))
+            {
+                this->mime_type_enum = MimeTypeMap__1.at(mime_type);
+            }
+            else
+            {
+                this->mime_type_enum = MimeType::OTHER;
+            }
+        }
     };
 
     struct Data
