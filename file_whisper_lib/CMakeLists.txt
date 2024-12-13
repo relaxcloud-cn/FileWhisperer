@@ -30,4 +30,5 @@ target_link_libraries(file_whisper_lib
     ICU::io
     re2::re2
     spdlog::spdlog
+    -Wl,--whole-archive ${ICU_DATA_LIBRARY} -Wl,--no-whole-archive
 )

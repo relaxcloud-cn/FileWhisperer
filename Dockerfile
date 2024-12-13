@@ -29,8 +29,6 @@ RUN git clone https://github.com/Microsoft/vcpkg.git && \
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
 
-ENV VCPKG_DEFAULT_LIBRARY_TYPE=dynamic
-
 WORKDIR /app
 COPY . .
 
