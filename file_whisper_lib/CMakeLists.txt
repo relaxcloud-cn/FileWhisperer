@@ -18,6 +18,14 @@ find_package(ICU COMPONENTS data uc i18n io REQUIRED)
 find_package(re2 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
+if(APPLE)
+    set(WHOLE_ARCHIVE_FLAG "-force_load")
+    set(NO_WHOLE_ARCHIVE_FLAG "")
+else()
+    set(WHOLE_ARCHIVE_FLAG "-Wl,--whole-archive")
+    set(NO_WHOLE_ARCHIVE_FLAG "-Wl,--no-whole-archive")
+endif()
+
 target_link_libraries(file_whisper_lib
     PUBLIC
     OpenSSL::SSL
@@ -30,5 +38,5 @@ target_link_libraries(file_whisper_lib
     ICU::io
     re2::re2
     spdlog::spdlog
-    -Wl,--whole-archive ${ICU_DATA_LIBRARY} -Wl,--no-whole-archive
+    ${WHOLE_ARCHIVE_FLAG} ${ICU_DATA_LIBRARY} ${NO_WHOLE_ARCHIVE_FLAG}
 )
