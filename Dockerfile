@@ -3,8 +3,9 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
-ENV VCPKG_MAX_CONCURRENCY=$(nproc)
 ENV VCPKG_DISABLE_METRICS=1
+ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+ENV VCPKG_FEATURE_FLAGS=manifests
 
 RUN apt-get update && apt-get install -y \
     autoconf \
@@ -45,6 +46,7 @@ WORKDIR /app
 COPY vcpkg.json .
 
 RUN if [ -f vcpkg.json ]; then \
+    export VCPKG_MAX_CONCURRENCY=$(nproc) && \
     vcpkg install \
     --clean-after-build \
     --no-print-usage \
