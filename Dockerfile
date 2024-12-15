@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     git \
+    libtool \
     libcap-dev \
     libgles2-mesa-dev \
     liblz4-dev \
