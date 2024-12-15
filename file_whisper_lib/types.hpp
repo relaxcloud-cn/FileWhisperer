@@ -14,7 +14,7 @@ namespace whisper_data_type
 
     const std::map<std::string, Types> Types__1 = {
         // DATA
-        {"DATA_TEXT", TEXT_PLAIN},
+        {"TEXT", TEXT_PLAIN},
 
         // FILE
         {"text/plain", TEXT_PLAIN},

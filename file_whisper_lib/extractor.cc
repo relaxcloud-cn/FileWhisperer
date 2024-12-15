@@ -247,6 +247,33 @@ namespace extractor
 
 namespace extractor
 {
+    std::vector<Node *> extract_html(Node *node)
+    {
+        std::vector<Node *> nodes;
+        std::string text;
+        if (std::holds_alternative<File>(node->content))
+        {
+            File &file = std::get<File>(node->content);
+            spdlog::debug("Node[{}] file {}", node->id, file.mime_type);
+            text = decode_binary(file.content);
+        }
+        else if (std::holds_alternative<Data>(node->content))
+        {
+            Data &data = std::get<Data>(node->content);
+            spdlog::debug("Node[{}] data {}", node->id, data.type);
+            text = decode_binary(data.content);
+        }
+
+        auto html_text = stripHtml(text);
+        Node *t_node = new whisper_data_type::Node{.content = whisper_data_type::Data{
+                                                       .type = "TEXT",
+                                                       .content = encode_binary(html_text)}};
+        t_node->prev = node;
+        nodes.push_back(t_node);
+
+        return nodes;
+    }
+
     std::string extractHtmlText(GumboNode *node)
     {
         if (node->type == GUMBO_NODE_TEXT)
