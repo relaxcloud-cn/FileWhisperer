@@ -24,6 +24,12 @@ RUN apt-get update && apt-get install -y \
     libx11-dev \
     libxft-dev \
     libxext-dev \
+    libssl-dev \
+    libcap-dev \
+    libsystemd-dev \
+    liblz4-dev \
+    libzstd-dev \
+    libxz-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
