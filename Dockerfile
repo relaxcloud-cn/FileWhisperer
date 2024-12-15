@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     python3 \
+    bison \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
