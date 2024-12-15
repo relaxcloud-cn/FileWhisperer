@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     python3 \
+    python3-pip \
     bison \
     libx11-dev \
     libxft-dev \
@@ -30,6 +31,8 @@ RUN apt-get update && apt-get install -y \
     liblz4-dev \
     libzstd-dev \
     liblzma-dev \
+    libgles2-mesa-dev \
+    meson \ 
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
