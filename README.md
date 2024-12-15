@@ -51,3 +51,26 @@ ctest --test-dir build
 ```sh
 make list
 ```
+
+## 请求服务
+
+可以使用、参考项目文件 `py/client.py` 。
+
+```sh
+# python py/client.py --help
+Usage: client.py [OPTIONS] COMMAND [ARGS]...
+
+  Archive extractor CLI tool
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  run
+```
+
+示例命令：
+
+```sh
+python py/client.py run tests/fixtures/test_with_pwd_abcd.zip --binary -p123 -pabcd
+```
