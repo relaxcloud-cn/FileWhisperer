@@ -85,12 +85,9 @@ namespace extractor
                 files = extract_files_from_data(data, "");
                 extracted = true;
             }
-            catch (const bit7z::BitException &ex)
+            catch (...)
             {
-                if (static_cast<BitError>(ex.code().value()) != BitError::InvalidZipPassword)
-                {
-                    throw;
-                }
+                throw;
             }
         }
 
