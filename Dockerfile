@@ -42,7 +42,11 @@ RUN git clone --depth 1 https://github.com/Microsoft/vcpkg.git && \
 WORKDIR /app
 COPY vcpkg.json .
 
-RUN if [ -f vcpkg.json ]; then vcpkg install; fi
+RUN if [ -f vcpkg.json ]; then \
+    vcpkg install --jobs=$(nproc) \
+    --clean-after-build \
+    --no-print-usage \
+    ; fi
 
 COPY . .
 
