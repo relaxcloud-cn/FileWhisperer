@@ -6,6 +6,8 @@ ENV VCPKG_ROOT=/opt/vcpkg
 ENV VCPKG_DISABLE_METRICS=1
 ENV VCPKG_FORCE_SYSTEM_BINARIES=1
 ENV VCPKG_FEATURE_FLAGS=manifests
+ENV VCPKG_DEFAULT_TRIPLET=x64-linux
+ENV VCPKG_MAX_CONCURRENCY=8
 
 RUN apt-get update && apt-get install -y \
     autoconf \
@@ -46,10 +48,13 @@ WORKDIR /app
 COPY vcpkg.json .
 
 RUN if [ -f vcpkg.json ]; then \
-    export VCPKG_MAX_CONCURRENCY=$(nproc) && \
+    vcpkg update && \
+    vcpkg upgrade && \
     vcpkg install \
     --clean-after-build \
     --no-print-usage \
+    --host-triplet=x64-linux \
+    --triplet=x64-linux \
     ; fi
 
 COPY . .
