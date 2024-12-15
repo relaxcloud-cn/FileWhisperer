@@ -72,6 +72,14 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
 
       std::unique_ptr<mio::mmap_source> mmap;
 
+      std::vector<std::string> passwords;
+      for (const auto &password : request->passwords())
+      {
+        passwords.push_back(password);
+      }
+
+      node->passwords = std::move(passwords);
+
       if (request->has_file_path())
       {
         file_path = request->file_path();

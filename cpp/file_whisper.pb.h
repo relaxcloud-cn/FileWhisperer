@@ -239,9 +239,32 @@ class WhisperRequest final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
+    kPasswordsFieldNumber = 3,
     kFilePathFieldNumber = 1,
     kFileContentFieldNumber = 2,
   };
+  // repeated string passwords = 3;
+  int passwords_size() const;
+  private:
+  int _internal_passwords_size() const;
+
+  public:
+  void clear_passwords() ;
+  const std::string& passwords(int index) const;
+  std::string* mutable_passwords(int index);
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_passwords(int index, Arg_&& value, Args_... args);
+  std::string* add_passwords();
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void add_passwords(Arg_&& value, Args_... args);
+  const ::google::protobuf::RepeatedPtrField<std::string>& passwords() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_passwords();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_passwords() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_passwords();
+
+  public:
   // string file_path = 1;
   bool has_file_path() const;
   void clear_file_path() ;
@@ -287,8 +310,8 @@ class WhisperRequest final : public ::google::protobuf::Message
   inline void clear_has_data();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 2, 0,
-      40, 2>
+      0, 3, 0,
+      49, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -308,6 +331,7 @@ class WhisperRequest final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const WhisperRequest& from_msg);
+    ::google::protobuf::RepeatedPtrField<std::string> passwords_;
     union DataUnion {
       constexpr DataUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
@@ -1879,6 +1903,70 @@ inline void WhisperRequest::set_allocated_file_content(std::string* value) {
     _impl_.data_.file_content_.InitAllocated(value, GetArena());
   }
   // @@protoc_insertion_point(field_set_allocated:whisper.WhisperRequest.file_content)
+}
+
+// repeated string passwords = 3;
+inline int WhisperRequest::_internal_passwords_size() const {
+  return _internal_passwords().size();
+}
+inline int WhisperRequest::passwords_size() const {
+  return _internal_passwords_size();
+}
+inline void WhisperRequest::clear_passwords() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.passwords_.Clear();
+}
+inline std::string* WhisperRequest::add_passwords() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_passwords()->Add();
+  // @@protoc_insertion_point(field_add_mutable:whisper.WhisperRequest.passwords)
+  return _s;
+}
+inline const std::string& WhisperRequest::passwords(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:whisper.WhisperRequest.passwords)
+  return _internal_passwords().Get(index);
+}
+inline std::string* WhisperRequest::mutable_passwords(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:whisper.WhisperRequest.passwords)
+  return _internal_mutable_passwords()->Mutable(index);
+}
+template <typename Arg_, typename... Args_>
+inline void WhisperRequest::set_passwords(int index, Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::AssignToString(
+      *_internal_mutable_passwords()->Mutable(index),
+      std::forward<Arg_>(value), args... );
+  // @@protoc_insertion_point(field_set:whisper.WhisperRequest.passwords)
+}
+template <typename Arg_, typename... Args_>
+inline void WhisperRequest::add_passwords(Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_passwords(),
+                               std::forward<Arg_>(value),
+                               args... );
+  // @@protoc_insertion_point(field_add:whisper.WhisperRequest.passwords)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+WhisperRequest::passwords() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:whisper.WhisperRequest.passwords)
+  return _internal_passwords();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+WhisperRequest::mutable_passwords() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:whisper.WhisperRequest.passwords)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_passwords();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+WhisperRequest::_internal_passwords() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.passwords_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+WhisperRequest::_internal_mutable_passwords() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.passwords_;
 }
 
 inline bool WhisperRequest::has_data() const {

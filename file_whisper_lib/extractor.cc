@@ -60,6 +60,7 @@ namespace extractor
 {
     std::vector<Node *> extract_compressed_file(Node *node)
     {
+        using namespace bit7z;
         std::vector<uint8_t> data;
         std::vector<Node *> nodes;
         if (std::holds_alternative<File>(node->content))
@@ -73,7 +74,53 @@ namespace extractor
             return nodes;
         }
 
-        auto files = extract_files_from_data(data);
+        std::vector<std::string> passwords = node->passwords;
+        bool extracted = false;
+        std::map<std::string, std::vector<uint8_t>> files;
+
+        if (passwords.empty())
+        {
+            try
+            {
+                files = extract_files_from_data(data, "");
+                extracted = true;
+            }
+            catch (const bit7z::BitException &ex)
+            {
+                if (static_cast<BitError>(ex.code().value()) != BitError::InvalidZipPassword)
+                {
+                    throw;
+                }
+            }
+        }
+
+        if (!extracted)
+        {
+            for (const auto &password : passwords)
+            {
+                try
+                {
+                    files = extract_files_from_data(data, password);
+                    extracted = true;
+                    node->meta.map_string["correct_password"] = password;
+                    break;
+                }
+                catch (const bit7z::BitException &ex)
+                {
+                    if (static_cast<BitError>(ex.code().value()) != BitError::InvalidZipPassword)
+                    {
+                        throw;
+                    }
+                    spdlog::debug("Password {} failed, trying next", password);
+                    continue;
+                }
+            }
+        }
+
+        if (!extracted)
+        {
+            throw std::runtime_error("All passwords failed");
+        }
 
         for (const auto &pair : files)
         {

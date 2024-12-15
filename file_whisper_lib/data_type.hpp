@@ -48,6 +48,7 @@ namespace whisper_data_type
         // std::vector<std::string> children;
         std::vector<Node *> children;
         std::variant<File, Data> content;
+        std::vector<std::string> passwords;
         Types type;
         Meta meta;
 

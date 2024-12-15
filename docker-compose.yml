@@ -7,6 +7,7 @@ services:
     command: /app/build/FileWhisperer
     environment: 
       MAGIC_MGC_PATH: /usr/share/misc/magic.mgc
+      LIB_PATH_7Z: /app/fixtures/7z.so
     restart: always
     logging:
       driver: fluentd
