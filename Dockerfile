@@ -46,7 +46,10 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-dev \
     libgirepository1.0-dev \
     python3-jinja2 \ 
+    locales \
     && rm -rf /var/lib/apt/lists/*
+
+RUN dpkg-reconfigure locales
 
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/Microsoft/vcpkg.git && \

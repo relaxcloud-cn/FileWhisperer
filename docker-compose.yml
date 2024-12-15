@@ -4,7 +4,7 @@ services:
     image: ghcr.io/relaxcloud-cn/filewhisperer:main
     container_name: filewhisperer
     network_mode: "host"
-    command: /app/build/FileWhisperer
+    command: /app/build/FileWhisperer -p 50098 -l info
     environment: 
       MAGIC_MGC_PATH: /usr/share/misc/magic.mgc
       LIB_PATH_7Z: /app/fixtures/7z.so
@@ -13,9 +13,9 @@ services:
       driver: fluentd
       options:
         fluentd-address: localhost:54324
-        tag: docker.fuglu
-        fluentd-max-retries: 3
-        fluentd-buffer-limit: 100
-        fluentd-retry-wait: 3s
+        tag: docker.filewhisperer
+        fluentd-max-retries: "3"
+        fluentd-buffer-limit: "100"
+        fluentd-retry-wait: "3s"
         fluentd-async: "true"
-    mem_limit: 20g
+    mem_limit: "20g"
