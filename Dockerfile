@@ -42,6 +42,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     && rm -rf /var/lib/apt/lists/*
 
+RUN python3 -m pip install jinja2
+
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/Microsoft/vcpkg.git && \
     ./vcpkg/bootstrap-vcpkg.sh
