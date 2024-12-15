@@ -7,6 +7,8 @@ ENV VCPKG_DISABLE_METRICS=1
 ENV VCPKG_FEATURE_FLAGS=manifests
 ENV VCPKG_DEFAULT_TRIPLET=x64-linux
 ENV VCPKG_MAX_CONCURRENCY=8
+ENV CC=/usr/bin/gcc
+ENV CXX=/usr/bin/g++
 
 RUN apt-get update && apt-get install -y \
     autoconf \
@@ -65,8 +67,16 @@ RUN cd fixtures && \
     make -j$(nproc) && \
     make install
 
-RUN cmake -B build -S . --preset=vcpkg -DCMAKE_BUILD_TYPE=Release || ( \
-    cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-meson-log.txt.log && \
-    cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-out.log && \
-    false )
+RUN cmake -B build -S . \
+    --preset=vcpkg \
+    -G "Ninja" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=/usr/bin/gcc \
+    -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
+    || ( \
+        cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-meson-log.txt.log && \
+        cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-out.log && \
+        false \
+    )
+
 RUN cmake --build build -j$(nproc)
