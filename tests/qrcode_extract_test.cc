@@ -8,7 +8,6 @@ TEST(EXTRACT_QRCODE, qrcode_wikipedia)
 {
     std::string json_file = test_utils::get_test_file_path("tests/fixtures/qrcode_wikipedia.jpg").string();
     
-    // 读取文件内容到vector
     std::ifstream file(json_file, std::ios::binary);
     ASSERT_TRUE(file.is_open());
     

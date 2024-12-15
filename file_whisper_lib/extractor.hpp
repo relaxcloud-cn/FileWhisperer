@@ -23,6 +23,6 @@ namespace extractor
     std::vector<std::string> extract_urls_from_text(const std::string &text);
     std::vector<Node *> extract_compressed_file(Node *node);
     std::map<std::string, std::vector<uint8_t>> extract_files_from_data(const std::vector<uint8_t> file, std::string password = "");
-
-    std::string decodeQRCode(const std::vector<uint8_t>& file);
+    std::vector<Node *> extract_qrcode(Node *node);
+    std::string decodeQRCode(const std::vector<uint8_t> &file);
 }

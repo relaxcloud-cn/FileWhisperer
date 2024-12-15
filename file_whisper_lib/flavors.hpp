@@ -12,6 +12,7 @@ namespace flavors
     using ExtractFunctionModern = std::function<std::vector<Node *>(Node *)>;
     std::map<Types, std::vector<ExtractFunctionModern>> flavor_extractors = {
         {Types::TEXT_PLAIN, {extractor::extract_urls}},
+        {Types::IMAGE, {extractor::extract_qrcode}},
         {Types::COMPRESSED_FILE, {extractor::extract_compressed_file}}};
 
     std::vector<Node *> extract(Node *node)
