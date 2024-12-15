@@ -3,6 +3,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
+ENV VCPKG_MAX_CONCURRENCY=$(nproc)
 
 RUN apt-get update && apt-get install -y \
     autoconf \
