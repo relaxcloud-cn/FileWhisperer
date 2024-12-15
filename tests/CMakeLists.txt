@@ -5,6 +5,7 @@ add_executable(
     mime_type_test.cc
     url_extract_test.cc
     qrcode_extract_test.cc
+    html_test.cc
 )
 
 target_link_libraries(

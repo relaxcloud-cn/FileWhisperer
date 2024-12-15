@@ -244,3 +244,42 @@ namespace extractor
         }
     }
 }
+
+namespace extractor
+{
+    std::string extractHtmlText(GumboNode *node)
+    {
+        if (node->type == GUMBO_NODE_TEXT)
+        {
+            return std::string(node->v.text.text);
+        }
+        if (node->type == GUMBO_NODE_ELEMENT)
+        {
+            std::string contents;
+            GumboVector *children = &node->v.element.children;
+            for (unsigned int i = 0; i < children->length; ++i)
+            {
+                std::string text = extractHtmlText((GumboNode *)children->data[i]);
+                if (contents.empty())
+                {
+                    contents = text;
+                }
+                else if (!text.empty())
+                {
+                    contents += " " + text;
+                }
+            }
+            return contents;
+        }
+        return "";
+    }
+
+    std::string stripHtml(const std::string &html)
+    {
+        GumboOutput *output = gumbo_parse(html.c_str());
+        std::string text = extractHtmlText(output->root);
+        gumbo_destroy_output(&kGumboDefaultOptions, output);
+        return text;
+    }
+
+}
