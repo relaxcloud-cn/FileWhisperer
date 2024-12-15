@@ -27,7 +27,6 @@ RUN apt-get update && apt-get install -y \
     libxext-dev \
     libssl-dev \
     libcap-dev \
-    libsystemd-dev \
     liblz4-dev \
     libzstd-dev \
     liblzma-dev \
@@ -49,5 +48,8 @@ RUN cd fixtures && tar -zxvf file-5.45.tar.gz && cd file-5.45 && ./configure --p
 
 WORKDIR /app
 
-RUN cmake -B build -S . --preset=vcpkg
+RUN cmake -B build -S . --preset=vcpkg || ( \
+    cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-meson-log.txt.log && \
+    cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-out.log && \
+    false )
 RUN cmake --build build
