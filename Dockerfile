@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y \
     libsystemd-dev \
     liblz4-dev \
     libzstd-dev \
-    libxz-dev \
+    liblzma-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
