@@ -4,7 +4,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
 ENV VCPKG_DISABLE_METRICS=1
-ENV VCPKG_FORCE_SYSTEM_BINARIES=1
 ENV VCPKG_FEATURE_FLAGS=manifests
 ENV VCPKG_DEFAULT_TRIPLET=x64-linux
 ENV VCPKG_MAX_CONCURRENCY=8
@@ -45,17 +44,17 @@ RUN git clone --depth 1 https://github.com/Microsoft/vcpkg.git && \
     ./vcpkg/bootstrap-vcpkg.sh
 
 WORKDIR /app
-COPY vcpkg.json .
+# COPY vcpkg.json .
 
-RUN if [ -f vcpkg.json ]; then \
-    vcpkg update && \
-    vcpkg upgrade && \
-    vcpkg install \
-    --clean-after-build \
-    --no-print-usage \
-    --host-triplet=x64-linux \
-    --triplet=x64-linux \
-    ; fi
+# RUN if [ -f vcpkg.json ]; then \
+#     vcpkg update && \
+#     vcpkg upgrade && \
+#     vcpkg install \
+#     --clean-after-build \
+#     --no-print-usage \
+#     --host-triplet=x64-linux \
+#     --triplet=x64-linux \
+#     ; fi
 
 COPY . .
 
