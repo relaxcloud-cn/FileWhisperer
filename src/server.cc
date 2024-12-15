@@ -157,6 +157,7 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
     whisper_data_type::File &root_file = std::get<whisper_data_type::File>(root->content);
     whisper::File *file = node->mutable_file();
     file->set_path(root_file.path);
+    file->set_name(root_file.name);
     file->set_size(root_file.size);
     file->set_mime_type(root_file.mime_type);
     file->set_md5(root_file.md5);

@@ -17,6 +17,7 @@ find_package(unofficial-libmagic REQUIRED)
 find_package(ICU COMPONENTS data uc i18n io REQUIRED)
 find_package(re2 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(unofficial-bit7z CONFIG REQUIRED)
 
 if(APPLE)
     set(WHOLE_ARCHIVE_FLAG "-force_load")
@@ -34,9 +35,10 @@ target_link_libraries(file_whisper_lib
     unofficial::libmagic::libmagic
     ICU::data 
     ICU::uc 
-    ICU::i18n 
+    ICU::i18n
     ICU::io
     re2::re2
     spdlog::spdlog
     ${WHOLE_ARCHIVE_FLAG} ${ICU_DATA_LIBRARY} ${NO_WHOLE_ARCHIVE_FLAG}
+    unofficial::bit7z::bit7z64
 )

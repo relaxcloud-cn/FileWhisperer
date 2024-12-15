@@ -9,6 +9,7 @@
     "mio",
     "openssl",
     "re2",
-    "spdlog"
+    "spdlog",
+    "bit7z"
   ]
 }
