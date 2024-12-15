@@ -192,4 +192,28 @@ namespace extractor
 
         return result_map;
     }
+
+    std::string decodeQRCode(const std::vector<uint8_t> &file)
+    {
+        try
+        {
+            cv::Mat image = cv::imdecode(file, cv::IMREAD_COLOR);
+            if (image.empty())
+            {
+                return "";
+            }
+
+            cv::QRCodeDetector qrDecoder;
+
+            std::vector<cv::Point> points;
+
+            std::string result = qrDecoder.detectAndDecode(image, points);
+
+            return result;
+        }
+        catch (const std::exception &e)
+        {
+            return "";
+        }
+    }
 }

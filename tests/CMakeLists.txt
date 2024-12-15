@@ -1,8 +1,10 @@
 add_executable(
     hello_test
+    test_utils.cc
     hello_test.cc
     mime_type_test.cc
     url_extract_test.cc
+    qrcode_extract_test.cc
 )
 
 target_link_libraries(

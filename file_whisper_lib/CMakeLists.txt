@@ -18,6 +18,7 @@ find_package(ICU COMPONENTS data uc i18n io REQUIRED)
 find_package(re2 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(unofficial-bit7z CONFIG REQUIRED)
+find_package(OpenCV REQUIRED)
 
 if(APPLE)
     set(WHOLE_ARCHIVE_FLAG "-force_load")
@@ -41,4 +42,5 @@ target_link_libraries(file_whisper_lib
     spdlog::spdlog
     ${WHOLE_ARCHIVE_FLAG} ${ICU_DATA_LIBRARY} ${NO_WHOLE_ARCHIVE_FLAG}
     unofficial::bit7z::bit7z64
+    ${OpenCV_LIBS}
 )

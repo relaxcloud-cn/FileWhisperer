@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "bit7z",
     "boost-uuid",
     "cli11",
     "grpc",
@@ -10,6 +11,6 @@
     "openssl",
     "re2",
     "spdlog",
-    "bit7z"
+    "opencv"
   ]
 }
