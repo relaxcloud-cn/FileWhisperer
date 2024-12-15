@@ -8,11 +8,17 @@ namespace whisper_data_type
         TEXT_PLAIN,
         COMPRESSED_FILE,
         IMAGE,
+        TEXT_HTML,
         OTHER
     };
 
     const std::map<std::string, Types> Types__1 = {
+        // DATA
+        {"DATA_TEXT", TEXT_PLAIN},
+
+        // FILE
         {"text/plain", TEXT_PLAIN},
+        {"text/html", TEXT_HTML},
         {"application/zip", COMPRESSED_FILE},
         {"application/x-rar-compressed", COMPRESSED_FILE},
         {"application/vnd.rar", COMPRESSED_FILE},
@@ -101,6 +107,5 @@ namespace whisper_data_type
         {"image/webp", IMAGE},
         {"image/wmf", IMAGE},
         {"image/x-emf", IMAGE},
-        {"image/x-wmf", IMAGE}
-    };
+        {"image/x-wmf", IMAGE}};
 }

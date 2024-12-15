@@ -8,9 +8,10 @@
     "icu",
     "libmagic",
     "mio",
+    "opencv",
     "openssl",
     "re2",
     "spdlog",
-    "opencv"
+    "gumbo"
   ]
 }
