@@ -18,6 +18,12 @@ VCPKG_ROOT
 MAGIC_MGC_PATH
 ```
 
+## 7z 动态库路径
+
+```sh
+LIB_PATH_7Z
+```
+
 ---
 
 # 测试
