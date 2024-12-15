@@ -4,6 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
 ENV VCPKG_MAX_CONCURRENCY=$(nproc)
+ENV VCPKG_DISABLE_METRICS=1
 
 RUN apt-get update && apt-get install -y \
     autoconf \
@@ -44,7 +45,7 @@ WORKDIR /app
 COPY vcpkg.json .
 
 RUN if [ -f vcpkg.json ]; then \
-    vcpkg install --jobs=$(nproc) \
+    vcpkg install \
     --clean-after-build \
     --no-print-usage \
     ; fi
