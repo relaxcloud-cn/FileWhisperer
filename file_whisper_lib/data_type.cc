@@ -30,11 +30,28 @@ void whisper_data_type::Tree::digest(Node *node)
     }
     node->meta = meta;
 
-    auto nodes = flavors::extract(node);
+    std::vector<Node *> nodes;
+
+    try
+    {
+        auto nodes = flavors::extract(node);
+        extracted_nodes.insert(extracted_nodes.end(), nodes.begin(), nodes.end());
+    }
+    catch (const std::exception &e)
+    {
+        std::stringstream ss;
+        ss << "Standard exception: " << e.what();
+        node->meta.map_string["error_message"] = ss.str();
+    }
+    catch (...)
+    {
+        node->meta.map_string["error_message"] = "Unknown exception occurred";
+    }
+
     extracted_nodes.insert(extracted_nodes.end(), nodes.begin(), nodes.end());
 
     node->children = extracted_nodes;
-    
+
     for (auto &t_node : extracted_nodes)
     {
         this->digest(t_node);
