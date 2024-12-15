@@ -21,6 +21,9 @@ RUN apt-get update && apt-get install -y \
     gcc \
     python3 \
     bison \
+    libx11-dev \
+    libxft-dev \
+    libxext-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
