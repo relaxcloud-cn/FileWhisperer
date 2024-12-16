@@ -33,6 +33,20 @@ RUN apt-get update && apt-get install -y \
     libxi-dev \
     libxtst-dev \
     libzstd-dev \
+    libxrender-dev \
+    libxinerama-dev \
+    libxrandr-dev \
+    libxcursor-dev \
+    libxfixes-dev \
+    libxcomposite-dev \
+    libxdamage-dev \
+    libxkbcommon-dev \
+    libwayland-dev \
+    libepoxy-dev \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libatk1.0-dev \
+    libgdk-pixbuf2.0-dev \
     linux-libc-dev \
     meson \
     ninja-build \
