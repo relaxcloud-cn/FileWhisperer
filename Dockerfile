@@ -45,6 +45,8 @@ RUN apt-get update && apt-get install -y \
     libdbus-1-dev \
     libglib2.0-dev \
     libgirepository1.0-dev \
+    python-jinja2 \
+    python3-jinja2 \ 
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
