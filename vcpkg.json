@@ -14,7 +14,11 @@
     "spdlog",
     "gumbo",
     "at-spi2-core",
-    "libsystemd"
+    "libsystemd",
+    {
+      "name": "tool-meson",
+      "version>=": "0.63.0"
+    }
   ],
   "overrides": [
     {
