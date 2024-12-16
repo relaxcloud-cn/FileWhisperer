@@ -6,7 +6,13 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "/usr/local",
+                "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+            },
+            "environment": {
+                "VCPKG_ROOT": "/opt/vcpkg"
             }
         }
     ]

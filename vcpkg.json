@@ -12,6 +12,11 @@
     "openssl",
     "re2",
     "spdlog",
-    "gumbo"
+    "gumbo",
+    "at-spi2-core",
+    {
+      "name": "libsystemd",
+      "features": ["debug"]
+    }
   ]
 }

@@ -42,9 +42,10 @@ RUN apt-get update && apt-get install -y \
     tar \
     unzip \
     zip \
+    libdbus-1-dev \
+    libglib2.0-dev \
+    libgirepository1.0-dev \
     && rm -rf /var/lib/apt/lists/*
-
-RUN python3 -m pip install jinja2
 
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/Microsoft/vcpkg.git && \
@@ -78,9 +79,11 @@ RUN cmake -B build -S . \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_COMPILER=/usr/bin/gcc \
     -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
+    -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
     || ( \
-        cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-meson-log.txt.log && \
-        cat /opt/vcpkg/buildtrees/libsystemd/config-x64-linux-dbg-out.log && \
+        cat /opt/vcpkg/buildtrees/*/config-x64-linux-dbg-meson-log.txt.log || true && \
+        cat /opt/vcpkg/buildtrees/*/config-x64-linux-dbg-out.log || true && \
         false \
     )
 
