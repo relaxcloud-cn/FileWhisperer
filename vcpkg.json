@@ -8,22 +8,22 @@
     "icu",
     "libmagic",
     "mio",
-    "opencv",
+    {
+      "name": "opencv",
+      "features": [
+        "default-features",
+        "ffmpeg",
+        "jpeg",
+        "png",
+        "tiff",
+        "gtk"
+      ]
+    },
     "openssl",
     "re2",
     "spdlog",
     "gumbo",
     "at-spi2-core",
-    "libsystemd",
-    {
-      "name": "tool-meson",
-      "version>=": "0.63.0"
-    }
-  ],
-  "overrides": [
-    {
-      "name": "glib",
-      "version": "2.70.1"
-    }
+    "libsystemd"
   ]
 }
