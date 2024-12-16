@@ -14,6 +14,7 @@
     "spdlog",
     "gumbo",
     "at-spi2-core",
-    "libsystemd"
+    "libsystemd",
+    "gtk3"
   ]
 }
