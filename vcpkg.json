@@ -14,9 +14,6 @@
     "spdlog",
     "gumbo",
     "at-spi2-core",
-    {
-      "name": "libsystemd",
-      "features": ["debug"]
-    }
+    "libsystemd"
   ]
 }

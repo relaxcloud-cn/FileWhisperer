@@ -73,7 +73,7 @@ RUN cd fixtures && \
     make -j$(nproc) && \
     make install
 
-RUN cmake -B build -S . \
+    RUN cmake -B build -S . \
     --preset=vcpkg \
     -G "Ninja" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -81,9 +81,10 @@ RUN cmake -B build -S . \
     -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
     -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
     -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DVCPKG_TARGET_TRIPLET=x64-linux \
+    -DVCPKG_HOST_TRIPLET=x64-linux \
     || ( \
-        cat /opt/vcpkg/buildtrees/*/config-x64-linux-dbg-meson-log.txt.log || true && \
-        cat /opt/vcpkg/buildtrees/*/config-x64-linux-dbg-out.log || true && \
+        cat build/vcpkg-manifest-install.log || true && \
         false \
     )
 
