@@ -30,6 +30,8 @@ RUN apt-get update && apt-get install -y \
     libx11-dev \
     libxext-dev \
     libxft-dev \
+    libxi-dev \
+    libxtst-dev \
     libzstd-dev \
     linux-libc-dev \
     meson \
