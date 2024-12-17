@@ -1,25 +1,26 @@
 {
   "dependencies": [
+    {
+      "name": "at-spi2-core",
+      "platform": "linux"
+    },
     "bit7z",
     "boost-uuid",
     "cli11",
     "grpc",
     "gtest",
+    "gumbo",
     "icu",
     "libmagic",
+    {
+      "name": "libsystemd",
+      "platform": "linux"
+    },
     "mio",
     "opencv",
     "openssl",
     "re2",
     "spdlog",
-    "gumbo",
-    {
-      "name": "at-spi2-core",
-      "platform": "linux"
-    },
-    {
-      "name": "libsystemd",
-      "platform": "linux"
-    }
+    "tesseract"
   ]
 }

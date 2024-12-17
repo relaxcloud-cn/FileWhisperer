@@ -310,3 +310,77 @@ namespace extractor
     }
 
 }
+
+namespace extractor
+{
+    std::vector<Node *> extract_ocr(Node *node)
+    {
+        std::vector<Node *> nodes;
+        if (std::holds_alternative<File>(node->content))
+        {
+            File &file = std::get<File>(node->content);
+            std::vector<uint8_t> &data = file.content;
+            OCRHelper ocr;
+            std::string result = ocr.recognize_image(data);
+            Node *t_node = new whisper_data_type::Node{.content = whisper_data_type::Data{
+                                                           .type = "OCR",
+                                                           .content = encode_binary(result)}};
+            t_node->prev = node;
+            nodes.push_back(t_node);
+        }
+        else if (std::holds_alternative<Data>(node->content))
+        {
+            spdlog::debug("extract_compressed_file enter Data type");
+            return nodes;
+        }
+
+        return nodes;
+    }
+
+    OCRHelper::OCRHelper()
+    {
+        ocr_ = new tesseract::TessBaseAPI();
+
+        if (ocr_->Init(nullptr, "chi_tra+eng") != 0)
+        {
+            delete ocr_;
+            throw std::runtime_error("Could not initialize tesseract. Please ensure TESSDATA_PREFIX environment variable is set correctly.");
+        }
+    }
+
+    OCRHelper::~OCRHelper()
+    {
+        if (ocr_)
+        {
+            ocr_->End();
+            delete ocr_;
+        }
+    }
+
+    std::string OCRHelper::recognize_image(const std::vector<uint8_t> &image_data)
+    {
+        if (image_data.empty())
+        {
+            throw std::runtime_error("Image data is empty");
+        }
+
+        // 从内存数据创建Pix对象
+        Pix *image = pixReadMemPng(
+            image_data.data(),
+            image_data.size());
+
+        if (!image)
+        {
+            throw std::runtime_error("Failed to read image data");
+        }
+
+        ocr_->SetImage(image);
+        char *outText = ocr_->GetUTF8Text();
+        std::string result(outText);
+
+        delete[] outText;
+        pixDestroy(&image);
+
+        return result;
+    }
+}

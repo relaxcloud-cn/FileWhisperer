@@ -17,6 +17,7 @@ namespace whisper_data_type
         {"TEXT", TEXT_PLAIN},
 
         // FILE
+        {"OCR", TEXT_PLAIN},
         {"text/plain", TEXT_PLAIN},
         {"text/html", TEXT_HTML},
         {"application/zip", COMPRESSED_FILE},
