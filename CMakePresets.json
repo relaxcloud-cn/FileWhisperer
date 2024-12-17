@@ -3,6 +3,21 @@
     "configurePresets": [
         {
             "name": "vcpkg",
+            "displayName": "Vcpkg Preset for macOS",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_MAKE_PROGRAM": "/opt/homebrew/bin/ninja"
+            },
+            "environment": {
+                "VCPKG_ROOT": "/opt/vcpkg"
+            }
+        },
+        {
+            "name": "vcpkg-linux",
+            "displayName": "Vcpkg Preset for Linux",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
