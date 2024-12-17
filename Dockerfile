@@ -47,6 +47,11 @@ RUN apt-get update && apt-get install -y \
     libgirepository1.0-dev \
     libglib2.0-dev \
     locales \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libatk1.0-dev \
+    libgdk-pixbuf2.0-dev \
+    libepoxy-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN dpkg-reconfigure locales
@@ -77,7 +82,7 @@ RUN cd fixtures && \
     make -j$(nproc) && \
     make install
 
-    RUN cmake -B build -S . \
+RUN cmake -B build -S . \
     --preset=vcpkg-linux \
     -G "Ninja" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -89,6 +94,7 @@ RUN cd fixtures && \
     -DVCPKG_HOST_TRIPLET=x64-linux \
     || ( \
         cat build/vcpkg-manifest-install.log || true && \
+        cat /opt/vcpkg/buildtrees/gtk3/config-x64-linux-dbg-out.log || true && \
         false \
     )
 
