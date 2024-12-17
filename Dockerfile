@@ -69,7 +69,7 @@ COPY . .
 RUN cd fixtures && \
     tar -zxf file-5.45.tar.gz && \
     cd file-5.45 && \
-    ./configure --prefix=/usr && \
+    ./configure --prefix=/usr/local && \
     make -j$(nproc) && \
     make install
 

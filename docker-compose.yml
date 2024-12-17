@@ -6,7 +6,7 @@ services:
     network_mode: "host"
     command: /app/build/FileWhisperer -p 50098 -l info
     environment: 
-      MAGIC_MGC_PATH: /usr/share/misc/magic.mgc
+      MAGIC_MGC_PATH: /usr/local/share/misc/magic.mgc
       LIB_PATH_7Z: /app/fixtures/7z.so
       TESSDATA_PREFIX: /app/fixtures/tesseract
     restart: always
