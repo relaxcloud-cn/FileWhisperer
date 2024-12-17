@@ -8,22 +8,7 @@
     "icu",
     "libmagic",
     "mio",
-    {
-      "name": "opencv",
-      "default-features": false,
-      "features": [
-        "calib3d",
-        "fs",
-        "highgui",
-        "intrinsics",
-        "jpeg",
-        "png",
-        "quirc",
-        "thread",
-        "tiff",
-        "webp"
-      ]
-    },
+    "opencv",
     "openssl",
     "re2",
     "spdlog",
@@ -36,7 +21,5 @@
       "name": "libsystemd",
       "platform": "linux"
     }
-  ],
-  "overrides": [],
-  "builtin-baseline": "efb2be8def2ce0b517fab714142bc1b5a7d4e987"
+  ]
 }

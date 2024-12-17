@@ -10,9 +10,6 @@
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_MAKE_PROGRAM": "/opt/homebrew/bin/ninja"
-            },
-            "environment": {
-                "VCPKG_ROOT": "/opt/vcpkg"
             }
         },
         {
