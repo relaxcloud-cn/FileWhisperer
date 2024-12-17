@@ -52,6 +52,9 @@ RUN apt-get update && apt-get install -y \
     libatk1.0-dev \
     libgdk-pixbuf2.0-dev \
     libepoxy-dev \
+    libxrandr-dev \
+    libxkbcommon-dev \
+    iso-codes \
     && rm -rf /var/lib/apt/lists/*
 
 RUN dpkg-reconfigure locales
