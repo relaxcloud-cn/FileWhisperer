@@ -11,12 +11,7 @@
     {
       "name": "opencv",
       "features": [
-        "default-features",
-        "ffmpeg",
-        "jpeg",
-        "png",
-        "tiff",
-        "gtk"
+        "-gtk"
       ]
     },
     "openssl",

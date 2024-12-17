@@ -42,10 +42,10 @@ RUN apt-get update && apt-get install -y \
     tar \
     unzip \
     zip \
-    libdbus-1-dev \
-    libglib2.0-dev \
-    libgirepository1.0-dev \
     python3-jinja2 \ 
+    libdbus-1-dev \
+    libgirepository1.0-dev \
+    libglib2.0-dev \
     locales \
     && rm -rf /var/lib/apt/lists/*
 
