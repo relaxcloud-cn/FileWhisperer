@@ -10,15 +10,33 @@
     "mio",
     {
       "name": "opencv",
+      "default-features": false,
       "features": [
-        "-gtk"
+        "calib3d",
+        "fs",
+        "highgui",
+        "intrinsics",
+        "jpeg",
+        "png",
+        "quirc",
+        "thread",
+        "tiff",
+        "webp"
       ]
     },
     "openssl",
     "re2",
     "spdlog",
     "gumbo",
-    "at-spi2-core",
-    "libsystemd"
-  ]
+    {
+      "name": "at-spi2-core",
+      "platform": "linux"
+    },
+    {
+      "name": "libsystemd",
+      "platform": "linux"
+    }
+  ],
+  "overrides": [],
+  "builtin-baseline": "efb2be8def2ce0b517fab714142bc1b5a7d4e987"
 }

@@ -78,7 +78,7 @@ RUN cd fixtures && \
     make install
 
     RUN cmake -B build -S . \
-    --preset=vcpkg \
+    --preset=vcpkg-linux \
     -G "Ninja" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_COMPILER=/usr/bin/gcc \
