@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/vcpkg:${PATH}"
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
     tar \
     unzip \
     zip \
-    python3-jinja2 \ 
+    python3-jinja2 \
     libdbus-1-dev \
     libgirepository1.0-dev \
     libglib2.0-dev \
@@ -64,18 +64,6 @@ RUN git clone --depth 1 https://github.com/Microsoft/vcpkg.git && \
     ./vcpkg/bootstrap-vcpkg.sh
 
 WORKDIR /app
-# COPY vcpkg.json .
-
-# RUN if [ -f vcpkg.json ]; then \
-#     vcpkg update && \
-#     vcpkg upgrade && \
-#     vcpkg install \
-#     --clean-after-build \
-#     --no-print-usage \
-#     --host-triplet=x64-linux \
-#     --triplet=x64-linux \
-#     ; fi
-
 COPY . .
 
 RUN cd fixtures && \
@@ -102,3 +90,12 @@ RUN cmake -B build -S . \
     )
 
 RUN cmake --build build -j$(nproc)
+
+FROM ubuntu:22.04
+
+COPY --from=builder /usr/local /usr/local
+
+WORKDIR /app
+
+COPY --from=builder /app/build /app/build
+COPY --from=builder /app/fixtures /app/fixtures
