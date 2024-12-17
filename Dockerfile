@@ -55,6 +55,11 @@ RUN apt-get update && apt-get install -y \
     libxrandr-dev \
     libxkbcommon-dev \
     iso-codes \
+    libxcursor-dev \
+    libxdamage-dev \
+    libxcomposite-dev \
+    sassc \
+    xsltproc \
     && rm -rf /var/lib/apt/lists/*
 
 RUN dpkg-reconfigure locales
