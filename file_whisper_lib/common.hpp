@@ -8,6 +8,7 @@
 #include <unicode/ustring.h>
 #include <unicode/unistr.h>
 #include <spdlog/spdlog.h>
+#include "snowflake.hpp"
 
 #pragma once
 

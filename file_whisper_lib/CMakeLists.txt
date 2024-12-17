@@ -2,6 +2,7 @@ add_library(file_whisper_lib
     common.cc
     data_type.cc
     extractor.cc
+    snowflake.cc
 )
 
 target_include_directories(file_whisper_lib
