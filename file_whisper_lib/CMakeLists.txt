@@ -21,6 +21,7 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(unofficial-bit7z CONFIG REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(unofficial-gumbo REQUIRED)
+find_package(Tesseract CONFIG REQUIRED)
 
 if(APPLE)
     set(WHOLE_ARCHIVE_FLAG "-force_load")
@@ -46,4 +47,5 @@ target_link_libraries(file_whisper_lib
     unofficial::bit7z::bit7z64
     ${OpenCV_LIBS}
     unofficial::gumbo::gumbo
+    Tesseract::libtesseract
 )

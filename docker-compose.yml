@@ -8,6 +8,7 @@ services:
     environment: 
       MAGIC_MGC_PATH: /usr/share/misc/magic.mgc
       LIB_PATH_7Z: /app/fixtures/7z.so
+      TESSDATA_PREFIX: /app/fixtures/tesseract
     restart: always
     logging:
       driver: fluentd
