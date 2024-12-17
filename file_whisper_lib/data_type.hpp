@@ -42,7 +42,7 @@ namespace whisper_data_type
 
     struct Node
     {
-        std::string id;
+        int64_t id;
         // std::string parent_id;
         Node *prev;
         // std::vector<std::string> children;

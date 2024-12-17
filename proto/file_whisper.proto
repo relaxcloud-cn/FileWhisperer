@@ -25,9 +25,9 @@ message Meta {
 }
 
 message Node {
-  string id = 1;
-  string parent_id = 2;
-  repeated string children = 3;
+  int64 id = 1;
+  int64 parent_id = 2;
+  repeated int64 children = 3;
   oneof content {
       File file = 4;
       Data data = 5;

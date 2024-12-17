@@ -10,7 +10,10 @@ void whisper_data_type::Tree::digest(Node *node)
     }
     boost::uuids::random_generator generator;
     boost::uuids::uuid uuid = generator();
-    node->id = boost::uuids::to_string(uuid);
+    SnowFlake* snowflake = SnowFlake::getInstance(1, 1);
+    int64_t id = snowflake->nextId();
+    // node->id = boost::uuids::to_string(uuid);
+    node->id = id;
     Meta meta{};
     if (std::holds_alternative<File>(node->content))
     {

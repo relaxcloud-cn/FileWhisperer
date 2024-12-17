@@ -213,13 +213,10 @@ inline constexpr Node::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         children_{},
-        id_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        parent_id_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
+        _children_cached_byte_size_{0},
         meta_{nullptr},
+        id_{::int64_t{0}},
+        parent_id_{::int64_t{0}},
         content_{},
         _oneof_case_{} {}
 
@@ -437,8 +434,8 @@ const char descriptor_table_protodef_file_5fwhisper_2eproto[] ABSL_ATTRIBUTE_SEC
     "\002 \001(\t:\0028\001\0320\n\016MapNumberEntry\022\013\n\003key\030\001 \001(\t"
     "\022\r\n\005value\030\002 \001(\003:\0028\001\032.\n\014MapBoolEntry\022\013\n\003k"
     "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\010:\0028\001\"\235\001\n\004Node\022\n\n\002"
-    "id\030\001 \001(\t\022\021\n\tparent_id\030\002 \001(\t\022\020\n\010children\030"
-    "\003 \003(\t\022\035\n\004file\030\004 \001(\0132\r.whisper.FileH\000\022\035\n\004"
+    "id\030\001 \001(\003\022\021\n\tparent_id\030\002 \001(\003\022\020\n\010children\030"
+    "\003 \003(\003\022\035\n\004file\030\004 \001(\0132\r.whisper.FileH\000\022\035\n\004"
     "data\030\005 \001(\0132\r.whisper.DataH\000\022\033\n\004meta\030\006 \001("
     "\0132\r.whisper.MetaB\t\n\007content\"\225\001\n\004File\022\014\n\004"
     "path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\022\021"
@@ -1671,8 +1668,7 @@ inline PROTOBUF_NDEBUG_INLINE Node::Impl_::Impl_(
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         children_{visibility, arena, from.children_},
-        id_(arena, from.id_),
-        parent_id_(arena, from.parent_id_),
+        _children_cached_byte_size_{0},
         content_{},
         _oneof_case_{from._oneof_case_[0]} {}
 
@@ -1693,6 +1689,13 @@ Node::Node(
   _impl_.meta_ = (cached_has_bits & 0x00000001u) ? ::google::protobuf::Message::CopyConstruct<::whisper::Meta>(
                               arena, *from._impl_.meta_)
                         : nullptr;
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, parent_id_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::parent_id_));
   switch (content_case()) {
     case CONTENT_NOT_SET:
       break;
@@ -1711,14 +1714,18 @@ inline PROTOBUF_NDEBUG_INLINE Node::Impl_::Impl_(
     ::google::protobuf::Arena* arena)
       : _cached_size_{0},
         children_{visibility, arena},
-        id_(arena),
-        parent_id_(arena),
+        _children_cached_byte_size_{0},
         content_{},
         _oneof_case_{} {}
 
 inline void Node::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.meta_ = {};
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, meta_),
+           0,
+           offsetof(Impl_, parent_id_) -
+               offsetof(Impl_, meta_) +
+               sizeof(Impl_::parent_id_));
 }
 Node::~Node() {
   // @@protoc_insertion_point(destructor:whisper.Node)
@@ -1727,8 +1734,6 @@ Node::~Node() {
 }
 inline void Node::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.id_.Destroy();
-  _impl_.parent_id_.Destroy();
   delete _impl_.meta_;
   if (has_content()) {
     clear_content();
@@ -1793,7 +1798,7 @@ const ::google::protobuf::MessageLite::ClassData* Node::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 6, 3, 40, 2> Node::_table_ = {
+const ::_pbi::TcParseTable<3, 6, 3, 0, 2> Node::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(Node, _impl_._has_bits_),
     0, // no _extensions_
@@ -1812,14 +1817,14 @@ const ::_pbi::TcParseTable<3, 6, 3, 40, 2> Node::_table_ = {
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // string id = 1;
-    {::_pbi::TcParser::FastUS1,
-     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Node, _impl_.id_)}},
-    // string parent_id = 2;
-    {::_pbi::TcParser::FastUS1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(Node, _impl_.parent_id_)}},
-    // repeated string children = 3;
-    {::_pbi::TcParser::FastUR1,
+    // int64 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Node, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(Node, _impl_.id_)}},
+    // int64 parent_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Node, _impl_.parent_id_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(Node, _impl_.parent_id_)}},
+    // repeated int64 children = 3;
+    {::_pbi::TcParser::FastV64P1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(Node, _impl_.children_)}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
@@ -1830,15 +1835,15 @@ const ::_pbi::TcParseTable<3, 6, 3, 40, 2> Node::_table_ = {
   }}, {{
     65535, 65535
   }}, {{
-    // string id = 1;
+    // int64 id = 1;
     {PROTOBUF_FIELD_OFFSET(Node, _impl_.id_), -1, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string parent_id = 2;
+    (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
+    // int64 parent_id = 2;
     {PROTOBUF_FIELD_OFFSET(Node, _impl_.parent_id_), -1, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // repeated string children = 3;
+    (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
+    // repeated int64 children = 3;
     {PROTOBUF_FIELD_OFFSET(Node, _impl_.children_), -1, 0,
-    (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt64)},
     // .whisper.File file = 4;
     {PROTOBUF_FIELD_OFFSET(Node, _impl_.content_.file_), _Internal::kOneofCaseOffset + 0, 0,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
@@ -1853,11 +1858,6 @@ const ::_pbi::TcParseTable<3, 6, 3, 40, 2> Node::_table_ = {
     {::_pbi::TcParser::GetTable<::whisper::Data>()},
     {::_pbi::TcParser::GetTable<::whisper::Meta>()},
   }}, {{
-    "\14\2\11\10\0\0\0\0"
-    "whisper.Node"
-    "id"
-    "parent_id"
-    "children"
   }},
 };
 
@@ -1869,13 +1869,14 @@ PROTOBUF_NOINLINE void Node::Clear() {
   (void) cached_has_bits;
 
   _impl_.children_.Clear();
-  _impl_.id_.ClearToEmpty();
-  _impl_.parent_id_.ClearToEmpty();
   cached_has_bits = _impl_._has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     ABSL_DCHECK(_impl_.meta_ != nullptr);
     _impl_.meta_->Clear();
   }
+  ::memset(&_impl_.id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.parent_id_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.parent_id_));
   clear_content();
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -1896,28 +1897,27 @@ PROTOBUF_NOINLINE void Node::Clear() {
           ::uint32_t cached_has_bits = 0;
           (void)cached_has_bits;
 
-          // string id = 1;
-          if (!this_._internal_id().empty()) {
-            const std::string& _s = this_._internal_id();
-            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "whisper.Node.id");
-            target = stream->WriteStringMaybeAliased(1, _s, target);
+          // int64 id = 1;
+          if (this_._internal_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt64ToArrayWithField<1>(
+                    stream, this_._internal_id(), target);
           }
 
-          // string parent_id = 2;
-          if (!this_._internal_parent_id().empty()) {
-            const std::string& _s = this_._internal_parent_id();
-            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "whisper.Node.parent_id");
-            target = stream->WriteStringMaybeAliased(2, _s, target);
+          // int64 parent_id = 2;
+          if (this_._internal_parent_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt64ToArrayWithField<2>(
+                    stream, this_._internal_parent_id(), target);
           }
 
-          // repeated string children = 3;
-          for (int i = 0, n = this_._internal_children_size(); i < n; ++i) {
-            const auto& s = this_._internal_children().Get(i);
-            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-                s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "whisper.Node.children");
-            target = stream->WriteString(3, s, target);
+          // repeated int64 children = 3;
+          {
+            int byte_size = this_._impl_._children_cached_byte_size_.Get();
+            if (byte_size > 0) {
+              target = stream->WriteInt64Packed(
+                  3, this_._internal_children(), byte_size, target);
+            }
           }
 
           switch (this_.content_case()) {
@@ -1969,26 +1969,19 @@ PROTOBUF_NOINLINE void Node::Clear() {
 
           ::_pbi::Prefetch5LinesFrom7Lines(&this_);
            {
-            // repeated string children = 3;
+            // repeated int64 children = 3;
              {
-              total_size +=
-                  1 * ::google::protobuf::internal::FromIntSize(this_._internal_children().size());
-              for (int i = 0, n = this_._internal_children().size(); i < n; ++i) {
-                total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
-                    this_._internal_children().Get(i));
-              }
-            }
-          }
-           {
-            // string id = 1;
-            if (!this_._internal_id().empty()) {
-              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                              this_._internal_id());
-            }
-            // string parent_id = 2;
-            if (!this_._internal_parent_id().empty()) {
-              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                              this_._internal_parent_id());
+              std::size_t data_size = ::_pbi::WireFormatLite::Int64Size(
+                  this_._internal_children())
+              ;
+              this_._impl_._children_cached_byte_size_.Set(
+                  ::_pbi::ToCachedSize(data_size));
+              std::size_t tag_size = data_size == 0
+                  ? 0
+                  : 1 + ::_pbi::WireFormatLite::Int32Size(
+                                      static_cast<int32_t>(data_size))
+              ;
+              total_size += tag_size + data_size;
             }
           }
            {
@@ -1998,6 +1991,18 @@ PROTOBUF_NOINLINE void Node::Clear() {
             if (cached_has_bits & 0x00000001u) {
               total_size += 1 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.meta_);
+            }
+          }
+           {
+            // int64 id = 1;
+            if (this_._internal_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+                  this_._internal_id());
+            }
+            // int64 parent_id = 2;
+            if (this_._internal_parent_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+                  this_._internal_parent_id());
             }
           }
           switch (this_.content_case()) {
@@ -2031,12 +2036,6 @@ void Node::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::pr
   (void) cached_has_bits;
 
   _this->_internal_mutable_children()->MergeFrom(from._internal_children());
-  if (!from._internal_id().empty()) {
-    _this->_internal_set_id(from._internal_id());
-  }
-  if (!from._internal_parent_id().empty()) {
-    _this->_internal_set_parent_id(from._internal_parent_id());
-  }
   cached_has_bits = from._impl_._has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     ABSL_DCHECK(from._impl_.meta_ != nullptr);
@@ -2046,6 +2045,12 @@ void Node::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::pr
     } else {
       _this->_impl_.meta_->MergeFrom(*from._impl_.meta_);
     }
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  if (from._internal_parent_id() != 0) {
+    _this->_impl_.parent_id_ = from._impl_.parent_id_;
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
   if (const uint32_t oneof_from_case = from._impl_._oneof_case_[0]) {
@@ -2094,14 +2099,15 @@ void Node::CopyFrom(const Node& from) {
 
 void Node::InternalSwap(Node* PROTOBUF_RESTRICT other) {
   using std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.children_.InternalSwap(&other->_impl_.children_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.id_, &other->_impl_.id_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.parent_id_, &other->_impl_.parent_id_, arena);
-  swap(_impl_.meta_, other->_impl_.meta_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(Node, _impl_.parent_id_)
+      + sizeof(Node::_impl_.parent_id_)
+      - PROTOBUF_FIELD_OFFSET(Node, _impl_.meta_)>(
+          reinterpret_cast<char*>(&_impl_.meta_),
+          reinterpret_cast<char*>(&other->_impl_.meta_));
   swap(_impl_.content_, other->_impl_.content_);
   swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }

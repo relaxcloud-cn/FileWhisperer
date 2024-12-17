@@ -1360,64 +1360,28 @@ class Node final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kChildrenFieldNumber = 3,
+    kMetaFieldNumber = 6,
     kIdFieldNumber = 1,
     kParentIdFieldNumber = 2,
-    kMetaFieldNumber = 6,
     kFileFieldNumber = 4,
     kDataFieldNumber = 5,
   };
-  // repeated string children = 3;
+  // repeated int64 children = 3;
   int children_size() const;
   private:
   int _internal_children_size() const;
 
   public:
   void clear_children() ;
-  const std::string& children(int index) const;
-  std::string* mutable_children(int index);
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_children(int index, Arg_&& value, Args_... args);
-  std::string* add_children();
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void add_children(Arg_&& value, Args_... args);
-  const ::google::protobuf::RepeatedPtrField<std::string>& children() const;
-  ::google::protobuf::RepeatedPtrField<std::string>* mutable_children();
+  ::int64_t children(int index) const;
+  void set_children(int index, ::int64_t value);
+  void add_children(::int64_t value);
+  const ::google::protobuf::RepeatedField<::int64_t>& children() const;
+  ::google::protobuf::RepeatedField<::int64_t>* mutable_children();
 
   private:
-  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_children() const;
-  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_children();
-
-  public:
-  // string id = 1;
-  void clear_id() ;
-  const std::string& id() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_id(Arg_&& arg, Args_... args);
-  std::string* mutable_id();
-  PROTOBUF_NODISCARD std::string* release_id();
-  void set_allocated_id(std::string* value);
-
-  private:
-  const std::string& _internal_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_id(
-      const std::string& value);
-  std::string* _internal_mutable_id();
-
-  public:
-  // string parent_id = 2;
-  void clear_parent_id() ;
-  const std::string& parent_id() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_parent_id(Arg_&& arg, Args_... args);
-  std::string* mutable_parent_id();
-  PROTOBUF_NODISCARD std::string* release_parent_id();
-  void set_allocated_parent_id(std::string* value);
-
-  private:
-  const std::string& _internal_parent_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_parent_id(
-      const std::string& value);
-  std::string* _internal_mutable_parent_id();
+  const ::google::protobuf::RepeatedField<::int64_t>& _internal_children() const;
+  ::google::protobuf::RepeatedField<::int64_t>* _internal_mutable_children();
 
   public:
   // .whisper.Meta meta = 6;
@@ -1433,6 +1397,26 @@ class Node final : public ::google::protobuf::Message
   private:
   const ::whisper::Meta& _internal_meta() const;
   ::whisper::Meta* _internal_mutable_meta();
+
+  public:
+  // int64 id = 1;
+  void clear_id() ;
+  ::int64_t id() const;
+  void set_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_id() const;
+  void _internal_set_id(::int64_t value);
+
+  public:
+  // int64 parent_id = 2;
+  void clear_parent_id() ;
+  ::int64_t parent_id() const;
+  void set_parent_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_parent_id() const;
+  void _internal_set_parent_id(::int64_t value);
 
   public:
   // .whisper.File file = 4;
@@ -1485,7 +1469,7 @@ class Node final : public ::google::protobuf::Message
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
       3, 6, 3,
-      40, 2>
+      0, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -1507,10 +1491,11 @@ class Node final : public ::google::protobuf::Message
                           const Node& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    ::google::protobuf::RepeatedPtrField<std::string> children_;
-    ::google::protobuf::internal::ArenaStringPtr id_;
-    ::google::protobuf::internal::ArenaStringPtr parent_id_;
+    ::google::protobuf::RepeatedField<::int64_t> children_;
+    mutable ::google::protobuf::internal::CachedSize _children_cached_byte_size_;
     ::whisper::Meta* meta_;
+    ::int64_t id_;
+    ::int64_t parent_id_;
     union ContentUnion {
       constexpr ContentUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
@@ -2129,107 +2114,51 @@ inline ::google::protobuf::Map<std::string, bool>* Meta::mutable_map_bool() ABSL
 
 // Node
 
-// string id = 1;
+// int64 id = 1;
 inline void Node::clear_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.id_.ClearToEmpty();
+  _impl_.id_ = ::int64_t{0};
 }
-inline const std::string& Node::id() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline ::int64_t Node::id() const {
   // @@protoc_insertion_point(field_get:whisper.Node.id)
   return _internal_id();
 }
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void Node::set_id(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.id_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+inline void Node::set_id(::int64_t value) {
+  _internal_set_id(value);
   // @@protoc_insertion_point(field_set:whisper.Node.id)
 }
-inline std::string* Node::mutable_id() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_id();
-  // @@protoc_insertion_point(field_mutable:whisper.Node.id)
-  return _s;
-}
-inline const std::string& Node::_internal_id() const {
+inline ::int64_t Node::_internal_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.id_.Get();
+  return _impl_.id_;
 }
-inline void Node::_internal_set_id(const std::string& value) {
+inline void Node::_internal_set_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.id_.Set(value, GetArena());
-}
-inline std::string* Node::_internal_mutable_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.id_.Mutable( GetArena());
-}
-inline std::string* Node::release_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:whisper.Node.id)
-  return _impl_.id_.Release();
-}
-inline void Node::set_allocated_id(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.id_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.id_.IsDefault()) {
-          _impl_.id_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:whisper.Node.id)
+  _impl_.id_ = value;
 }
 
-// string parent_id = 2;
+// int64 parent_id = 2;
 inline void Node::clear_parent_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.parent_id_.ClearToEmpty();
+  _impl_.parent_id_ = ::int64_t{0};
 }
-inline const std::string& Node::parent_id() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline ::int64_t Node::parent_id() const {
   // @@protoc_insertion_point(field_get:whisper.Node.parent_id)
   return _internal_parent_id();
 }
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void Node::set_parent_id(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.parent_id_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+inline void Node::set_parent_id(::int64_t value) {
+  _internal_set_parent_id(value);
   // @@protoc_insertion_point(field_set:whisper.Node.parent_id)
 }
-inline std::string* Node::mutable_parent_id() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_parent_id();
-  // @@protoc_insertion_point(field_mutable:whisper.Node.parent_id)
-  return _s;
-}
-inline const std::string& Node::_internal_parent_id() const {
+inline ::int64_t Node::_internal_parent_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.parent_id_.Get();
+  return _impl_.parent_id_;
 }
-inline void Node::_internal_set_parent_id(const std::string& value) {
+inline void Node::_internal_set_parent_id(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.parent_id_.Set(value, GetArena());
-}
-inline std::string* Node::_internal_mutable_parent_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.parent_id_.Mutable( GetArena());
-}
-inline std::string* Node::release_parent_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:whisper.Node.parent_id)
-  return _impl_.parent_id_.Release();
-}
-inline void Node::set_allocated_parent_id(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.parent_id_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.parent_id_.IsDefault()) {
-          _impl_.parent_id_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:whisper.Node.parent_id)
+  _impl_.parent_id_ = value;
 }
 
-// repeated string children = 3;
+// repeated int64 children = 3;
 inline int Node::_internal_children_size() const {
   return _internal_children().size();
 }
@@ -2240,55 +2169,36 @@ inline void Node::clear_children() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.children_.Clear();
 }
-inline std::string* Node::add_children() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  std::string* _s = _internal_mutable_children()->Add();
-  // @@protoc_insertion_point(field_add_mutable:whisper.Node.children)
-  return _s;
-}
-inline const std::string& Node::children(int index) const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline ::int64_t Node::children(int index) const {
   // @@protoc_insertion_point(field_get:whisper.Node.children)
   return _internal_children().Get(index);
 }
-inline std::string* Node::mutable_children(int index)
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable:whisper.Node.children)
-  return _internal_mutable_children()->Mutable(index);
-}
-template <typename Arg_, typename... Args_>
-inline void Node::set_children(int index, Arg_&& value, Args_... args) {
-  ::google::protobuf::internal::AssignToString(
-      *_internal_mutable_children()->Mutable(index),
-      std::forward<Arg_>(value), args... );
+inline void Node::set_children(int index, ::int64_t value) {
+  _internal_mutable_children()->Set(index, value);
   // @@protoc_insertion_point(field_set:whisper.Node.children)
 }
-template <typename Arg_, typename... Args_>
-inline void Node::add_children(Arg_&& value, Args_... args) {
+inline void Node::add_children(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_children(),
-                               std::forward<Arg_>(value),
-                               args... );
+  _internal_mutable_children()->Add(value);
   // @@protoc_insertion_point(field_add:whisper.Node.children)
 }
-inline const ::google::protobuf::RepeatedPtrField<std::string>&
-Node::children() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline const ::google::protobuf::RepeatedField<::int64_t>& Node::children() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
   // @@protoc_insertion_point(field_list:whisper.Node.children)
   return _internal_children();
 }
-inline ::google::protobuf::RepeatedPtrField<std::string>*
-Node::mutable_children() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline ::google::protobuf::RepeatedField<::int64_t>* Node::mutable_children()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
   // @@protoc_insertion_point(field_mutable_list:whisper.Node.children)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   return _internal_mutable_children();
 }
-inline const ::google::protobuf::RepeatedPtrField<std::string>&
+inline const ::google::protobuf::RepeatedField<::int64_t>&
 Node::_internal_children() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.children_;
 }
-inline ::google::protobuf::RepeatedPtrField<std::string>*
-Node::_internal_mutable_children() {
+inline ::google::protobuf::RepeatedField<::int64_t>* Node::_internal_mutable_children() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.children_;
 }
