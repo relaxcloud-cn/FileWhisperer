@@ -26,23 +26,27 @@ jobs:
 
       - name: Free disk space
         run: |
-          # 删除不需要的软件包
-          sudo apt-get remove -y '^ghc-8.*'
-          sudo apt-get remove -y '^dotnet-.*'
-          sudo apt-get remove -y '^llvm-.*'
-          sudo apt-get remove -y 'php.*'
-          sudo apt-get remove -y azure-cli google-cloud-sdk google-chrome-stable firefox
+          echo "Before cleanup"
+          sudo du -hS / 2>/dev/null | sort -rh | head -n 10
+          
+          sudo apt-get remove -y ghc* dotnet* llvm* php* powershell azure-cli google-cloud-sdk google-chrome-stable firefox
           sudo apt-get autoremove -y
           sudo apt-get clean
           
-          # 删除不需要的目录
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache
-
-          # 清理日志
-          sudo find /var/log -type f -delete
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/swift
+          
+          docker system prune -af
+          
+          sudo find /var/log -type f -exec rm -rf {} \;
+          
+          echo "After cleanup"
+          sudo du -hS / 2>/dev/null | sort -rh | head -n 10
 
       - name: Check disk usage after cleanup
         run: df -h
