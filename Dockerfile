@@ -60,6 +60,12 @@ RUN apt-get update && apt-get install -y \
     libxcomposite-dev \
     sassc \
     xsltproc \
+    libcups2-dev \
+    libxml2-dev \
+    libxfixes-dev \
+    libxinerama-dev \
+    libgtk-3-dev \
+    gettext \
     && rm -rf /var/lib/apt/lists/*
 
 RUN dpkg-reconfigure locales
