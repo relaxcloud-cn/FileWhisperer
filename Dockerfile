@@ -66,6 +66,8 @@ RUN apt-get update && apt-get install -y \
     libxinerama-dev \
     libgtk-3-dev \
     gettext \
+    
+    libsystemd-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN dpkg-reconfigure locales
