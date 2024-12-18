@@ -7,6 +7,11 @@ PROTO_DIR = ./proto
 PYTHON_CODE_DIR = ./py
 CPP_CODE_DIR = ./cpp
 
+# Docker configuration
+DOCKER_IMAGE_NAME = filewhisperer
+DOCKER_IMAGE_TAG = latest
+DOCKER_BUILD_FLAGS = --progress=plain
+
 # Find all .proto files in the proto directory
 PROTO_FILES = $(wildcard $(PROTO_DIR)/*.proto)
 
@@ -24,8 +29,12 @@ PROTOC_CPP = ./vcpkg_installed/arm64-osx/tools/protobuf/protoc  # Assumes protoc
 # Adjust the path below to match where vcpkg installs grpc_cpp_plugin on your system
 GRPC_CPP_PLUGIN = $(shell which grpc_cpp_plugin)
 
-# Phony targets to avoid conflicts with files of the same name
-.PHONY: all clean generate_proto install_deps gen_python gen_cpp list
+# System information for Docker build
+CORES = $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+MEMORY = $(shell free -g 2>/dev/null | awk '/^Mem:/{print $$2}' || echo 4)
+
+# Phony targets
+.PHONY: all clean generate_proto install_deps gen_python gen_cpp list docker-build docker-clean docker-rebuild
 
 # Default target to install dependencies and generate code
 all: install_deps generate_proto
@@ -89,3 +98,35 @@ list:
 	@for proto in $(PROTO_FILES); do \
 		echo "  $$proto"; \
 	done
+
+# Docker targets
+docker-build:
+	@echo "Building Docker image using $(CORES) cores..."
+	DOCKER_BUILDKIT=$(DOCKER_BUILDKIT) docker build \
+		$(DOCKER_BUILD_FLAGS) \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--build-arg MAKEFLAGS="-j$(CORES)" \
+		-t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) \
+		.
+
+docker-clean:
+	@echo "Removing Docker image $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)..."
+	docker rmi -f $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
+
+docker-rebuild: docker-clean docker-build
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  all            : Install dependencies and generate code (default)"
+	@echo "  generate_proto : Generate both Python and C++ code"
+	@echo "  gen            : Shortcut for generate_proto"
+	@echo "  install_deps   : Install required dependencies"
+	@echo "  gen_python     : Generate Python code only"
+	@echo "  gen_cpp        : Generate C++ code only"
+	@echo "  clean          : Clean generated files"
+	@echo "  list           : List all .proto files"
+	@echo "  docker-build   : Build Docker image"
+	@echo "  docker-clean   : Remove Docker image"
+	@echo "  docker-rebuild : Clean and rebuild Docker image"
+	@echo "  help           : Show this help message"
