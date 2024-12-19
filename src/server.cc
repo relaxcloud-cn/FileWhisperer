@@ -12,6 +12,7 @@ void make_whisper_reply(whisper::WhisperReply *, whisper_data_type::Tree *);
 void bfs(whisper::WhisperReply *, whisper_data_type::Node *);
 void bsf_process_whisper_reply_node(whisper::WhisperReply *, whisper_data_type::Node *);
 void RunServer(int);
+void write_content_to_file(const std::string &, const std::vector<uint8_t> &);
 
 int main(int argc, char **argv)
 {
@@ -164,13 +165,15 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
   {
     whisper_data_type::File &root_file = std::get<whisper_data_type::File>(root->content);
     whisper::File *file = node->mutable_file();
-    file->set_path(root_file.path);
+    auto file_path = root->uuid;
+    file->set_path(file_path);
     file->set_name(root_file.name);
     file->set_size(root_file.size);
     file->set_mime_type(root_file.mime_type);
     file->set_md5(root_file.md5);
     file->set_sha256(root_file.sha256);
-    file->set_content(std::string(root_file.content.begin(), root_file.content.end()));
+    // file->set_content(std::string(root_file.content.begin(), root_file.content.end()));
+    write_content_to_file(file_path, root_file.content);
   }
   else if (std::holds_alternative<whisper_data_type::Data>(root->content))
   {
@@ -210,4 +213,32 @@ void RunServer(int port)
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   spdlog::info("Server listening on {} ", server_address);
   server->Wait();
+}
+
+void write_content_to_file(const std::string &file_path, const std::vector<uint8_t> &content)
+{
+  const char *output_dir = std::getenv("FILE_WHISPERER_OUTPUT_DIR");
+  if (!output_dir)
+  {
+    throw std::runtime_error("FILE_WHISPERER_OUTPUT_DIR environment variable not set");
+  }
+
+  std::string full_path = std::string(output_dir) + "/" + file_path;
+
+  std::ofstream file(full_path, std::ios::binary | std::ios::trunc);
+  file.write(reinterpret_cast<const char *>(content.data()), content.size());
+  file.close();
+
+  mio::mmap_sink rw_mmap;
+  std::error_code error;
+  rw_mmap.map(full_path, error);
+
+  if (error)
+  {
+    throw std::runtime_error("Failed to map file: " + error.message());
+  }
+
+  std::copy(content.begin(), content.end(), rw_mmap.begin());
+
+  // mio 会在析构时自动解除映射
 }
