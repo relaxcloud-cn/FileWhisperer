@@ -44,6 +44,7 @@ namespace whisper_data_type
     {
         int64_t id;
         // std::string parent_id;
+        std::string uuid;
         Node *prev;
         // std::vector<std::string> children;
         std::vector<Node *> children;
