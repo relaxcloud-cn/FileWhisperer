@@ -10,6 +10,10 @@ ENV VCPKG_MAX_CONCURRENCY=8
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
 RUN apt-get update && apt-get install -y \
     autoconf \
     autoconf-archive \
@@ -66,11 +70,11 @@ RUN apt-get update && apt-get install -y \
     libxinerama-dev \
     libgtk-3-dev \
     gettext \
-    
     libsystemd-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN dpkg-reconfigure locales
+RUN locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/Microsoft/vcpkg.git && \
@@ -105,6 +109,15 @@ RUN cmake -B build -S . \
 RUN cmake --build build -j$(nproc)
 
 FROM ubuntu:22.04
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+RUN apt-get update && apt-get install -y locales && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local /usr/local
 

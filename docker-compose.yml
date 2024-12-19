@@ -19,4 +19,7 @@ services:
         fluentd-buffer-limit: "100"
         fluentd-retry-wait: "3s"
         fluentd-async: "true"
-    mem_limit: "20g"
+    deploy:
+      resources:
+        limits:
+          memory: 20G
