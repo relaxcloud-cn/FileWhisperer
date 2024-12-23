@@ -10,6 +10,8 @@ services:
       LIB_PATH_7Z: /app/fixtures/7z.so
       TESSDATA_PREFIX: /app/fixtures/tesseract
       FILE_WHISPERER_OUTPUT_DIR: /opt/docker/filewhisperer/output
+    volumes:
+      - ./output:/opt/docker/filewhisperer/output
     restart: always
     logging:
       driver: fluentd

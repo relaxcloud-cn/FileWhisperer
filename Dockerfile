@@ -1,14 +1,22 @@
+# syntax=docker/dockerfile:1
+ARG TARGETARCH
+
 FROM ubuntu:22.04 AS builder
 
+ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
 ENV VCPKG_DISABLE_METRICS=1
 ENV VCPKG_FEATURE_FLAGS=manifests
-ENV VCPKG_DEFAULT_TRIPLET=x64-linux
 ENV VCPKG_MAX_CONCURRENCY=8
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
+
+# Set VCPKG triplet based on architecture
+ENV VCPKG_DEFAULT_TRIPLET=${TARGETARCH}-linux
+ENV VCPKG_TARGET_TRIPLET=${TARGETARCH}-linux
+ENV VCPKG_HOST_TRIPLET=${TARGETARCH}-linux
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
@@ -98,17 +106,19 @@ RUN cmake -B build -S . \
     -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
     -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
     -DCMAKE_INSTALL_PREFIX=/usr/local \
-    -DVCPKG_TARGET_TRIPLET=x64-linux \
-    -DVCPKG_HOST_TRIPLET=x64-linux \
+    -DVCPKG_TARGET_TRIPLET=${TARGETARCH}-linux \
+    -DVCPKG_HOST_TRIPLET=${TARGETARCH}-linux \
     || ( \
         cat build/vcpkg-manifest-install.log || true && \
-        cat /opt/vcpkg/buildtrees/gtk3/config-x64-linux-dbg-out.log || true && \
+        cat /opt/vcpkg/buildtrees/gtk3/config-${TARGETARCH}-linux-dbg-out.log || true && \
         false \
     )
 
 RUN cmake --build build -j$(nproc)
 
 FROM ubuntu:22.04
+
+ARG TARGETARCH
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
