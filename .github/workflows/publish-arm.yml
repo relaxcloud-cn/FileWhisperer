@@ -1,5 +1,5 @@
-# publish.yml
-name: Docker Build and Push AMD64
+# publish-arm.yml
+name: Docker Build and Push ARM
 
 on:
   workflow_dispatch:
@@ -79,11 +79,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64
+          file: DockerfileArm
+          platforms: linux/arm64
           push: true
           tags: |
             ${{ steps.meta.outputs.tags }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag_name || 'filewhisperer' }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag_name || 'filewhisperer' }}-arm
           labels: ${{ steps.meta.outputs.labels }}
           cleanup: true
 
