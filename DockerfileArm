@@ -1,11 +1,11 @@
-FROM ubuntu:22.04 AS builder
+FROM --platform=linux/arm64 ubuntu:22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/vcpkg:${PATH}"
 ENV VCPKG_ROOT=/opt/vcpkg
 ENV VCPKG_DISABLE_METRICS=1
 ENV VCPKG_FEATURE_FLAGS=manifests
-ENV VCPKG_DEFAULT_TRIPLET=x64-linux
+ENV VCPKG_DEFAULT_TRIPLET=arm64-linux
 ENV VCPKG_MAX_CONCURRENCY=8
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
@@ -98,17 +98,18 @@ RUN cmake -B build -S . \
     -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
     -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
     -DCMAKE_INSTALL_PREFIX=/usr/local \
-    -DVCPKG_TARGET_TRIPLET=x64-linux \
-    -DVCPKG_HOST_TRIPLET=x64-linux \
+    -DVCPKG_TARGET_TRIPLET=arm64-linux \
+    -DVCPKG_HOST_TRIPLET=arm64-linux \
     || ( \
         cat build/vcpkg-manifest-install.log || true && \
-        cat /opt/vcpkg/buildtrees/gtk3/config-x64-linux-dbg-out.log || true && \
+        cat /opt/vcpkg/buildtrees/gtk3/config-arm64-linux-dbg-out.log || true && \
         false \
     )
 
+
 RUN cmake --build build -j$(nproc)
 
-FROM ubuntu:22.04
+FROM --platform=linux/arm64 ubuntu:22.04
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
