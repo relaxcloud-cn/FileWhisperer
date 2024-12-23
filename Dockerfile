@@ -14,9 +14,20 @@ ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
 # Set VCPKG triplet based on architecture
-ENV VCPKG_DEFAULT_TRIPLET=${TARGETARCH}-linux
-ENV VCPKG_TARGET_TRIPLET=${TARGETARCH}-linux
-ENV VCPKG_HOST_TRIPLET=${TARGETARCH}-linux
+# If TARGETARCH is amd64, set it to x64-linux; otherwise, keep ${TARGETARCH}-linux
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        echo "Setting VCPKG triplet for amd64 as x64-linux"; \
+        export VCPKG_TRIPLET="x64-linux"; \
+    else \
+        echo "Setting VCPKG triplet for $TARGETARCH as $TARGETARCH-linux"; \
+        export VCPKG_TRIPLET="${TARGETARCH}-linux"; \
+    fi && \
+    echo "VCPKG_TRIPLET set to $VCPKG_TRIPLET"
+
+# Set VCPKG triplet based on architecture
+ENV VCPKG_DEFAULT_TRIPLET=$VCPKG_TRIPLET
+ENV VCPKG_TARGET_TRIPLET=$VCPKG_TRIPLET
+ENV VCPKG_HOST_TRIPLET=$VCPKG_TRIPLET
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
@@ -106,11 +117,10 @@ RUN cmake -B build -S . \
     -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
     -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
     -DCMAKE_INSTALL_PREFIX=/usr/local \
-    -DVCPKG_TARGET_TRIPLET=${TARGETARCH}-linux \
-    -DVCPKG_HOST_TRIPLET=${TARGETARCH}-linux \
+    -DVCPKG_TARGET_TRIPLET=$VCPKG_TRIPLET \
+    -DVCPKG_HOST_TRIPLET=$VCPKG_TRIPLET \
     || ( \
         cat build/vcpkg-manifest-install.log || true && \
-        cat /opt/vcpkg/buildtrees/gtk3/config-${TARGETARCH}-linux-dbg-out.log || true && \
         false \
     )
 
