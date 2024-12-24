@@ -15,9 +15,10 @@ namespace whisper_data_type
     const std::map<std::string, Types> Types__1 = {
         // DATA
         {"TEXT", TEXT_PLAIN},
+        {"OCR", TEXT_PLAIN},
+        {"QRCODE", TEXT_PLAIN},
 
         // FILE
-        {"OCR", TEXT_PLAIN},
         {"text/plain", TEXT_PLAIN},
         {"text/html", TEXT_HTML},
         {"application/zip", COMPRESSED_FILE},
