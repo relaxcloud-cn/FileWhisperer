@@ -13,6 +13,7 @@
 #include <gumbo.h>
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
+#include <ZXing/ReadBarcode.h>
 
 #include "bit7z/biterror.hpp"
 #include "data_type.hpp"
@@ -29,6 +30,7 @@ namespace extractor
     std::map<std::string, std::vector<uint8_t>> extract_files_from_data(const std::vector<uint8_t> file, std::string password = "");
     std::vector<Node *> extract_qrcode(Node *node);
     std::string decodeQRCode(const std::vector<uint8_t> &file);
+    std::string decodeQRCodeZXing(const std::vector<uint8_t> &file);
     std::vector<Node *> extract_html(Node *node);
     std::string extractHtmlText(GumboNode *node);
     std::string stripHtml(const std::string &html);
