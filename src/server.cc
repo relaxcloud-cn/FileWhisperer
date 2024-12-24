@@ -67,9 +67,12 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
       tree->root = nullptr;
       whisper_data_type::Node *node = new whisper_data_type::Node{.content = whisper_data_type::File{}};
 
-      if (request->has_root_id()) {
+      if (request->has_root_id())
+      {
         node->id = request->root_id();
-      } else {
+      }
+      else
+      {
         node->id = 0;
       }
 
@@ -178,6 +181,7 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
     file->set_mime_type(root_file.mime_type);
     file->set_md5(root_file.md5);
     file->set_sha256(root_file.sha256);
+    file->set_sha1(root_file.sha1);
     // file->set_content(std::string(root_file.content.begin(), root_file.content.end()));
     write_content_to_file(file_path, root_file.content);
   }

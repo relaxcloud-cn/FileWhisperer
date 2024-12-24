@@ -24,6 +24,7 @@ namespace whisper_data_type
         std::string extension;
         std::string md5;
         std::string sha256;
+        std::string sha1;
         std::vector<uint8_t> content;
     };
 

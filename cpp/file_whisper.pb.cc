@@ -128,6 +128,9 @@ inline constexpr File::Impl_::Impl_(
         sha256_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
+        sha1_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         content_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -382,7 +385,9 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::whisper::File, _impl_.extension_),
         PROTOBUF_FIELD_OFFSET(::whisper::File, _impl_.md5_),
         PROTOBUF_FIELD_OFFSET(::whisper::File, _impl_.sha256_),
+        PROTOBUF_FIELD_OFFSET(::whisper::File, _impl_.sha1_),
         PROTOBUF_FIELD_OFFSET(::whisper::File, _impl_.content_),
+        ~0u,
         ~0u,
         ~0u,
         ~0u,
@@ -412,8 +417,8 @@ static const ::_pbi::MigrationSchema
         {50, 60, -1, sizeof(::whisper::Meta_MapBoolEntry_DoNotUse)},
         {62, -1, -1, sizeof(::whisper::Meta)},
         {73, 88, -1, sizeof(::whisper::Node)},
-        {94, 110, -1, sizeof(::whisper::File)},
-        {118, -1, -1, sizeof(::whisper::Data)},
+        {94, 111, -1, sizeof(::whisper::File)},
+        {120, -1, -1, sizeof(::whisper::Data)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::whisper::_WhisperRequest_default_instance_._instance,
@@ -444,20 +449,20 @@ const char descriptor_table_protodef_file_5fwhisper_2eproto[] ABSL_ATTRIBUTE_SEC
     "(\003\022\021\n\tparent_id\030\002 \001(\003\022\020\n\010children\030\003 \003(\003\022"
     "\035\n\004file\030\004 \001(\0132\r.whisper.FileH\000\022\035\n\004data\030\005"
     " \001(\0132\r.whisper.DataH\000\022\033\n\004meta\030\006 \001(\0132\r.wh"
-    "isper.MetaB\t\n\007content\"\225\001\n\004File\022\014\n\004path\030\001"
+    "isper.MetaB\t\n\007content\"\243\001\n\004File\022\014\n\004path\030\001"
     " \001(\t\022\014\n\004name\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\022\021\n\tmime"
     "_type\030\004 \001(\t\022\021\n\textension\030\005 \001(\t\022\013\n\003md5\030\006 "
-    "\001(\t\022\016\n\006sha256\030\007 \001(\t\022\024\n\007content\030\010 \001(\014H\000\210\001"
-    "\001B\n\n\010_content\"%\n\004Data\022\014\n\004type\030\001 \001(\t\022\017\n\007c"
-    "ontent\030\002 \001(\0142I\n\007Whisper\022>\n\nWhispering\022\027."
-    "whisper.WhisperRequest\032\025.whisper.Whisper"
-    "Reply\"\000b\006proto3"
+    "\001(\t\022\016\n\006sha256\030\007 \001(\t\022\014\n\004sha1\030\010 \001(\t\022\024\n\007con"
+    "tent\030\t \001(\014H\000\210\001\001B\n\n\010_content\"%\n\004Data\022\014\n\004t"
+    "ype\030\001 \001(\t\022\017\n\007content\030\002 \001(\0142I\n\007Whisper\022>\n"
+    "\nWhispering\022\027.whisper.WhisperRequest\032\025.w"
+    "hisper.WhisperReply\"\000b\006proto3"
 };
 static ::absl::once_flag descriptor_table_file_5fwhisper_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_file_5fwhisper_2eproto = {
     false,
     false,
-    935,
+    949,
     descriptor_table_protodef_file_5fwhisper_2eproto,
     "file_whisper.proto",
     &descriptor_table_file_5fwhisper_2eproto_once,
@@ -2191,6 +2196,7 @@ inline PROTOBUF_NDEBUG_INLINE File::Impl_::Impl_(
         extension_(arena, from.extension_),
         md5_(arena, from.md5_),
         sha256_(arena, from.sha256_),
+        sha1_(arena, from.sha1_),
         content_(arena, from.content_) {}
 
 File::File(
@@ -2220,6 +2226,7 @@ inline PROTOBUF_NDEBUG_INLINE File::Impl_::Impl_(
         extension_(arena),
         md5_(arena),
         sha256_(arena),
+        sha1_(arena),
         content_(arena) {}
 
 inline void File::SharedCtor(::_pb::Arena* arena) {
@@ -2239,6 +2246,7 @@ inline void File::SharedDtor() {
   _impl_.extension_.Destroy();
   _impl_.md5_.Destroy();
   _impl_.sha256_.Destroy();
+  _impl_.sha1_.Destroy();
   _impl_.content_.Destroy();
   _impl_.~Impl_();
 }
@@ -2272,15 +2280,15 @@ const ::google::protobuf::MessageLite::ClassData* File::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 8, 0, 64, 2> File::_table_ = {
+const ::_pbi::TcParseTable<4, 9, 0, 68, 2> File::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(File, _impl_._has_bits_),
     0, // no _extensions_
-    8, 56,  // max_field_number, fast_idx_mask
+    9, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967040,  // skipmap
+    4294966784,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    8,  // num_field_entries
+    9,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -2290,9 +2298,7 @@ const ::_pbi::TcParseTable<3, 8, 0, 64, 2> File::_table_ = {
     ::_pbi::TcParser::GetTable<::whisper::File>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // optional bytes content = 8;
-    {::_pbi::TcParser::FastBS1,
-     {66, 0, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.content_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // string path = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.path_)}},
@@ -2314,6 +2320,18 @@ const ::_pbi::TcParseTable<3, 8, 0, 64, 2> File::_table_ = {
     // string sha256 = 7;
     {::_pbi::TcParser::FastUS1,
      {58, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.sha256_)}},
+    // string sha1 = 8;
+    {::_pbi::TcParser::FastUS1,
+     {66, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.sha1_)}},
+    // optional bytes content = 9;
+    {::_pbi::TcParser::FastBS1,
+     {74, 0, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.content_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2338,13 +2356,16 @@ const ::_pbi::TcParseTable<3, 8, 0, 64, 2> File::_table_ = {
     // string sha256 = 7;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.sha256_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // optional bytes content = 8;
+    // string sha1 = 8;
+    {PROTOBUF_FIELD_OFFSET(File, _impl_.sha1_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional bytes content = 9;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.content_), _Internal::kHasBitsOffset + 0, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\14\4\4\0\11\11\3\6\0\0\0\0\0\0\0\0"
+    "\14\4\4\0\11\11\3\6\4\0\0\0\0\0\0\0"
     "whisper.File"
     "path"
     "name"
@@ -2352,6 +2373,7 @@ const ::_pbi::TcParseTable<3, 8, 0, 64, 2> File::_table_ = {
     "extension"
     "md5"
     "sha256"
+    "sha1"
   }},
 };
 
@@ -2368,6 +2390,7 @@ PROTOBUF_NOINLINE void File::Clear() {
   _impl_.extension_.ClearToEmpty();
   _impl_.md5_.ClearToEmpty();
   _impl_.sha256_.ClearToEmpty();
+  _impl_.sha1_.ClearToEmpty();
   cached_has_bits = _impl_._has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     _impl_.content_.ClearNonDefaultToEmpty();
@@ -2447,11 +2470,19 @@ PROTOBUF_NOINLINE void File::Clear() {
             target = stream->WriteStringMaybeAliased(7, _s, target);
           }
 
+          // string sha1 = 8;
+          if (!this_._internal_sha1().empty()) {
+            const std::string& _s = this_._internal_sha1();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "whisper.File.sha1");
+            target = stream->WriteStringMaybeAliased(8, _s, target);
+          }
+
           cached_has_bits = this_._impl_._has_bits_[0];
-          // optional bytes content = 8;
+          // optional bytes content = 9;
           if (cached_has_bits & 0x00000001u) {
             const std::string& _s = this_._internal_content();
-            target = stream->WriteBytesMaybeAliased(8, _s, target);
+            target = stream->WriteBytesMaybeAliased(9, _s, target);
           }
 
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -2509,9 +2540,14 @@ PROTOBUF_NOINLINE void File::Clear() {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                               this_._internal_sha256());
             }
+            // string sha1 = 8;
+            if (!this_._internal_sha1().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_sha1());
+            }
           }
            {
-            // optional bytes content = 8;
+            // optional bytes content = 9;
             cached_has_bits =
                 this_._impl_._has_bits_[0];
             if (cached_has_bits & 0x00000001u) {
@@ -2556,6 +2592,9 @@ void File::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::pr
   if (!from._internal_sha256().empty()) {
     _this->_internal_set_sha256(from._internal_sha256());
   }
+  if (!from._internal_sha1().empty()) {
+    _this->_internal_set_sha1(from._internal_sha1());
+  }
   cached_has_bits = from._impl_._has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     _this->_internal_set_content(from._internal_content());
@@ -2587,6 +2626,7 @@ void File::InternalSwap(File* PROTOBUF_RESTRICT other) {
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.extension_, &other->_impl_.extension_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_, &other->_impl_.md5_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sha256_, &other->_impl_.sha256_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sha1_, &other->_impl_.sha1_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.content_, &other->_impl_.content_, arena);
         swap(_impl_.size_, other->_impl_.size_);
 }
