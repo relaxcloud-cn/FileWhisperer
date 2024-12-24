@@ -202,8 +202,9 @@ namespace extractor
         {
             File &file = std::get<File>(node->content);
             std::vector<uint8_t> &data = file.content;
-            auto url = decodeQRCode(data);
-            
+            // auto url = decodeQRCode(data);
+            auto url = decodeQRCodeZXing(data);
+
             if (!url.empty())
             {
                 Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "QRCODE", .content = encode_binary(url)}};
@@ -240,6 +241,41 @@ namespace extractor
         }
         catch (const std::exception &e)
         {
+            return "";
+        }
+    }
+
+    std::string decodeQRCodeZXing(const std::vector<uint8_t> &file)
+    {
+        try
+        {
+            cv::Mat image = cv::imdecode(file, cv::IMREAD_COLOR);
+            if (image.empty())
+            {
+                return "";
+            }
+
+            cv::Mat grey;
+            cv::cvtColor(image, grey, cv::COLOR_BGR2GRAY);
+
+            ZXing::ImageView imageView(grey.data, grey.cols, grey.rows, ZXing::ImageFormat::Lum);
+
+            ZXing::ReaderOptions options;
+            options.setTryHarder(true);
+            options.setTryRotate(true);
+            options.setFormats(ZXing::BarcodeFormat::QRCode);
+
+            auto result = ZXing::ReadBarcode(imageView, options);
+
+            if (result.isValid()) {
+                return result.text();
+            }
+
+            return "";
+        }
+        catch (const std::exception &e)
+        {
+            spdlog::error("QR code decode error: {}", e.what());
             return "";
         }
     }

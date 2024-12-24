@@ -21,6 +21,7 @@
     "openssl",
     "re2",
     "spdlog",
-    "tesseract"
+    "tesseract",
+    "nu-book-zxing-cpp"
   ]
 }
