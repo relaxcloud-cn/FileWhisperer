@@ -44,7 +44,8 @@ message File {
     string extension = 5;
     string md5 = 6;
     string sha256 = 7;
-    optional bytes content = 8;
+    string sha1 = 8;
+    optional bytes content = 9;
 }
 
 message Data {

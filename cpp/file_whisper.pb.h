@@ -610,7 +610,8 @@ class File final : public ::google::protobuf::Message
     kExtensionFieldNumber = 5,
     kMd5FieldNumber = 6,
     kSha256FieldNumber = 7,
-    kContentFieldNumber = 8,
+    kSha1FieldNumber = 8,
+    kContentFieldNumber = 9,
     kSizeFieldNumber = 3,
   };
   // string path = 1;
@@ -709,7 +710,23 @@ class File final : public ::google::protobuf::Message
   std::string* _internal_mutable_sha256();
 
   public:
-  // optional bytes content = 8;
+  // string sha1 = 8;
+  void clear_sha1() ;
+  const std::string& sha1() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_sha1(Arg_&& arg, Args_... args);
+  std::string* mutable_sha1();
+  PROTOBUF_NODISCARD std::string* release_sha1();
+  void set_allocated_sha1(std::string* value);
+
+  private:
+  const std::string& _internal_sha1() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_sha1(
+      const std::string& value);
+  std::string* _internal_mutable_sha1();
+
+  public:
+  // optional bytes content = 9;
   bool has_content() const;
   void clear_content() ;
   const std::string& content() const;
@@ -741,8 +758,8 @@ class File final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 8, 0,
-      64, 2>
+      4, 9, 0,
+      68, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -770,6 +787,7 @@ class File final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr extension_;
     ::google::protobuf::internal::ArenaStringPtr md5_;
     ::google::protobuf::internal::ArenaStringPtr sha256_;
+    ::google::protobuf::internal::ArenaStringPtr sha1_;
     ::google::protobuf::internal::ArenaStringPtr content_;
     ::int64_t size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -2834,7 +2852,57 @@ inline void File::set_allocated_sha256(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:whisper.File.sha256)
 }
 
-// optional bytes content = 8;
+// string sha1 = 8;
+inline void File::clear_sha1() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sha1_.ClearToEmpty();
+}
+inline const std::string& File::sha1() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:whisper.File.sha1)
+  return _internal_sha1();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void File::set_sha1(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sha1_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:whisper.File.sha1)
+}
+inline std::string* File::mutable_sha1() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_sha1();
+  // @@protoc_insertion_point(field_mutable:whisper.File.sha1)
+  return _s;
+}
+inline const std::string& File::_internal_sha1() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sha1_.Get();
+}
+inline void File::_internal_set_sha1(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sha1_.Set(value, GetArena());
+}
+inline std::string* File::_internal_mutable_sha1() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.sha1_.Mutable( GetArena());
+}
+inline std::string* File::release_sha1() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:whisper.File.sha1)
+  return _impl_.sha1_.Release();
+}
+inline void File::set_allocated_sha1(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sha1_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.sha1_.IsDefault()) {
+          _impl_.sha1_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:whisper.File.sha1)
+}
+
+// optional bytes content = 9;
 inline bool File::has_content() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;

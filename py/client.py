@@ -51,6 +51,7 @@ def run(host, port, binary, password, root_id, path):
                 print(f"Extension: {file.extension}")
                 print(f"MD5: {file.md5}")
                 print(f"SHA256: {file.sha256}")
+                print(f"SHA1: {file.sha1}")
                 if file.HasField('content'):
                     print(f"Content length: {len(file.content)}")
             elif node.HasField('data'):

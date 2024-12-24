@@ -27,6 +27,7 @@ void whisper_data_type::Tree::digest(Node *node)
         file.mime_type = get_buffer_mime_type(file.content.data(), file.size);
         file.md5 = calculate_md5(file.content.data(), file.size);
         file.sha256 = calculate_sha256(file.content.data(), file.size);
+        file.sha1 = calculate_sha1(file.content.data(), file.size);
         node->set_type(file.mime_type);
         meta_detect_encoding(meta, file.content);
     }
