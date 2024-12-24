@@ -203,9 +203,13 @@ namespace extractor
             File &file = std::get<File>(node->content);
             std::vector<uint8_t> &data = file.content;
             auto url = decodeQRCode(data);
-            Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "QRCODE", .content = encode_binary(url)}};
-            t_node->prev = node;
-            nodes.push_back(t_node);
+            
+            if (!url.empty())
+            {
+                Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "QRCODE", .content = encode_binary(url)}};
+                t_node->prev = node;
+                nodes.push_back(t_node);
+            }
         }
         else if (std::holds_alternative<Data>(node->content))
         {
