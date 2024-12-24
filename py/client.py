@@ -13,23 +13,27 @@ def cli():
 @click.option('--port', default=50051, help='gRPC server port')
 @click.option('--binary', is_flag=True, help='Send file as binary content instead of path')
 @click.option('--password', '-p', multiple=True, help='Passwords to try')
+@click.option('--root-id', type=int, help='Root ID for the request')
 @click.argument('path', type=click.Path(exists=True))
-def run(host, port, binary, password, path):
+def run(host, port, binary, password, root_id, path):
     with grpc.insecure_channel(f'{host}:{port}') as channel:
         stub = file_whisper_pb2_grpc.WhisperStub(channel)
         
+        request_params = {
+            'passwords': list(password)
+        }
+        
+        if root_id is not None:
+            request_params['root_id'] = root_id
+            
         if binary:
             with open(path, 'rb') as f:
                 file_content = f.read()
-            request = file_whisper_pb2.WhisperRequest(
-                file_content=file_content,
-                passwords=list(password)
-            )
+            request_params['file_content'] = file_content
         else:
-            request = file_whisper_pb2.WhisperRequest(
-                file_path=path,
-                passwords=list(password)
-            )
+            request_params['file_path'] = path
+            
+        request = file_whisper_pb2.WhisperRequest(**request_params)
             
         response = stub.Whispering(request)
         

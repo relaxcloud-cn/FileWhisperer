@@ -67,6 +67,12 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
       tree->root = nullptr;
       whisper_data_type::Node *node = new whisper_data_type::Node{.content = whisper_data_type::File{}};
 
+      if (request->has_root_id()) {
+        node->id = request->root_id();
+      } else {
+        node->id = 0;
+      }
+
       const uint8_t *data = nullptr;
       size_t data_size = 0;
       std::string file_path;

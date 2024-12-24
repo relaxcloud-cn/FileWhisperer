@@ -240,6 +240,7 @@ class WhisperRequest final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kPasswordsFieldNumber = 3,
+    kRootIdFieldNumber = 4,
     kFilePathFieldNumber = 1,
     kFileContentFieldNumber = 2,
   };
@@ -263,6 +264,17 @@ class WhisperRequest final : public ::google::protobuf::Message
   private:
   const ::google::protobuf::RepeatedPtrField<std::string>& _internal_passwords() const;
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_passwords();
+
+  public:
+  // optional int64 root_id = 4;
+  bool has_root_id() const;
+  void clear_root_id() ;
+  ::int64_t root_id() const;
+  void set_root_id(::int64_t value);
+
+  private:
+  ::int64_t _internal_root_id() const;
+  void _internal_set_root_id(::int64_t value);
 
   public:
   // string file_path = 1;
@@ -310,7 +322,7 @@ class WhisperRequest final : public ::google::protobuf::Message
   inline void clear_has_data();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 3, 0,
+      1, 4, 0,
       49, 2>
       _table_;
 
@@ -331,14 +343,16 @@ class WhisperRequest final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const WhisperRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::RepeatedPtrField<std::string> passwords_;
+    ::int64_t root_id_;
     union DataUnion {
       constexpr DataUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
       ::google::protobuf::internal::ArenaStringPtr file_path_;
       ::google::protobuf::internal::ArenaStringPtr file_content_;
     } data_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1952,6 +1966,34 @@ inline ::google::protobuf::RepeatedPtrField<std::string>*
 WhisperRequest::_internal_mutable_passwords() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.passwords_;
+}
+
+// optional int64 root_id = 4;
+inline bool WhisperRequest::has_root_id() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void WhisperRequest::clear_root_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.root_id_ = ::int64_t{0};
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline ::int64_t WhisperRequest::root_id() const {
+  // @@protoc_insertion_point(field_get:whisper.WhisperRequest.root_id)
+  return _internal_root_id();
+}
+inline void WhisperRequest::set_root_id(::int64_t value) {
+  _internal_set_root_id(value);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  // @@protoc_insertion_point(field_set:whisper.WhisperRequest.root_id)
+}
+inline ::int64_t WhisperRequest::_internal_root_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.root_id_;
+}
+inline void WhisperRequest::_internal_set_root_id(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.root_id_ = value;
 }
 
 inline bool WhisperRequest::has_data() const {

@@ -11,10 +11,14 @@ void whisper_data_type::Tree::digest(Node *node)
     boost::uuids::random_generator generator;
     boost::uuids::uuid uuid = generator();
     node->uuid = boost::uuids::to_string(uuid);
-    SnowFlake* snowflake = SnowFlake::getInstance(1, 1);
-    int64_t id = snowflake->nextId();
-    // node->id = boost::uuids::to_string(uuid);
-    node->id = id;
+    // 根结点可能会由调用方提供 id
+    if (node->id == 0)
+    {
+        // node->id = boost::uuids::to_string(uuid);
+        SnowFlake *snowflake = SnowFlake::getInstance(1, 1);
+        int64_t id = snowflake->nextId();
+        node->id = id;
+    }
     Meta meta{};
     if (std::holds_alternative<File>(node->content))
     {

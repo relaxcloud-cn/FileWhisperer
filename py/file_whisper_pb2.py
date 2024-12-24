@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x66ile_whisper.proto\x12\x07whisper\"X\n\x0eWhisperRequest\x12\x13\n\tfile_path\x18\x01 \x01(\tH\x00\x12\x16\n\x0c\x66ile_content\x18\x02 \x01(\x0cH\x00\x12\x11\n\tpasswords\x18\x03 \x03(\tB\x06\n\x04\x64\x61ta\"+\n\x0cWhisperReply\x12\x1b\n\x04tree\x18\x01 \x03(\x0b\x32\r.whisper.Node\"\xac\x02\n\x04Meta\x12\x30\n\nmap_string\x18\x01 \x03(\x0b\x32\x1c.whisper.Meta.MapStringEntry\x12\x30\n\nmap_number\x18\x02 \x03(\x0b\x32\x1c.whisper.Meta.MapNumberEntry\x12,\n\x08map_bool\x18\x03 \x03(\x0b\x32\x1a.whisper.Meta.MapBoolEntry\x1a\x30\n\x0eMapStringEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x30\n\x0eMapNumberEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a.\n\x0cMapBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\"\x9d\x01\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x11\n\tparent_id\x18\x02 \x01(\x03\x12\x10\n\x08\x63hildren\x18\x03 \x03(\x03\x12\x1d\n\x04\x66ile\x18\x04 \x01(\x0b\x32\r.whisper.FileH\x00\x12\x1d\n\x04\x64\x61ta\x18\x05 \x01(\x0b\x32\r.whisper.DataH\x00\x12\x1b\n\x04meta\x18\x06 \x01(\x0b\x32\r.whisper.MetaB\t\n\x07\x63ontent\"\x95\x01\n\x04\x46ile\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x03\x12\x11\n\tmime_type\x18\x04 \x01(\t\x12\x11\n\textension\x18\x05 \x01(\t\x12\x0b\n\x03md5\x18\x06 \x01(\t\x12\x0e\n\x06sha256\x18\x07 \x01(\t\x12\x14\n\x07\x63ontent\x18\x08 \x01(\x0cH\x00\x88\x01\x01\x42\n\n\x08_content\"%\n\x04\x44\x61ta\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\x0c\x32I\n\x07Whisper\x12>\n\nWhispering\x12\x17.whisper.WhisperRequest\x1a\x15.whisper.WhisperReply\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x66ile_whisper.proto\x12\x07whisper\"z\n\x0eWhisperRequest\x12\x13\n\tfile_path\x18\x01 \x01(\tH\x00\x12\x16\n\x0c\x66ile_content\x18\x02 \x01(\x0cH\x00\x12\x11\n\tpasswords\x18\x03 \x03(\t\x12\x14\n\x07root_id\x18\x04 \x01(\x03H\x01\x88\x01\x01\x42\x06\n\x04\x64\x61taB\n\n\x08_root_id\"+\n\x0cWhisperReply\x12\x1b\n\x04tree\x18\x01 \x03(\x0b\x32\r.whisper.Node\"\xac\x02\n\x04Meta\x12\x30\n\nmap_string\x18\x01 \x03(\x0b\x32\x1c.whisper.Meta.MapStringEntry\x12\x30\n\nmap_number\x18\x02 \x03(\x0b\x32\x1c.whisper.Meta.MapNumberEntry\x12,\n\x08map_bool\x18\x03 \x03(\x0b\x32\x1a.whisper.Meta.MapBoolEntry\x1a\x30\n\x0eMapStringEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x30\n\x0eMapNumberEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a.\n\x0cMapBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\"\x9d\x01\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x11\n\tparent_id\x18\x02 \x01(\x03\x12\x10\n\x08\x63hildren\x18\x03 \x03(\x03\x12\x1d\n\x04\x66ile\x18\x04 \x01(\x0b\x32\r.whisper.FileH\x00\x12\x1d\n\x04\x64\x61ta\x18\x05 \x01(\x0b\x32\r.whisper.DataH\x00\x12\x1b\n\x04meta\x18\x06 \x01(\x0b\x32\r.whisper.MetaB\t\n\x07\x63ontent\"\x95\x01\n\x04\x46ile\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x03\x12\x11\n\tmime_type\x18\x04 \x01(\t\x12\x11\n\textension\x18\x05 \x01(\t\x12\x0b\n\x03md5\x18\x06 \x01(\t\x12\x0e\n\x06sha256\x18\x07 \x01(\t\x12\x14\n\x07\x63ontent\x18\x08 \x01(\x0cH\x00\x88\x01\x01\x42\n\n\x08_content\"%\n\x04\x44\x61ta\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\x0c\x32I\n\x07Whisper\x12>\n\nWhispering\x12\x17.whisper.WhisperRequest\x1a\x15.whisper.WhisperReply\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -38,23 +38,23 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_META_MAPBOOLENTRY']._loaded_options = None
   _globals['_META_MAPBOOLENTRY']._serialized_options = b'8\001'
   _globals['_WHISPERREQUEST']._serialized_start=31
-  _globals['_WHISPERREQUEST']._serialized_end=119
-  _globals['_WHISPERREPLY']._serialized_start=121
-  _globals['_WHISPERREPLY']._serialized_end=164
-  _globals['_META']._serialized_start=167
-  _globals['_META']._serialized_end=467
-  _globals['_META_MAPSTRINGENTRY']._serialized_start=321
-  _globals['_META_MAPSTRINGENTRY']._serialized_end=369
-  _globals['_META_MAPNUMBERENTRY']._serialized_start=371
-  _globals['_META_MAPNUMBERENTRY']._serialized_end=419
-  _globals['_META_MAPBOOLENTRY']._serialized_start=421
-  _globals['_META_MAPBOOLENTRY']._serialized_end=467
-  _globals['_NODE']._serialized_start=470
-  _globals['_NODE']._serialized_end=627
-  _globals['_FILE']._serialized_start=630
-  _globals['_FILE']._serialized_end=779
-  _globals['_DATA']._serialized_start=781
-  _globals['_DATA']._serialized_end=818
-  _globals['_WHISPER']._serialized_start=820
-  _globals['_WHISPER']._serialized_end=893
+  _globals['_WHISPERREQUEST']._serialized_end=153
+  _globals['_WHISPERREPLY']._serialized_start=155
+  _globals['_WHISPERREPLY']._serialized_end=198
+  _globals['_META']._serialized_start=201
+  _globals['_META']._serialized_end=501
+  _globals['_META_MAPSTRINGENTRY']._serialized_start=355
+  _globals['_META_MAPSTRINGENTRY']._serialized_end=403
+  _globals['_META_MAPNUMBERENTRY']._serialized_start=405
+  _globals['_META_MAPNUMBERENTRY']._serialized_end=453
+  _globals['_META_MAPBOOLENTRY']._serialized_start=455
+  _globals['_META_MAPBOOLENTRY']._serialized_end=501
+  _globals['_NODE']._serialized_start=504
+  _globals['_NODE']._serialized_end=661
+  _globals['_FILE']._serialized_start=664
+  _globals['_FILE']._serialized_end=813
+  _globals['_DATA']._serialized_start=815
+  _globals['_DATA']._serialized_end=852
+  _globals['_WHISPER']._serialized_start=854
+  _globals['_WHISPER']._serialized_end=927
 # @@protoc_insertion_point(module_scope)
