@@ -1,14 +1,6 @@
-# publish.yml
-name: Docker Build and Push AMD64
+name: Docker Build and Push
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'Docker image tag'
-        required: true
-        default: 'filewhisperer'
-        type: string
   push:
     branches: [ "main" ]
   pull_request:
@@ -79,11 +71,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64
           push: true
-          tags: |
-            ${{ steps.meta.outputs.tags }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag_name || 'filewhisperer' }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cleanup: true
 
