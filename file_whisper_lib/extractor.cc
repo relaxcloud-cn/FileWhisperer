@@ -28,9 +28,7 @@ namespace extractor
 
         for (auto &item : urls)
         {
-            Node *t_node = new whisper_data_type::Node{.content = whisper_data_type::Data{
-                                                           .type = "URL",
-                                                           .content = encode_binary(item)}};
+            Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "URL", .content = encode_binary(item)}};
             t_node->prev = node;
             nodes.push_back(t_node);
         }
@@ -205,9 +203,7 @@ namespace extractor
             File &file = std::get<File>(node->content);
             std::vector<uint8_t> &data = file.content;
             auto url = decodeQRCode(data);
-            Node *t_node = new whisper_data_type::Node{.content = whisper_data_type::Data{
-                                                           .type = "QRCODE",
-                                                           .content = encode_binary(url)}};
+            Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "QRCODE", .content = encode_binary(url)}};
             t_node->prev = node;
             nodes.push_back(t_node);
         }
@@ -265,9 +261,7 @@ namespace extractor
         }
 
         auto html_text = stripHtml(text);
-        Node *t_node = new whisper_data_type::Node{.content = whisper_data_type::Data{
-                                                       .type = "TEXT",
-                                                       .content = encode_binary(html_text)}};
+        Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "TEXT", .content = encode_binary(html_text)}};
         t_node->prev = node;
         nodes.push_back(t_node);
 
@@ -322,9 +316,7 @@ namespace extractor
             std::vector<uint8_t> &data = file.content;
             OCRHelper ocr;
             std::string result = ocr.recognize_image(data);
-            Node *t_node = new whisper_data_type::Node{.content = whisper_data_type::Data{
-                                                           .type = "OCR",
-                                                           .content = encode_binary(result)}};
+            Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "OCR", .content = encode_binary(result)}};
             t_node->prev = node;
             nodes.push_back(t_node);
         }

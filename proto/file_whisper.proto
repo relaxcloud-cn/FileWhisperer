@@ -12,6 +12,7 @@ message WhisperRequest {
     bytes file_content = 2;
   }
   repeated string passwords = 3;
+  optional int64 root_id = 4;
 }
 
 message WhisperReply {
