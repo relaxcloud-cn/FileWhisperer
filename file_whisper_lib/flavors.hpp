@@ -11,8 +11,9 @@ namespace flavors
     using namespace whisper_data_type;
 
     using ExtractFunctionModern = std::function<std::vector<Node *>(Node *)>;
-    
-    struct ExtractorInfo {
+
+    struct ExtractorInfo
+    {
         std::string name;
         ExtractFunctionModern func;
     };
@@ -27,8 +28,7 @@ namespace flavors
         {Types::TEXT_PLAIN, {url_extractor}},
         {Types::IMAGE, {qrcode_extractor, ocr_extractor}},
         {Types::TEXT_HTML, {html_extractor}},
-        {Types::COMPRESSED_FILE, {compressed_file_extractor}}
-    };
+        {Types::COMPRESSED_FILE, {compressed_file_extractor}}};
 
     std::vector<Node *> extract(Node *node)
     {
@@ -45,14 +45,25 @@ namespace flavors
             for (const auto &extractor : it->second)
             {
                 auto start = std::chrono::high_resolution_clock::now();
-                auto extracted = extractor.func(node);
+                try
+                {
+                    auto extracted = extractor.func(node);
+                    nodes.insert(nodes.end(), extracted.begin(), extracted.end());
+                }
+                catch (const std::exception &e)
+                {
+                    std::stringstream ss;
+                    ss << "Standard exception: " << e.what();
+                    node->meta.map_string["error_message"] = extractor.name + ": " + ss.str() + ";";
+                }
+                catch (...)
+                {
+                    node->meta.map_string["error_message"] = extractor.name + ": " + "Unknown exception occurred";
+                }
                 auto end = std::chrono::high_resolution_clock::now();
-                
                 auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
                 std::string key = "microsecond_" + extractor.name;
                 node->meta.map_number[key] = duration;
-                
-                nodes.insert(nodes.end(), extracted.begin(), extracted.end());
             }
         }
 
