@@ -267,7 +267,8 @@ namespace extractor
 
             auto result = ZXing::ReadBarcode(imageView, options);
 
-            if (result.isValid()) {
+            if (result.isValid())
+            {
                 return result.text();
             }
 
@@ -396,10 +397,9 @@ namespace extractor
             throw std::runtime_error("Image data is empty");
         }
 
-        // 从内存数据创建Pix对象
-        Pix *image = pixReadMemPng(
-            image_data.data(),
-            image_data.size());
+        Pix *image = nullptr;
+
+        image = pixReadMem(image_data.data(), image_data.size());
 
         if (!image)
         {
