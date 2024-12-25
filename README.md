@@ -4,6 +4,16 @@ FileWhisperer 是一个专注于将多种文件类型解析为 LLM 友好 结构
 
 ---
 
+# 数据结构说明
+
+## FileWhisperer 扫描请求
+
+[WhisperRequest](./doc/grpc/request/WhisperRequest.md)
+
+## FileWhisperer 扫描返回结果
+
+[WhisperReply](./doc/grpc/reply/WhisperReply.md)
+
 # 环境变量
 
 ## vcpkg 根目录
