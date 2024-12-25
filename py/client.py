@@ -57,7 +57,8 @@ def run(host, port, binary, password, root_id, path):
             elif node.HasField('data'):
                 data = node.data
                 print(f"Data type: {data.type}")
-                print(f"Content length: {len(data.content)}")
+                # print(f"Content length: {len(data.content)}")
+                print(f"Content length: {data.content}")
             
             if node.HasField('meta'):
                 meta = node.meta
