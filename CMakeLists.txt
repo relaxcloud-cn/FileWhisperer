@@ -46,3 +46,19 @@ if(BUILD_TESTING)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+if(APPLE)
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+endif()
+
+if(APPLE)
+    add_compile_options(
+        -Wall 
+        -Wextra 
+        -Wpedantic 
+        -Werror 
+        -Wconversion
+        -Wsign-conversion
+    )
+endif()
