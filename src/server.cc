@@ -182,8 +182,8 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
     file->set_md5(root_file.md5);
     file->set_sha256(root_file.sha256);
     file->set_sha1(root_file.sha1);
-    // file->set_content(std::string(root_file.content.begin(), root_file.content.end()));
-    write_content_to_file(file_path, root_file.content);
+    file->set_content(std::string(root_file.content.begin(), root_file.content.end()));
+    // write_content_to_file(file_path, root_file.content);
   }
   else if (std::holds_alternative<whisper_data_type::Data>(root->content))
   {
@@ -215,11 +215,11 @@ void RunServer(int port)
 {
   std::string server_address = "0.0.0.0:" + std::to_string(port);
   GreeterServiceImpl service;
-
   grpc::ServerBuilder builder;
+  builder.SetMaxReceiveMessageSize(50 * 1024 * 1024);
+  builder.SetMaxSendMessageSize(50 * 1024 * 1024);
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
-
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   spdlog::info("Server listening on {} ", server_address);
   server->Wait();
