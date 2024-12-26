@@ -1,3 +1,4 @@
+#include <csignal>
 #include <CLI/CLI.hpp>
 #include <grpcpp/grpcpp.h>
 #include <iostream>
