@@ -98,6 +98,5 @@ namespace whisper_data_type
     };
 
     void meta_detect_encoding(Meta &meta, const std::vector<uint8_t> &data);
-    std::vector<Node *> file_extract(Node *node);
 
 } // namespace whisper
