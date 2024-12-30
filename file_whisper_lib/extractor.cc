@@ -5,9 +5,9 @@ namespace extractor
 
     using namespace whisper_data_type;
 
-    std::vector<Node *> extract_urls(Node *node)
+    std::vector<std::shared_ptr<Node>> extract_urls(std::shared_ptr<Node> node)
     {
-        std::vector<Node *> nodes;
+        std::vector<std::shared_ptr<Node>> nodes;
         std::string text;
         if (std::holds_alternative<File>(node->content))
         {
@@ -23,12 +23,13 @@ namespace extractor
         }
 
         auto urls = extract_urls_from_text(text);
-
         spdlog::debug("Node[{}] Number of urls: {}", node->id, urls.size());
 
         for (auto &item : urls)
         {
-            Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "URL", .content = encode_binary(item)}};
+            auto t_node = std::make_shared<Node>();
+            t_node->id = 0;
+            t_node->content = Data{.type = "URL", .content = encode_binary(item)};
             t_node->prev = node;
             nodes.push_back(t_node);
         }
@@ -52,15 +53,12 @@ namespace extractor
         return urls;
     }
 
-}
-
-namespace extractor
-{
-    std::vector<Node *> extract_compressed_file(Node *node)
+    std::vector<std::shared_ptr<Node>> extract_compressed_file(std::shared_ptr<Node> node)
     {
         using namespace bit7z;
         std::vector<uint8_t> data;
-        std::vector<Node *> nodes;
+        std::vector<std::shared_ptr<Node>> nodes;
+
         if (std::holds_alternative<File>(node->content))
         {
             File &file = std::get<File>(node->content);
@@ -89,9 +87,9 @@ namespace extractor
             }
         }
 
-        // 这里只能使用 find("Wrong password") 的方法来判断密码错误, bit7z 封装到标准错误里了。
         if (!extracted)
         {
+            // 这里只能使用 find("Wrong password") 的方法来判断密码错误, bit7z 封装到标准错误里了。
             for (const auto &password : passwords)
             {
                 try
@@ -150,11 +148,12 @@ namespace extractor
             const std::string &key = pair.first;
             const std::vector<uint8_t> &value = pair.second;
 
-            Node *t_node = new Node{.content = File{}};
+            auto t_node = std::make_shared<Node>();
+            t_node->content = File{};
             File &file = std::get<File>(t_node->content);
             file.path = key;
             file.name = key;
-            file.content = std::move(value);
+            file.content = value;
 
             t_node->prev = node;
             nodes.push_back(t_node);
@@ -165,9 +164,10 @@ namespace extractor
 
     std::map<std::string, std::vector<uint8_t>> extract_files_from_data(const std::vector<uint8_t> file, std::string password)
     {
+        using namespace bit7z;
         std::locale::global(std::locale("en_US.UTF-8"));
         std::map<std::string, std::vector<uint8_t>> result_map;
-        using namespace bit7z;
+
         try
         {
             const char *path = std::getenv("LIB_PATH_7Z");
@@ -185,29 +185,27 @@ namespace extractor
         }
         catch (...)
         {
-            throw; // Re-throw exception
+            throw;
         }
 
         return result_map;
     }
 
-}
-
-namespace extractor
-{
-    std::vector<Node *> extract_qrcode(Node *node)
+    std::vector<std::shared_ptr<Node>> extract_qrcode(std::shared_ptr<Node> node)
     {
-        std::vector<Node *> nodes;
+        std::vector<std::shared_ptr<Node>> nodes;
+
         if (std::holds_alternative<File>(node->content))
         {
             File &file = std::get<File>(node->content);
             std::vector<uint8_t> &data = file.content;
-            // auto url = decodeQRCode(data);
             auto url = decodeQRCodeZXing(data);
 
             if (!url.empty())
             {
-                Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "QRCODE", .content = encode_binary(url)}};
+                auto t_node = std::make_shared<Node>();
+                t_node->id = 0;
+                t_node->content = Data{.type = "QRCODE", .content = encode_binary(url)};
                 t_node->prev = node;
                 nodes.push_back(t_node);
             }
@@ -232,9 +230,7 @@ namespace extractor
             }
 
             cv::QRCodeDetector qrDecoder;
-
             std::vector<cv::Point> points;
-
             std::string result = qrDecoder.detectAndDecode(image, points);
 
             return result;
@@ -280,14 +276,12 @@ namespace extractor
             return "";
         }
     }
-}
 
-namespace extractor
-{
-    std::vector<Node *> extract_html(Node *node)
+    std::vector<std::shared_ptr<Node>> extract_html(std::shared_ptr<Node> node)
     {
-        std::vector<Node *> nodes;
+        std::vector<std::shared_ptr<Node>> nodes;
         std::string text;
+
         if (std::holds_alternative<File>(node->content))
         {
             File &file = std::get<File>(node->content);
@@ -302,7 +296,9 @@ namespace extractor
         }
 
         auto html_text = stripHtml(text);
-        Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "TEXT", .content = encode_binary(html_text)}};
+        auto t_node = std::make_shared<Node>();
+        t_node->id = 0;
+        t_node->content = Data{.type = "TEXT", .content = encode_binary(html_text)};
         t_node->prev = node;
         nodes.push_back(t_node);
 
@@ -348,71 +344,84 @@ namespace extractor
 
 namespace extractor
 {
-    std::vector<Node *> extract_ocr(Node *node)
+    thread_local std::unique_ptr<tesseract::TessBaseAPI> OCRHelper::ocr_;
+
+    void OCRHelper::initializeOCR()
     {
-        std::vector<Node *> nodes;
-        if (std::holds_alternative<File>(node->content))
+        if (!ocr_)
         {
-            File &file = std::get<File>(node->content);
-            std::vector<uint8_t> &data = file.content;
-            OCRHelper ocr;
-            std::string result = ocr.recognize_image(data);
-            Node *t_node = new whisper_data_type::Node{.id = 0, .content = whisper_data_type::Data{.type = "OCR", .content = encode_binary(result)}};
-            t_node->prev = node;
-            nodes.push_back(t_node);
-        }
-        else if (std::holds_alternative<Data>(node->content))
-        {
-            spdlog::debug("extract_compressed_file enter Data type");
-            return nodes;
-        }
-
-        return nodes;
-    }
-
-    OCRHelper::OCRHelper()
-    {
-        ocr_ = new tesseract::TessBaseAPI();
-
-        if (ocr_->Init(nullptr, "chi_tra+eng") != 0)
-        {
-            delete ocr_;
-            throw std::runtime_error("Could not initialize tesseract. Please ensure TESSDATA_PREFIX environment variable is set correctly.");
-        }
-    }
-
-    OCRHelper::~OCRHelper()
-    {
-        if (ocr_)
-        {
-            ocr_->End();
-            delete ocr_;
+            ocr_ = std::make_unique<tesseract::TessBaseAPI>();
+            if (ocr_->Init(nullptr, "chi_tra+eng") != 0)
+            {
+                throw std::runtime_error("Could not initialize tesseract. Please ensure TESSDATA_PREFIX environment variable is set correctly.");
+            }
         }
     }
 
     std::string OCRHelper::recognize_image(const std::vector<uint8_t> &image_data)
     {
+        // Ensure OCR is initialized for this thread
+        initializeOCR();
+
         if (image_data.empty())
         {
             throw std::runtime_error("Image data is empty");
         }
 
-        Pix *image = nullptr;
-
-        image = pixReadMem(image_data.data(), image_data.size());
-
-        if (!image)
+        // Read image using RAII pattern
+        Pix *raw_image = pixReadMem(image_data.data(), image_data.size());
+        if (!raw_image)
         {
             throw std::runtime_error("Failed to read image data");
         }
 
-        ocr_->SetImage(image);
-        char *outText = ocr_->GetUTF8Text();
-        std::string result(outText);
+        auto pixDeleter = [](Pix *pix)
+        {
+            if (pix)
+            {
+                pixDestroy(&pix);
+            }
+        };
 
-        delete[] outText;
-        pixDestroy(&image);
+        std::unique_ptr<Pix, decltype(pixDeleter)> image(raw_image, pixDeleter);
 
-        return result;
+        // Process image
+        ocr_->SetImage(image.get());
+
+        // Get and convert text using RAII
+        std::unique_ptr<char[]> outText(ocr_->GetUTF8Text());
+        return std::string(outText.get());
+    }
+
+    std::vector<std::shared_ptr<Node>> extract_ocr(std::shared_ptr<Node> node)
+    {
+        std::vector<std::shared_ptr<Node>> nodes;
+
+        if (std::holds_alternative<File>(node->content))
+        {
+            File &file = std::get<File>(node->content);
+            std::vector<uint8_t> &data = file.content;
+
+            try
+            {
+                std::string result = OCRHelper::recognize_image(data);
+
+                auto t_node = std::make_shared<Node>();
+                t_node->id = 0;
+                t_node->content = Data{.type = "OCR", .content = encode_binary(result)};
+                t_node->prev = node;
+                nodes.push_back(t_node);
+            }
+            catch (const std::exception &e)
+            {
+                spdlog::error("OCR processing failed: {}", e.what());
+            }
+        }
+        else if (std::holds_alternative<Data>(node->content))
+        {
+            spdlog::debug("extract_compressed_file enter Data type");
+        }
+
+        return nodes;
     }
 }

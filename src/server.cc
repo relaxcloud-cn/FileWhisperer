@@ -9,10 +9,10 @@
 #include <queue>
 #include <spdlog/spdlog.h>
 
-std::unique_ptr<grpc::Server> server; 
+std::unique_ptr<grpc::Server> server;
 void make_whisper_reply(whisper::WhisperReply *, whisper_data_type::Tree *);
-void bfs(whisper::WhisperReply *, whisper_data_type::Node *);
-void bsf_process_whisper_reply_node(whisper::WhisperReply *, whisper_data_type::Node *);
+void bfs(whisper::WhisperReply *, std::shared_ptr<whisper_data_type::Node>);
+void bsf_process_whisper_reply_node(whisper::WhisperReply *, std::shared_ptr<whisper_data_type::Node>);
 void RunServer(int);
 void write_content_to_file(const std::string &, const std::vector<uint8_t> &);
 
@@ -67,7 +67,8 @@ class GreeterServiceImpl final : public whisper::Whisper::Service
     {
       std::unique_ptr<whisper_data_type::Tree> tree = std::make_unique<whisper_data_type::Tree>();
       tree->root = nullptr;
-      whisper_data_type::Node *node = new whisper_data_type::Node{.content = whisper_data_type::File{}};
+      std::shared_ptr<whisper_data_type::Node> node = std::make_shared<whisper_data_type::Node>();
+      node->content = whisper_data_type::File{};
 
       if (request->has_root_id())
       {
@@ -135,35 +136,35 @@ void make_whisper_reply(whisper::WhisperReply *reply, whisper_data_type::Tree *t
   bfs(reply, tree->root);
 }
 
-void bfs(whisper::WhisperReply *reply, whisper_data_type::Node *root)
+void bfs(whisper::WhisperReply *reply, std::shared_ptr<whisper_data_type::Node> root)
 {
   if (!root)
     return;
 
-  std::queue<whisper_data_type::Node *> q;
+  std::queue<std::shared_ptr<whisper_data_type::Node>> q;
   q.push(root);
 
   while (!q.empty())
   {
-    whisper_data_type::Node *curr = q.front();
+    std::shared_ptr<whisper_data_type::Node> curr = q.front();
     q.pop();
 
     bsf_process_whisper_reply_node(reply, curr);
 
-    for (whisper_data_type::Node *child : curr->children)
+    for (std::shared_ptr<whisper_data_type::Node> child : curr->children)
     {
       q.push(child);
     }
   }
 }
 
-void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_type::Node *root)
+void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, std::shared_ptr<whisper_data_type::Node> root)
 {
   whisper::Node *node = reply->add_tree();
   node->set_id(root->id);
-  if (root->prev)
+  if (auto prev_node = root->prev.lock())
   {
-    node->set_parent_id(root->prev->id);
+    node->set_parent_id(prev_node->id);
   }
   if (!root->children.empty())
   {
@@ -213,26 +214,29 @@ void bsf_process_whisper_reply_node(whisper::WhisperReply *reply, whisper_data_t
   }
 }
 
-void SignalHandler(int signal) {
-    if (server) {
-        spdlog::info("Received signal {}. Shutting down...", signal);
-        server->Shutdown();
-    }
+void SignalHandler(int signal)
+{
+  if (server)
+  {
+    spdlog::info("Received signal {}. Shutting down...", signal);
+    server->Shutdown();
+  }
 }
 
-void RunServer(int port) {
-    std::string server_address = "0.0.0.0:" + std::to_string(port);
-    GreeterServiceImpl service;
-    grpc::ServerBuilder builder;
-    builder.SetMaxReceiveMessageSize(50 * 1024 * 1024);
-    builder.SetMaxSendMessageSize(50 * 1024 * 1024);
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    server = builder.BuildAndStart();
-    spdlog::info("Server listening on {} ", server_address);
-    signal(SIGTERM, SignalHandler);
-    signal(SIGINT, SignalHandler);
-    server->Wait();
+void RunServer(int port)
+{
+  std::string server_address = "0.0.0.0:" + std::to_string(port);
+  GreeterServiceImpl service;
+  grpc::ServerBuilder builder;
+  builder.SetMaxReceiveMessageSize(50 * 1024 * 1024);
+  builder.SetMaxSendMessageSize(50 * 1024 * 1024);
+  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+  builder.RegisterService(&service);
+  server = builder.BuildAndStart();
+  spdlog::info("Server listening on {} ", server_address);
+  signal(SIGTERM, SignalHandler);
+  signal(SIGINT, SignalHandler);
+  server->Wait();
 }
 
 void write_content_to_file(const std::string &file_path, const std::vector<uint8_t> &content)
