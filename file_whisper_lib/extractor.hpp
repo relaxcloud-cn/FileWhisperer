@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 #include <re2/re2.h>
 #include <spdlog/spdlog.h>
 #include <functional>
@@ -21,33 +22,45 @@
 
 #pragma once
 
-namespace extractor
-{
+namespace extractor {
     using namespace whisper_data_type;
-    std::vector<Node *> extract_urls(Node *node);
-    std::vector<std::string> extract_urls_from_text(const std::string &text);
-    std::vector<Node *> extract_compressed_file(Node *node);
-    std::map<std::string, std::vector<uint8_t>> extract_files_from_data(const std::vector<uint8_t> file, std::string password = "");
-    std::vector<Node *> extract_qrcode(Node *node);
-    std::string decodeQRCode(const std::vector<uint8_t> &file);
-    std::string decodeQRCodeZXing(const std::vector<uint8_t> &file);
-    std::vector<Node *> extract_html(Node *node);
-    std::string extractHtmlText(GumboNode *node);
-    std::string stripHtml(const std::string &html);
-    std::vector<Node *> extract_ocr(Node *node);
-    class OCRHelper
-    {
+    
+    // URL extraction
+    std::vector<std::shared_ptr<Node>> extract_urls(std::shared_ptr<Node> node);
+    std::vector<std::string> extract_urls_from_text(const std::string& text);
+    
+    // Compressed file handling
+    std::vector<std::shared_ptr<Node>> extract_compressed_file(std::shared_ptr<Node> node);
+    std::map<std::string, std::vector<uint8_t>> extract_files_from_data(
+        const std::vector<uint8_t> file, 
+        std::string password = ""
+    );
+    
+    // QR code processing
+    std::vector<std::shared_ptr<Node>> extract_qrcode(std::shared_ptr<Node> node);
+    std::string decodeQRCode(const std::vector<uint8_t>& file);
+    std::string decodeQRCodeZXing(const std::vector<uint8_t>& file);
+    
+    // HTML processing
+    std::vector<std::shared_ptr<Node>> extract_html(std::shared_ptr<Node> node);
+    std::string extractHtmlText(GumboNode* node);
+    std::string stripHtml(const std::string& html);
+    
+    // OCR processing
+    std::vector<std::shared_ptr<Node>> extract_ocr(std::shared_ptr<Node> node);
+    
+    class OCRHelper {
     public:
         OCRHelper();
         ~OCRHelper();
 
-        // 删除拷贝构造和赋值操作符
-        OCRHelper(const OCRHelper &) = delete;
-        OCRHelper &operator=(const OCRHelper &) = delete;
+        // Delete copy constructor and assignment operator
+        OCRHelper(const OCRHelper&) = delete;
+        OCRHelper& operator=(const OCRHelper&) = delete;
 
-        std::string recognize_image(const std::vector<uint8_t> &image_data);
+        std::string recognize_image(const std::vector<uint8_t>& image_data);
 
     private:
-        tesseract::TessBaseAPI *ocr_;
+        tesseract::TessBaseAPI* ocr_;
     };
 }
