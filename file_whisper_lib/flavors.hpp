@@ -10,7 +10,7 @@ namespace flavors
 {
     using namespace whisper_data_type;
 
-    using ExtractFunctionModern = std::function<std::vector<Node *>(Node *)>;
+    using ExtractFunctionModern = std::function<std::vector<std::shared_ptr<Node>>(std::shared_ptr<Node>)>;
 
     struct ExtractorInfo
     {
@@ -30,9 +30,9 @@ namespace flavors
         {Types::TEXT_HTML, {html_extractor}},
         {Types::COMPRESSED_FILE, {compressed_file_extractor}}};
 
-    std::vector<Node *> extract(Node *node)
+    std::vector<std::shared_ptr<Node>> extract(std::shared_ptr<Node> node)
     {
-        std::vector<Node *> nodes;
+        std::vector<std::shared_ptr<Node>> nodes;
 
         if (!node)
         {
