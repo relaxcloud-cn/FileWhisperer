@@ -1,9 +1,9 @@
 #include "data_type.hpp"
 #include "flavors.hpp"
 
-void whisper_data_type::Tree::digest(Node *node)
+void whisper_data_type::Tree::digest(std::shared_ptr<Node> node)
 {
-    std::vector<Node *> extracted_nodes;
+    std::vector<std::shared_ptr<Node>> extracted_nodes;
     if (this->root == nullptr)
     {
         this->root = node;

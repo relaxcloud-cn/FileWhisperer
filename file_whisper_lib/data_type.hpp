@@ -12,11 +12,9 @@
 #include "types.hpp"
 
 #pragma once
-namespace whisper_data_type
-{
+namespace whisper_data_type {
 
-    struct File
-    {
+    struct File {
         std::string path;
         std::string name;
         int64_t size;
@@ -28,75 +26,48 @@ namespace whisper_data_type
         std::vector<uint8_t> content;
     };
 
-    struct Data
-    {
+    struct Data {
         std::string type;
         std::vector<uint8_t> content;
     };
 
-    struct Meta
-    {
+    struct Meta {
         std::map<std::string, std::string> map_string;
         std::map<std::string, int64_t> map_number;
         std::map<std::string, bool> map_bool;
     };
 
-    struct Node
-    {
+    struct Node {
         int64_t id;
-        // std::string parent_id;
         std::string uuid;
-        Node *prev;
-        // std::vector<std::string> children;
-        std::vector<Node *> children;
+        std::weak_ptr<Node> prev;
+        std::vector<std::shared_ptr<Node>> children;
         std::variant<File, Data> content;
         std::vector<std::string> passwords;
         Types type;
         Meta meta;
 
-        void add_child(Node *child)
-        {
+        void add_child(std::shared_ptr<Node> child) {
             children.push_back(child);
         }
 
-        void set_type(std::string key)
-        {
-            if (Types__1.count(key))
-            {
+        void set_type(std::string key) {
+            if (Types__1.count(key)) {
                 this->type = Types__1.at(key);
             }
-            else
-            {
+            else {
                 this->type = Types::OTHER;
             }
         }
     };
 
-    struct Tree
-    {
-        Node *root;
+    struct Tree {
+        std::shared_ptr<Node> root;
         Tree() = default;
-        ~Tree()
-        {
-            deleteNode(root);
-        }
-
-    public:
-        void digest(Node *node);
-        void deleteNode(Node *node)
-        {
-            if (node == nullptr)
-                return;
-
-            for (Node *child : node->children)
-            {
-                deleteNode(child);
-            }
-
-            delete node;
-        }
+        
+        void digest(std::shared_ptr<Node> node);
     };
 
-    void meta_detect_encoding(Meta &meta, const std::vector<uint8_t> &data);
+    void meta_detect_encoding(Meta& meta, const std::vector<uint8_t>& data);
 
 } // namespace whisper
