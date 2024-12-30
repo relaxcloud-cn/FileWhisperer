@@ -340,6 +340,59 @@ namespace extractor
         return text;
     }
 
+}
+
+namespace extractor
+{
+    thread_local std::unique_ptr<tesseract::TessBaseAPI> OCRHelper::ocr_;
+
+    void OCRHelper::initializeOCR()
+    {
+        if (!ocr_)
+        {
+            ocr_ = std::make_unique<tesseract::TessBaseAPI>();
+            if (ocr_->Init(nullptr, "chi_tra+eng") != 0)
+            {
+                throw std::runtime_error("Could not initialize tesseract. Please ensure TESSDATA_PREFIX environment variable is set correctly.");
+            }
+        }
+    }
+
+    std::string OCRHelper::recognize_image(const std::vector<uint8_t> &image_data)
+    {
+        // Ensure OCR is initialized for this thread
+        initializeOCR();
+
+        if (image_data.empty())
+        {
+            throw std::runtime_error("Image data is empty");
+        }
+
+        // Read image using RAII pattern
+        Pix *raw_image = pixReadMem(image_data.data(), image_data.size());
+        if (!raw_image)
+        {
+            throw std::runtime_error("Failed to read image data");
+        }
+
+        auto pixDeleter = [](Pix *pix)
+        {
+            if (pix)
+            {
+                pixDestroy(&pix);
+            }
+        };
+
+        std::unique_ptr<Pix, decltype(pixDeleter)> image(raw_image, pixDeleter);
+
+        // Process image
+        ocr_->SetImage(image.get());
+
+        // Get and convert text using RAII
+        std::unique_ptr<char[]> outText(ocr_->GetUTF8Text());
+        return std::string(outText.get());
+    }
+
     std::vector<std::shared_ptr<Node>> extract_ocr(std::shared_ptr<Node> node)
     {
         std::vector<std::shared_ptr<Node>> nodes;
@@ -348,67 +401,27 @@ namespace extractor
         {
             File &file = std::get<File>(node->content);
             std::vector<uint8_t> &data = file.content;
-            OCRHelper ocr;
-            std::string result = ocr.recognize_image(data);
 
-            auto t_node = std::make_shared<Node>();
-            t_node->id = 0;
-            t_node->content = Data{.type = "OCR", .content = encode_binary(result)};
-            t_node->prev = node;
-            nodes.push_back(t_node);
+            try
+            {
+                std::string result = OCRHelper::recognize_image(data);
+
+                auto t_node = std::make_shared<Node>();
+                t_node->id = 0;
+                t_node->content = Data{.type = "OCR", .content = encode_binary(result)};
+                t_node->prev = node;
+                nodes.push_back(t_node);
+            }
+            catch (const std::exception &e)
+            {
+                spdlog::error("OCR processing failed: {}", e.what());
+            }
         }
         else if (std::holds_alternative<Data>(node->content))
         {
             spdlog::debug("extract_compressed_file enter Data type");
-            return nodes;
         }
 
         return nodes;
-    }
-
-    OCRHelper::OCRHelper()
-    {
-        ocr_ = new tesseract::TessBaseAPI();
-
-        if (ocr_->Init(nullptr, "chi_tra+eng") != 0)
-        {
-            delete ocr_;
-            throw std::runtime_error("Could not initialize tesseract. Please ensure TESSDATA_PREFIX environment variable is set correctly.");
-        }
-    }
-
-    OCRHelper::~OCRHelper()
-    {
-        if (ocr_)
-        {
-            ocr_->End();
-            delete ocr_;
-        }
-    }
-
-    std::string OCRHelper::recognize_image(const std::vector<uint8_t> &image_data)
-    {
-        if (image_data.empty())
-        {
-            throw std::runtime_error("Image data is empty");
-        }
-
-        Pix *image = nullptr;
-
-        image = pixReadMem(image_data.data(), image_data.size());
-
-        if (!image)
-        {
-            throw std::runtime_error("Failed to read image data");
-        }
-
-        ocr_->SetImage(image);
-        char *outText = ocr_->GetUTF8Text();
-        std::string result(outText);
-
-        delete[] outText;
-        pixDestroy(&image);
-
-        return result;
     }
 }
