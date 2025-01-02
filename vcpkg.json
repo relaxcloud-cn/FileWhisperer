@@ -17,11 +17,12 @@
       "platform": "linux"
     },
     "mio",
+    "nu-book-zxing-cpp",
     "opencv",
     "openssl",
     "re2",
     "spdlog",
     "tesseract",
-    "nu-book-zxing-cpp"
+    "python3"
   ]
 }
