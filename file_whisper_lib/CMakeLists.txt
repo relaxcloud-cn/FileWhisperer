@@ -1,3 +1,7 @@
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3")
+endif()
+
 add_library(file_whisper_lib
     common.cc
     data_type.cc
@@ -23,6 +27,7 @@ find_package(OpenCV REQUIRED)
 find_package(unofficial-gumbo REQUIRED)
 find_package(Tesseract CONFIG REQUIRED)
 find_package(ZXing CONFIG REQUIRED)
+find_package(Python3 COMPONENTS Development REQUIRED)
 
 if(APPLE)
     set(WHOLE_ARCHIVE_FLAG "-force_load")
@@ -50,4 +55,5 @@ target_link_libraries(file_whisper_lib
     unofficial::gumbo::gumbo
     Tesseract::libtesseract
     ZXing::ZXing
+    Python3::Python
 )
