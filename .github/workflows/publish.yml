@@ -74,7 +74,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cleanup: true
 
       - name: Check final disk usage
         run: df -h
