@@ -48,27 +48,8 @@ namespace extractor
     std::string stripHtml(const std::string &html);
 
     // OCR processing
+    std::string recognize_image(const std::vector<uint8_t> &image_data);
     std::vector<std::shared_ptr<Node>> extract_ocr(std::shared_ptr<Node> node);
 
     std::vector<std::shared_ptr<Node>> extract_py(std::shared_ptr<Node> node);
-}
-
-namespace extractor
-{
-    class OCRHelper
-    {
-    private:
-        static thread_local std::unique_ptr<tesseract::TessBaseAPI> ocr_;
-
-    public:
-        OCRHelper() = delete;
-        ~OCRHelper() = delete;
-        OCRHelper(const OCRHelper &) = delete;
-        OCRHelper &operator=(const OCRHelper &) = delete;
-        OCRHelper(OCRHelper &&) = delete;
-        OCRHelper &operator=(OCRHelper &&) = delete;
-
-        static void initializeOCR();
-        static std::string recognize_image(const std::vector<uint8_t> &image_data);
-    };
 }

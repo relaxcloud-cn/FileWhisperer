@@ -344,48 +344,46 @@ namespace extractor
 
 namespace extractor
 {
-    thread_local std::unique_ptr<tesseract::TessBaseAPI> OCRHelper::ocr_;
-
-    void OCRHelper::initializeOCR()
+    std::string recognize_image(const std::vector<uint8_t> &image_data)
     {
-        if (!ocr_)
-        {
-            ocr_ = std::make_unique<tesseract::TessBaseAPI>();
-            if (ocr_->Init(nullptr, "chi_tra+eng") != 0)
-            {
-                throw std::runtime_error("Could not initialize tesseract. Please ensure TESSDATA_PREFIX environment variable is set correctly.");
-            }
-        }
-    }
+        char *outText;
+        std::string result;
 
-    std::string OCRHelper::recognize_image(const std::vector<uint8_t> &image_data)
-    {
-        initializeOCR();
+        tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
-        if (image_data.empty())
+        // Initialize tesseract-ocr with Chinese Traditional and English
+        if (api->Init(NULL, "chi_tra+eng"))
         {
-            throw std::runtime_error("Image data is empty");
+            throw std::runtime_error("Could not initialize tesseract.");
         }
 
-        std::unique_ptr<Pix, decltype(&pixDestroy)> image(
-            pixReadMem(image_data.data(), image_data.size()),
-            pixDestroy);
+        // Convert image_data to Pix using Leptonica
+        Pix *image = pixReadMem(
+            image_data.data(),
+            image_data.size()
+        );
 
         if (!image)
         {
-            throw std::runtime_error("Failed to read image data");
+            api->End();
+            delete api;
+            throw std::runtime_error("Failed to load image data.");
         }
 
-        ocr_->SetImage(image.get());
+        api->SetImage(image);
 
-        char *text = ocr_->GetUTF8Text();
-        if (!text)
+        // Get OCR result
+        outText = api->GetUTF8Text();
+        if (outText)
         {
-            throw std::runtime_error("Failed to extract text");
+            result = std::string(outText);
         }
 
-        std::string result(text);
-        delete[] text;
+        // Cleanup
+        api->End();
+        delete api;
+        delete[] outText;
+        pixDestroy(&image);
 
         return result;
     }
@@ -401,7 +399,7 @@ namespace extractor
 
             try
             {
-                std::string result = OCRHelper::recognize_image(data);
+                std::string result = recognize_image(data);
 
                 auto t_node = std::make_shared<Node>();
                 t_node->id = 0;
