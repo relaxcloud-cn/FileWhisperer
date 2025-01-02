@@ -360,7 +360,6 @@ namespace extractor
 
     std::string OCRHelper::recognize_image(const std::vector<uint8_t> &image_data)
     {
-        // Ensure OCR is initialized for this thread
         initializeOCR();
 
         if (image_data.empty())
@@ -368,29 +367,27 @@ namespace extractor
             throw std::runtime_error("Image data is empty");
         }
 
-        // Read image using RAII pattern
-        Pix *raw_image = pixReadMem(image_data.data(), image_data.size());
-        if (!raw_image)
+        std::unique_ptr<Pix, decltype(&pixDestroy)> image(
+            pixReadMem(image_data.data(), image_data.size()),
+            pixDestroy);
+
+        if (!image)
         {
             throw std::runtime_error("Failed to read image data");
         }
 
-        auto pixDeleter = [](Pix *pix)
-        {
-            if (pix)
-            {
-                pixDestroy(&pix);
-            }
-        };
-
-        std::unique_ptr<Pix, decltype(pixDeleter)> image(raw_image, pixDeleter);
-
-        // Process image
         ocr_->SetImage(image.get());
 
-        // Get and convert text using RAII
-        std::unique_ptr<char[]> outText(ocr_->GetUTF8Text());
-        return std::string(outText.get());
+        char *text = ocr_->GetUTF8Text();
+        if (!text)
+        {
+            throw std::runtime_error("Failed to extract text");
+        }
+
+        std::string result(text);
+        delete[] text;
+
+        return result;
     }
 
     std::vector<std::shared_ptr<Node>> extract_ocr(std::shared_ptr<Node> node)
