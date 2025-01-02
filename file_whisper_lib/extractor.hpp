@@ -15,6 +15,7 @@
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 #include <ZXing/ReadBarcode.h>
+#include <python3.11/Python.h>
 
 #include "bit7z/biterror.hpp"
 #include "data_type.hpp"
@@ -49,6 +50,7 @@ namespace extractor
     // OCR processing
     std::vector<std::shared_ptr<Node>> extract_ocr(std::shared_ptr<Node> node);
 
+    std::vector<std::shared_ptr<Node>> extract_py(std::shared_ptr<Node> node);
 }
 
 namespace extractor
