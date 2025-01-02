@@ -425,3 +425,59 @@ namespace extractor
         return nodes;
     }
 }
+
+namespace extractor
+{
+    std::vector<std::shared_ptr<Node>> extract_py(std::shared_ptr<Node> node)
+    {
+        std::vector<std::shared_ptr<Node>> nodes;
+        const char *pythonPath = std::getenv("FILE_WHISPERER_PYTHON_PATH");
+        if (!pythonPath)
+        {
+            std::cout << "Environment variable FILE_WHISPERER_PYTHON_PATH is not set!" << std::endl;
+        }
+
+        Py_Initialize();
+
+        if (!Py_IsInitialized())
+        {
+            std::cout << "Python initialization failed!" << std::endl;
+        }
+
+        PyRun_SimpleString("import sys");
+        std::string pythonCmd = "sys.path.append(\"" + std::string(pythonPath) + "\")";
+        PyRun_SimpleString(pythonCmd.c_str());
+
+        PyObject *pModule = PyImport_ImportModule("extract_office");
+        if (!pModule)
+        {
+            PyErr_Print();
+            std::cout << "Can't find Python file in path: " << pythonPath << std::endl;
+            Py_Finalize();
+        }
+
+        PyObject *pAddFunc = PyObject_GetAttrString(pModule, "add");
+        PyObject *pGreetFunc = PyObject_GetAttrString(pModule, "greet");
+
+        PyObject *pArgs = PyTuple_Pack(2, PyLong_FromLong(3), PyLong_FromLong(4));
+        PyObject *pResult = PyObject_CallObject(pAddFunc, pArgs);
+
+        int result = PyLong_AsLong(pResult);
+        std::cout << "3 + 4 = " << result << std::endl;
+
+        pArgs = PyTuple_Pack(1, PyUnicode_FromString("C++"));
+        pResult = PyObject_CallObject(pGreetFunc, pArgs);
+
+        const char *greet_msg = PyUnicode_AsUTF8(pResult);
+        std::cout << greet_msg << std::endl;
+
+        Py_DECREF(pModule);
+        Py_DECREF(pAddFunc);
+        Py_DECREF(pGreetFunc);
+        Py_DECREF(pArgs);
+        Py_DECREF(pResult);
+
+        Py_Finalize();
+        return nodes;
+    }
+}

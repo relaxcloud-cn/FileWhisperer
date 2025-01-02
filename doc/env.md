@@ -17,3 +17,9 @@ MAGIC_MGC_PATH
 ```sh
 LIB_PATH_7Z
 ```
+
+## Python 文件路径
+
+```sh
+FILE_WHISPERER_PYTHON_PATH
+```
