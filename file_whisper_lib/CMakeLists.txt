@@ -6,6 +6,7 @@ add_library(file_whisper_lib
     common.cc
     data_type.cc
     extractor.cc
+    analyzer.cc
     snowflake.cc
 )
 
@@ -27,7 +28,7 @@ find_package(OpenCV REQUIRED)
 find_package(unofficial-gumbo REQUIRED)
 find_package(Tesseract CONFIG REQUIRED)
 find_package(ZXing CONFIG REQUIRED)
-find_package(Python3 COMPONENTS Development REQUIRED)
+# find_package(Python3 COMPONENTS Development REQUIRED)
 
 if(APPLE)
     set(WHOLE_ARCHIVE_FLAG "-force_load")
@@ -55,5 +56,5 @@ target_link_libraries(file_whisper_lib
     unofficial::gumbo::gumbo
     Tesseract::libtesseract
     ZXing::ZXing
-    Python3::Python
+    # Python3::Python
 )
