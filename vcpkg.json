@@ -22,7 +22,6 @@
     "openssl",
     "re2",
     "spdlog",
-    "tesseract",
-    "python3"
+    "tesseract"
   ]
 }

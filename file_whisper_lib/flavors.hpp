@@ -23,7 +23,7 @@ namespace flavors
     const ExtractorInfo ocr_extractor{"ocr_extractor", extractor::extract_ocr};
     const ExtractorInfo html_extractor{"html_extractor", extractor::extract_html};
     const ExtractorInfo compressed_file_extractor{"compressed_file_extractor", extractor::extract_compressed_file};
-    const ExtractorInfo py_extractor{"py_extractor", extractor::extract_py};
+    // const ExtractorInfo py_extractor{"py_extractor", extractor::extract_py};
 
     std::map<Types, std::vector<ExtractorInfo>> flavor_extractors = {
         {Types::TEXT_PLAIN, {url_extractor}},
