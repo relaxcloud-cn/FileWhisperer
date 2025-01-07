@@ -4,6 +4,12 @@ FileWhisperer 是一个专注于将多种文件类型解析为 LLM 友好 结构
 
 ---
 
+# 需求
+
+[requirements](./doc/requirements_document/requirements.md)
+
+---
+
 # 数据结构说明
 
 ## FileWhisperer 扫描请求
