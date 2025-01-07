@@ -39,6 +39,7 @@ void whisper_data_type::Tree::digest(std::shared_ptr<Node> node)
     }
     node->meta = meta;
 
+    flavors::analyze(node);
     auto nodes = flavors::extract(node);
     extracted_nodes.insert(extracted_nodes.end(), nodes.begin(), nodes.end());
 

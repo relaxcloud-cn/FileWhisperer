@@ -6,6 +6,7 @@ add_library(file_whisper_lib
     common.cc
     data_type.cc
     extractor.cc
+    analyzer.cc
     snowflake.cc
 )
 
