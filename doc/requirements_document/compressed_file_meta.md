@@ -1,5 +1,25 @@
 # 压缩文件相关标识
 
+## mime type
+
+```
+application/zip
+application/x-rar-compressed
+application/vnd.rar
+application/x-7z-compressed
+application/x-tar
+application/gzip
+application/x-gzip
+application/x-bzip2
+application/x-xz
+```
+
+## map_string
+
+键名 | 说明 | 状态
+---|---|---
+correct_password| 正确密码 | yes
+
 ## map_number
 
 键名 | 说明 | 状态
