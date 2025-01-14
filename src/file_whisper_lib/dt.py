@@ -6,8 +6,10 @@ from weakref import ref
 import hashlib
 import magic
 import chardet
-import operator
+from snowflake import SnowflakeGenerator
 from .types import Types, Types__1
+
+snowflakegen = SnowflakeGenerator(42)
 
 @dataclass
 class File:
@@ -82,7 +84,8 @@ class Tree:
         
         if node.id == 0:
             # Use a snowflake-like ID generator or similar
-            node.id = int(uuid.uuid4().int & (1<<63)-1)
+            # node.id = int(uuid.uuid4().int & (1<<63)-1)
+            node.id = next(snowflakegen)
 
         meta = Meta()
 
