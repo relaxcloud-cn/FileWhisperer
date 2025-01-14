@@ -5,6 +5,8 @@ from weakref import ref
 # import mimetypes
 import hashlib
 import magic
+import chardet
+import operator
 from .types import Types, Types__1
 
 @dataclass
@@ -60,22 +62,15 @@ class Tree:
         self.root: Optional[Node] = None
 
     def meta_detect_encoding(self, meta: Meta, data: bytes):
-        # Simplified encoding detection - you might want to use chardet or similar
-        try:
-            encodings = ['utf-8', 'ascii', 'iso-8859-1']
-            for idx, encoding in enumerate(encodings):
-                try:
-                    data.decode(encoding)
-                    if idx == 0:
-                        meta.map_string["encoding"] = encoding
-                        meta.map_number["encoding_confidence"] = 100
-                    else:
-                        meta.map_string[f"encoding{idx+1}"] = encoding
-                        meta.map_number[f"encoding_confidence{idx+1}"] = 90
-                except:
-                    continue
-        except:
-            pass
+        results = chardet.detect_all(data)
+
+        for idx, tmp in enumerate(results):
+            if idx == 0:
+                meta.map_string["encoding"] = tmp['encoding']
+                meta.map_number["encoding_confidence"] = int(tmp['confidence'] * 100)
+            else:
+                meta.map_string[f"encoding{idx+1}"] = tmp['encoding']
+                meta.map_number[f"encoding_confidence{idx+1}"] = int(tmp['confidence'] * 100)
 
     def digest(self, node: Node):
         extracted_nodes = []
