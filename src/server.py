@@ -12,7 +12,8 @@ import shutil
 # Assuming these are generated from your protobuf definitions
 from file_whisper_pb2 import WhisperRequest, WhisperReply, Node, File, Data, Meta
 from file_whisper_pb2_grpc import WhisperServicer, add_WhisperServicer_to_server
-from file_whisper_lib.dt import Tree, Node as DataNode, File as DataFile, Data as DataData
+from file_whisper_lib.dt import Node as DataNode, File as DataFile, Data as DataData
+from file_whisper_lib.tree import Tree
 
 server = None
 
@@ -106,13 +107,13 @@ def bfs_process_whisper_reply_node(reply: WhisperReply, root: DataNode):
         root_data = root.content
         data = node.data
         data.type = root_data.type
-        data.content = root_data.content.decode()
+        data.content = root_data.content
 
     node_meta = node.meta
     
     for key, value in root.meta.map_string.items():
         node_meta.map_string[key] = value
-
+    
     for key, value in root.meta.map_number.items():
         node_meta.map_number[key] = value
 
