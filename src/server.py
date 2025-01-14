@@ -173,7 +173,7 @@ def main():
     date_format = "%Y-%m-%d %H:%M:%S"
     
     level_map = {
-        'trace': logging.DEBUG,  # Python doesn't have TRACE level
+        'trace': logging.DEBUG,
         'debug': logging.DEBUG,
         'info': logging.INFO,
         'warn': logging.WARNING,
