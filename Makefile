@@ -4,7 +4,7 @@
 PROTO_DIR = ./proto
 
 # Output directories for generated code
-PYTHON_CODE_DIR = ./py
+PYTHON_CODE_DIR = ./src
 CPP_CODE_DIR = ./cpp
 
 # Docker configuration
