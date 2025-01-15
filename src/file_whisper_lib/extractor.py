@@ -10,6 +10,7 @@ import zxingcpp
 import pybit7z
 import uuid
 import docx
+import fitz
 import traceback
 import zipfile
 from bs4 import BeautifulSoup
@@ -398,3 +399,56 @@ class Extractor:
 
             #             self.urls.append(tmp_dict)
         
+    @staticmethod
+    def extract_pdf_file(node: Node) -> List[Node]:
+        nodes = []
+        file: File
+        if isinstance(node.content, File):
+            file = node.content
+        elif isinstance(node.content, Data):
+            logging.error("extract_pdf_file enter Data type")
+            return nodes
+        
+        all_text = ""
+        pdf = fitz.open(stream=BytesIO(file.content), filetype="pdf")
+        if pdf.needs_pass:
+            password_success = False
+            for password in node.passwords:
+                if pdf.authenticate(password):
+                    password_success = True
+                    node.meta.map_string["correct_password"] = password
+                    break
+    
+            if not password_success:
+                raise ValueError("PDF all passwords are invalid.")
+            
+        max_pages = min(10, len(pdf))
+        for page_number in range(max_pages):
+            page = pdf.load_page(page_number)
+            images = page.get_images(full=True)
+            text = page.get_text()
+            all_text += text
+            print(images)
+
+            for img_index, img in enumerate(images):
+                xref = img[0]
+                base_image = pdf.extract_image(xref)
+                image_bytes = base_image["image"]
+                # image = Image.open(io.BytesIO(image_bytes))
+                image_filename = f"page_{page_number + 1}_image_{img_index + 1}.png"
+                t_node = Node()
+                t_node.content = File(
+                    path=image_filename,
+                    name=image_filename,
+                    content=image_bytes
+                )
+                t_node.prev = node
+                nodes.append(t_node)
+
+        t_node = Node()
+        t_node.id = 0
+        t_node.content = Data(type="TEXT", content=encode_binary(all_text))
+        t_node.prev = node
+        nodes.append(t_node)
+
+        return nodes

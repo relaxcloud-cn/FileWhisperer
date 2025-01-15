@@ -8,6 +8,7 @@ class Types(Enum):
     DOC = 4
     DOCX = 5
     OTHER = 6
+    PDF = 7
 
 Extension_Types = {
     'doc': Types.DOC,
@@ -21,6 +22,7 @@ Types__1 = {
     "QRCODE": Types.TEXT_PLAIN,
 
     # FILE
+    "application/pdf": Types.PDF,
     "text/plain": Types.TEXT_PLAIN,
     "text/html": Types.TEXT_HTML,
     "application/zip": Types.COMPRESSED_FILE,
