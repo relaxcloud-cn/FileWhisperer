@@ -87,7 +87,8 @@ class Tree:
         node.meta = meta
 
         # Implement these functions as needed
-        # flavors.analyze(node)
+        node.meta.map_string["error_message"] = ""
+        Flavors.analyze(node)
         nodes = Flavors.extract(node)
         extracted_nodes.extend(nodes)
 

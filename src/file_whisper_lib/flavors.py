@@ -4,6 +4,7 @@ import traceback
 from .dt import Node
 from .types import Types 
 from .extractor import Extractor
+from .analyzer import Analyzer
 
 class Flavors:
     flavor_extractors = {
@@ -30,6 +31,12 @@ class Flavors:
             ("pdf_extractor", Extractor.extract_pdf_file) 
         ]
     }
+
+    flavor_analyzers = {
+        Types.COMPRESSED_FILE: [
+            ("compressed_file_analyzer", Analyzer.analyze_compressed_file)
+        ]
+    }
     
     @staticmethod
     def extract(node: Node) -> List[Node]:
@@ -47,8 +54,26 @@ class Flavors:
                 nodes.extend(extracted) 
             except Exception as e:
                 traceback.print_exc()
-                node.meta.map_string["error_message"] = f"{name}: {str(e)};"
+                node.meta.map_string["error_message"] += f"{name}: {str(e)};"
             duration = int((time.time() - start) * 1_000_000)
             node.meta.map_number[f"microsecond_{name}"] = duration
             
         return nodes
+    
+    @staticmethod
+    def analyze(node: Node):
+        if not node:
+            return
+            
+        analyzers = Flavors.flavor_analyzers.get(node.type, [])
+        
+        for name, analyzer in analyzers:
+            start = time.time()
+            try:
+                analyzer(node)
+            except Exception as e:
+                traceback.print_exc()
+                node.meta.map_string["error_message"] += f"{name}: {str(e)};"
+            duration = int((time.time() - start) * 1_000_000)
+            node.meta.map_number[f"microsecond_{name}"] = duration
+            
