@@ -25,6 +25,9 @@ class Flavors:
         ],
         Types.DOCX: [
             ("word_file_extractor", Extractor.extract_word_file) 
+        ],
+        Types.PDF: [
+            ("pdf_extractor", Extractor.extract_pdf_file) 
         ]
     }
     
