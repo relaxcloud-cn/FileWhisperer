@@ -1,6 +1,7 @@
 import hashlib
 import magic
 import uuid
+import os
 import chardet
 from typing import Optional
 from .dt import Node, Meta, File, Data
@@ -70,10 +71,12 @@ class Tree:
             # file.mime_type = mimetypes.guess_type(file.name)[0] or ""
             file.mime_type = get_mime_type(file.content)
             # Implement these hash functions as needed
+            file.extension = get_extension(file.name)
             file.md5 = calculate_md5(file.content)
             file.sha256 = calculate_sha256(file.content)
             file.sha1 = calculate_sha1(file.content)
-            node.set_type(file.mime_type)
+            node.set_type(file.mime_type, file.extension)
+            # File 不探测编码, 费时
             # self.meta_detect_encoding(meta, file.content)
         
         elif isinstance(node.content, Data):
@@ -111,3 +114,8 @@ def get_mime_type(data: bytes):
 def get_mime_type_desc(data: bytes):
     # makefile script, ASCII text
     return magic.from_buffer(data)
+
+def get_extension(filename):
+    extension = os.path.splitext(filename)[1]
+    extension = extension[1:]
+    return extension

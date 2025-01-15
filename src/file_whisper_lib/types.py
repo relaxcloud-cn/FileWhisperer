@@ -5,7 +5,14 @@ class Types(Enum):
     COMPRESSED_FILE = 1
     IMAGE = 2
     TEXT_HTML = 3
-    OTHER = 4
+    DOC = 4
+    DOCX = 5
+    OTHER = 6
+
+Extension_Types = {
+    'doc': Types.DOC,
+    'docx': Types.DOCX 
+}
 
 Types__1 = {
     # DATA

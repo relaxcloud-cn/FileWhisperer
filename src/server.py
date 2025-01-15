@@ -50,6 +50,7 @@ class GreeterServiceImpl(WhisperServicer):
 
             file = node.content
             file.path = file_path
+            file.name = os.path.basename(file_path)
             file.content = file_content
             tree.digest(node)
             reply = WhisperReply()
@@ -96,6 +97,7 @@ def bfs_process_whisper_reply_node(reply: WhisperReply, root: DataNode):
         file_path = root.uuid
         file.path = file_path
         file.name = root_file.name
+        file.extension = root_file.extension
         file.size = root_file.size
         file.mime_type = root_file.mime_type
         file.md5 = root_file.md5
