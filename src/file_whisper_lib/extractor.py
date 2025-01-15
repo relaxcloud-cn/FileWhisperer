@@ -2,12 +2,8 @@ from io import BytesIO
 import re
 import cv2
 import numpy as np
-from enum import Enum
 from typing import List, Dict, Optional, Union, Tuple
-from dataclasses import dataclass
 import logging
-import time
-from pathlib import Path
 from PIL import Image
 import pytesseract
 import zxingcpp
@@ -101,11 +97,8 @@ class Extractor:
             if isinstance(node.content, File):
                 data = node.content.content
                 
-                # 使用PIL打开图像
                 image = Image.open(BytesIO(data))
                 
-                # 使用pytesseract进行OCR识别
-                # 设置识别中文和英文
                 result = pytesseract.image_to_string(image, lang='chi_tra+eng')
                 
                 if result:
