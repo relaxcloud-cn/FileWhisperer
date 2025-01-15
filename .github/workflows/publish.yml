@@ -34,6 +34,6 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: |
-            relaxcloud/filewhisperer:latest
-            relaxcloud/filewhisperer:${{ github.sha }}
+          tags: relaxcloud/filewhisperer:latest
+          
+          # tags: relaxcloud/filewhisperer:${{ github.sha }}
