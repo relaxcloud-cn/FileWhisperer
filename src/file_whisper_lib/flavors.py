@@ -16,9 +16,9 @@ class Flavors:
         Types.TEXT_HTML: [
             ("html_extractor", Extractor.extract_html)
         ],
-        # Types.COMPRESSED_FILE: [
-        #     ("compressed_file_extractor", Extractor.extract_compressed_file) 
-        # ]
+        Types.COMPRESSED_FILE: [
+            ("compressed_file_extractor", Extractor.extract_compressed_file) 
+        ]
     }
     
     @staticmethod
