@@ -74,7 +74,7 @@ class Tree:
             file.sha256 = calculate_sha256(file.content)
             file.sha1 = calculate_sha1(file.content)
             node.set_type(file.mime_type)
-            self.meta_detect_encoding(meta, file.content)
+            # self.meta_detect_encoding(meta, file.content)
         
         elif isinstance(node.content, Data):
             data = node.content
