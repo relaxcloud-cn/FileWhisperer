@@ -5,7 +5,15 @@ class Types(Enum):
     COMPRESSED_FILE = 1
     IMAGE = 2
     TEXT_HTML = 3
-    OTHER = 4
+    DOC = 4
+    DOCX = 5
+    OTHER = 6
+    PDF = 7
+
+Extension_Types = {
+    'doc': Types.DOC,
+    'docx': Types.DOCX 
+}
 
 Types__1 = {
     # DATA
@@ -14,6 +22,7 @@ Types__1 = {
     "QRCODE": Types.TEXT_PLAIN,
 
     # FILE
+    "application/pdf": Types.PDF,
     "text/plain": Types.TEXT_PLAIN,
     "text/html": Types.TEXT_HTML,
     "application/zip": Types.COMPRESSED_FILE,

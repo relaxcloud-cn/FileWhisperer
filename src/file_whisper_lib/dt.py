@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Union
 # import mimetypes
-from .types import Types, Types__1
+from .types import Types, Types__1, Extension_Types
 
 @dataclass
 class File:
@@ -48,7 +48,11 @@ class Node:
     def add_child(self, child: 'Node'):
         self.children.append(child)
 
-    def set_type(self, key: str):
+    def set_type(self, key: str, ext: str = None):
+        # 根据后缀归类
+        if ext is not None:
+            tmp = Extension_Types.get(ext, None)
+            if tmp is not None:
+                self.type = tmp
+                return
         self.type = Types__1.get(key, Types.OTHER)
-
-

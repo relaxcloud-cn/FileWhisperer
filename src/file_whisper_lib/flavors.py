@@ -1,5 +1,6 @@
 import time
 from typing import List
+import traceback
 from .dt import Node
 from .types import Types 
 from .extractor import Extractor
@@ -18,6 +19,15 @@ class Flavors:
         ],
         Types.COMPRESSED_FILE: [
             ("compressed_file_extractor", Extractor.extract_compressed_file) 
+        ],
+        Types.DOC: [
+            ("word_file_extractor", Extractor.extract_word_file) 
+        ],
+        Types.DOCX: [
+            ("word_file_extractor", Extractor.extract_word_file) 
+        ],
+        Types.PDF: [
+            ("pdf_extractor", Extractor.extract_pdf_file) 
         ]
     }
     
@@ -36,6 +46,7 @@ class Flavors:
                 extracted = extractor(node)
                 nodes.extend(extracted) 
             except Exception as e:
+                traceback.print_exc()
                 node.meta.map_string["error_message"] = f"{name}: {str(e)};"
             duration = int((time.time() - start) * 1_000_000)
             node.meta.map_number[f"microsecond_{name}"] = duration
