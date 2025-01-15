@@ -6,6 +6,7 @@ services:
     network_mode: "host"
     command: python3 /app/src/server.py -p 50098 -l info
     environment: 
+      TESSDATA_PREFIX: /app/fixtures/tesseract
       FILE_WHISPERER_OUTPUT_DIR: /opt/docker/filewhisperer/output
     volumes:
       - ./output:/opt/docker/filewhisperer/output
