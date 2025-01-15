@@ -39,7 +39,7 @@ class GreeterServiceImpl(WhisperServicer):
                     file_content = mm.read()
                     mm.close()
             elif request.HasField('file_content'):
-                file_content = request.file_content.encode()
+                file_content = request.file_content
                 file_path = "memory_file"
             else:
                 error_msg = "No file data provided"
