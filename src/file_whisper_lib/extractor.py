@@ -7,6 +7,7 @@ import logging
 from PIL import Image
 import pytesseract
 import zxingcpp
+import pybit7z
 from bs4 import BeautifulSoup
 from .dt import Node, File, Data
 
@@ -143,92 +144,76 @@ class Extractor:
             
         return nodes
 
-    # @staticmethod
-    # def extract_compressed_file(node: Node) -> List[Node]:
-    #     nodes = []
-    #     data = None
+    @staticmethod
+    def extract_compressed_file(node: Node) -> List[Node]:
+        nodes = []
+        data = None
         
-    #     try:
-    #         if isinstance(node.content, File):
-    #             data = node.content.content
-    #         elif isinstance(node.content, Data):
-    #             logging.debug("extract_compressed_file enter Data type")
-    #             return nodes
+        try:
+            if isinstance(node.content, File):
+                data = node.content.content
+            elif isinstance(node.content, Data):
+                logging.debug("extract_compressed_file enter Data type")
+                return nodes
             
-    #         extracted = False
-    #         files = {}
+            extracted = False
+            files = {}
             
-    #         # 如果没有密码，尝试直接解压
-    #         if not node.passwords:
-    #             try:
-    #                 files = Extractor.extract_files_from_data(data)
-    #                 extracted = True
-    #             except Exception as e:
-    #                 if "password required" not in str(e).lower():
-    #                     raise e
+            if not node.passwords:
+                try:
+                    files = Extractor.extract_files_from_data(data)
+                    extracted = True
+                except Exception as e:
+                    # if "password is required" not in str(e).lower():
+                    # 需要密码的报错
+                    # Failed to extract the archive: A password is required but none was provided.
+                    raise e
 
-    #         # 如果需要密码，尝试所有提供的密码
-    #         if not extracted and node.passwords:
-    #             for password in node.passwords:
-    #                 try:
-    #                     files = Extractor.extract_files_from_data(data, password)
-    #                     extracted = True
-    #                     node.meta.map_string["correct_password"] = password
-    #                     break
-    #                 except Exception as e:
-    #                     if "password" in str(e).lower():
-    #                         logging.error(f"Password error: {e}")
-    #                         continue
-    #                     raise e
+            if not extracted and node.passwords:
+                for password in node.passwords:
+                    try:
+                        files = Extractor.extract_files_from_data(data, password)
+                        extracted = True
+                        node.meta.map_string["correct_password"] = password
+                        break
+                    except Exception as e:
+                        if "Wrong password" in str(e):
+                            logging.error(f"Password error: {e}")
+                            continue
+                        raise e
 
-    #         if not extracted:
-    #             raise RuntimeError("Failed to extract compressed file")
+            if not extracted:
+                raise RuntimeError("Failed to extract compressed file")
 
-    #         # 为每个解压出的文件创建新节点
-    #         for filename, content in files.items():
-    #             t_node = Node()
-    #             t_node.content = File(
-    #                 path=filename,
-    #                 name=filename,
-    #                 content=content
-    #             )
-    #             t_node.prev = node
-    #             nodes.append(t_node)
+            for filename, content in files.items():
+                t_node = Node()
+                t_node.content = File(
+                    path=filename,
+                    name=filename,
+                    content=content
+                )
+                t_node.prev = node
+                nodes.append(t_node)
 
-    #     except Exception as e:
-    #         logging.error(f"Error extracting compressed file: {str(e)}")
-    #         raise e
+        except Exception as e:
+            logging.error(f"Error extracting compressed file: {str(e)}")
+            raise e
 
-    #     return nodes
+        return nodes
 
-    # @staticmethod
-    # def extract_files_from_data(data: bytes, password: str = "") -> Dict[str, bytes]:
-    #     result = {}
+    @staticmethod
+    def extract_files_from_data(data: bytes, password: str = "") -> Dict[str, bytes]:
+        files_map = {}
         
-    #     try:
-    #         # 创建临时文件来处理二进制数据
-    #         with BytesIO(data) as bio:
-    #             with py7zr.SevenZipFile(bio, mode='r', password=password or None) as z:
-    #                 # 读取所有文件
-    #                 allfiles = z.readall()
-                    
-    #                 # 转换文件内容为bytes
-    #                 for filename, fileinfo in allfiles.items():
-    #                     if isinstance(fileinfo, bytes):
-    #                         result[filename] = fileinfo
-    #                     else:
-    #                         # 如果不是bytes，尝试读取内容
-    #                         try:
-    #                             if hasattr(fileinfo, 'read'):
-    #                                 result[filename] = fileinfo.read()
-    #                             elif isinstance(fileinfo, (str, bytearray)):
-    #                                 result[filename] = bytes(fileinfo)
-    #                         except Exception as e:
-    #                             logging.error(f"Error processing file {filename}: {str(e)}")
-    #                             continue
+        try:
+            with pybit7z.lib7zip_context() as lib:
+                extractor = pybit7z.BitMemExtractor(lib, pybit7z.FormatAuto)
+                if password:
+                    extractor.set_password(password)
+                files_map = extractor.extract(data)
                                 
-    #     except Exception as e:
-    #         logging.error(f"Error in extract_files_from_data: {str(e)}")
-    #         raise e
+        except Exception as e:
+            logging.error(f"Error in extract_files_from_data: {str(e)}")
+            raise e
             
-    #     return result
+        return files_map
