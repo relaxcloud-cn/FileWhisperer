@@ -13,6 +13,7 @@ import docx
 import fitz
 import traceback
 import zipfile
+import base64
 from bs4 import BeautifulSoup
 from spire.doc import *
 from spire.doc.common import *
@@ -227,6 +228,45 @@ class Extractor:
         return list(urls)
     
 
+    @staticmethod
+    def extract_img_from_html(html: str) -> list:
+        img_bytes_list = []
+        soup_t = BeautifulSoup(html, 'html.parser')
+        # 查找所有的 img 标签
+        images = soup_t.find_all('img')
+        
+        # 遍历 img 标签，打印图片 src 属性
+        for image in images:
+            # print(f"\n3.image --> {image}\n")
+            # 这里的img_src是：data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAIAAA……
+            # print(f"\n3.image --> {type(image)} -- \n")
+            if not image.has_attr('src'):
+                continue
+            img_src = image['src']
+            # print(f"\n4.img_src --> {img_src}\n")
+            #self._logger().debug(f"find image resource - {img_src}")
+            # 这个判据不知道是否正确，最起码没有base64编码的就有问题了
+            if (img_src.find("base64") == -1):
+                continue 
+            img_arrays1 = img_src.split(';')
+            
+            # img_arrays1[1]中的数据是：base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAIAAA……
+            img_arrays2 = img_arrays1[1].split(',')
+            if len(img_arrays2) < 1:
+                continue
+            if img_arrays2[0] != 'base64':
+                continue
+            
+            # 这里 img_str 中是 base64 编码的：iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAIAAA……
+            img_str = img_arrays2[1]
+            
+            # 这里的 img_bytes 就是图片的二进制数组，base64 解码后的
+            img_bytes = base64.b64decode(img_str)
+
+            img_bytes_list.append(img_bytes)
+
+        return img_bytes_list
+
 
     @staticmethod
     def extract_html(node: Node) -> List[Node]:
@@ -256,6 +296,17 @@ class Extractor:
                     t_node.content = Data(type="HTML", content=encode_binary(url))
                     t_node.prev = node
                     nodes.append(t_node)
+
+            img_bytes_list = Extractor.extract_img_from_html(text)
+            for img_bytes in img_bytes_list:
+                t_node = Node()
+                t_node.content = File(
+                    path="",
+                    name="",
+                    content=img_bytes
+                )
+                t_node.prev = node
+                nodes.append(t_node)
             
         except Exception as e:
             logging.error(f"Error extracting HTML: {str(e)}")
