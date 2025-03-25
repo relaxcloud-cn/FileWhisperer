@@ -61,7 +61,7 @@ def process_file(stub, file_path, binary, password, root_id):
             elif node.HasField('data'):
                 data = node.data
                 safe_print(f"Data type: {data.type}")
-                safe_print(f"Content length: {data.content}")
+                safe_print(f"Content length: {data.content[:100]}")
             
             if node.HasField('meta'):
                 meta = node.meta
