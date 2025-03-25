@@ -389,6 +389,7 @@ class Extractor:
 
     @staticmethod
     def extract_word_file(node: Node) -> List[Node]:
+        node.meta.map_bool["is_encrypted"] = False
         nodes = []
         file: File
         if isinstance(node.content, File):
@@ -505,6 +506,7 @@ class Extractor:
         try:
             analyze_docx_file(current_file_path)
         except zipfile.BadZipFile:
+            node.meta.map_bool["is_encrypted"] = True
             stop = False
             for pwd in node.passwords:
                 if stop: break
@@ -573,6 +575,7 @@ class Extractor:
         all_text = ""
         pdf = fitz.open(stream=BytesIO(file.content), filetype="pdf")
         if pdf.needs_pass:
+            node.meta.map_bool["is_encrypted"] = True
             password_success = False
             for password in node.passwords:
                 if pdf.authenticate(password):
@@ -582,6 +585,8 @@ class Extractor:
     
             if not password_success:
                 raise ValueError("PDF all passwords are invalid.")
+        else:
+            node.meta.map_bool["is_encrypted"] = False
             
         max_pages = min(10, len(pdf))
         for page_number in range(max_pages):
