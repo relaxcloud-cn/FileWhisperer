@@ -37,6 +37,7 @@ class Analyzer:
             if not node.content.content:
                 logging.error("Empty content")
                 return
+            node.meta.map_bool["is_encrypted"] = True
                 
             try:
                 with tempfile.NamedTemporaryFile(delete=True) as temp_file:
