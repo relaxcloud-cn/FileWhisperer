@@ -6,6 +6,7 @@ from typing import List, Dict
 import logging
 from PIL import Image
 import pytesseract
+from paddleocr import PaddleOCR
 import zxingcpp
 import pybit7z
 import uuid
@@ -107,16 +108,38 @@ class Extractor:
             if isinstance(node.content, File):
                 data = node.content.content
                 
-                image = Image.open(BytesIO(data))
+                # Initialize PaddleOCR with Chinese and English language support
+                ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False)
                 
-                result = pytesseract.image_to_string(image, lang='chi_tra+eng')
+                # Open the image
+                image = Image.open(BytesIO(data))
+                # Convert PIL Image to numpy array as PaddleOCR needs numpy array
+                image_np = np.array(image)
+                
+                # Check if the image is RGBA and convert to RGB
+                if image_np.shape[-1] == 4:
+                    image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2RGB)
+                
+                # Run OCR
+                result = ocr.ocr(image_np, cls=True)
                 
                 if result:
-                    t_node = Node()
-                    t_node.id = 0
-                    t_node.content = Data(type="OCR", content=encode_binary(result))
-                    t_node.prev = node
-                    nodes.append(t_node)
+                    # Extract text from results
+                    text_results = []
+                    for line in result:
+                        for item in line:
+                            if len(item) >= 2:  # Make sure the result has the expected format
+                                text_results.append(item[1][0])  # item[1][0] contains the recognized text
+                    
+                    # Join all recognized text
+                    extracted_text = '\n'.join(text_results)
+                    
+                    if extracted_text:
+                        t_node = Node()
+                        t_node.id = 0
+                        t_node.content = Data(type="OCR", content=encode_binary(extracted_text))
+                        t_node.prev = node
+                        nodes.append(t_node)
                     
             elif isinstance(node.content, Data):
                 logging.debug("extract_ocr enter Data type")
