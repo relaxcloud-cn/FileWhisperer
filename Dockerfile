@@ -7,6 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
     make \
     tesseract-ocr \
     libtesseract-dev \
