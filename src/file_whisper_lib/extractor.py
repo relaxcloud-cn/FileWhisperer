@@ -50,6 +50,8 @@ class Extractor:
                 t_node.id = 0
                 t_node.content = Data(type="URL", content=encode_binary(url))
                 t_node.prev = node
+                # 使用新方法继承父节点的页数限制
+                t_node.inherit_limits(node)
                 nodes.append(t_node)
                 
         except Exception as e:
@@ -90,6 +92,8 @@ class Extractor:
                     t_node.id = 0
                     t_node.content = Data(type="QRCODE", content=encode_binary(barcode.text))
                     t_node.prev = node
+                    # 使用inherit_limits方法继承限制
+                    t_node.inherit_limits(node)
                     nodes.append(t_node)
                     
             elif isinstance(node.content, Data):
@@ -139,6 +143,8 @@ class Extractor:
                         t_node.id = 0
                         t_node.content = Data(type="OCR", content=encode_binary(extracted_text))
                         t_node.prev = node
+                        # 使用inherit_limits方法继承限制
+                        t_node.inherit_limits(node)
                         nodes.append(t_node)
                     
             elif isinstance(node.content, Data):
@@ -310,6 +316,9 @@ class Extractor:
             t_node.id = 0
             t_node.content = Data(type="TEXT", content=encode_binary(html_text))
             t_node.prev = node
+            # 继承父节点的页数限制
+            t_node.pdf_max_pages = node.pdf_max_pages
+            t_node.word_max_pages = node.word_max_pages
             nodes.append(t_node)
 
             html_urls = Extractor.extract_urls_from_html(text)
@@ -318,6 +327,9 @@ class Extractor:
                     t_node.id = 0
                     t_node.content = Data(type="HTML", content=encode_binary(url))
                     t_node.prev = node
+                    # 继承父节点的页数限制
+                    t_node.pdf_max_pages = node.pdf_max_pages
+                    t_node.word_max_pages = node.word_max_pages
                     nodes.append(t_node)
 
             img_bytes_list = Extractor.extract_img_from_html(text)
@@ -329,6 +341,9 @@ class Extractor:
                     content=img_bytes
                 )
                 t_node.prev = node
+                # 继承父节点的页数限制
+                t_node.pdf_max_pages = node.pdf_max_pages
+                t_node.word_max_pages = node.word_max_pages
                 nodes.append(t_node)
             
         except Exception as e:
@@ -385,6 +400,8 @@ class Extractor:
                     content=content
                 )
                 t_node.prev = node
+                # 使用inherit_limits方法继承限制
+                t_node.inherit_limits(node)
                 nodes.append(t_node)
 
         except Exception as e:
@@ -426,7 +443,12 @@ class Extractor:
             doc = docx.Document(analyzed_path)
             text_content = []
             
-            for para in doc.paragraphs:
+            # 限制处理的段落数量，根据页数估算
+            # 假设每页约有20个段落
+            max_paragraphs = node.word_max_pages * 20
+            for i, para in enumerate(doc.paragraphs):
+                if i >= max_paragraphs:
+                    break
                 text_content.append(para.text)
 
             separator = "\n"
@@ -437,6 +459,8 @@ class Extractor:
             t_node.id = 0
             t_node.content = Data(type="TEXT", content=encode_binary(joined_text_content))
             t_node.prev = node
+            # 使用inherit_limits方法继承限制
+            t_node.inherit_limits(node)
             nodes.append(t_node)
 
             with zipfile.ZipFile(analyzed_path, 'r') as docx_zip:
@@ -454,6 +478,8 @@ class Extractor:
                             content=file_byte
                         )
                         t_node.prev = node
+                        # 使用inherit_limits方法继承限制
+                        t_node.inherit_limits(node)
                         nodes.append(t_node)
 
             if ole_file_count:
@@ -505,6 +531,8 @@ class Extractor:
                                         content=ole.NativeData
                                     )
                                     t_node.prev = node
+                                    # 使用inherit_limits方法继承限制
+                                    t_node.inherit_limits(node)
                                     nodes.append(t_node)                
                                     i += 1
 
@@ -611,7 +639,8 @@ class Extractor:
         else:
             node.meta.map_bool["is_encrypted"] = False
             
-        max_pages = min(10, len(pdf))
+        # 使用node.pdf_max_pages来限制处理的页数
+        max_pages = min(node.pdf_max_pages, len(pdf))
         for page_number in range(max_pages):
             page = pdf.load_page(page_number)
             images = page.get_images(full=True)
@@ -632,12 +661,16 @@ class Extractor:
                     content=image_bytes
                 )
                 t_node.prev = node
+                # 使用inherit_limits方法继承限制
+                t_node.inherit_limits(node)
                 nodes.append(t_node)
 
         t_node = Node()
         t_node.id = 0
         t_node.content = Data(type="TEXT", content=encode_binary(all_text))
         t_node.prev = node
+        # 使用inherit_limits方法继承限制
+        t_node.inherit_limits(node)
         nodes.append(t_node)
 
         return nodes

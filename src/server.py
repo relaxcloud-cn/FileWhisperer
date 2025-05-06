@@ -31,6 +31,18 @@ class GreeterServiceImpl(WhisperServicer):
 
             passwords = list(request.passwords)
             node.passwords = passwords
+            
+            # 提取PDF最大页数参数
+            if request.HasField('pdf_max_pages'):
+                node.pdf_max_pages = request.pdf_max_pages
+            else:
+                node.pdf_max_pages = 10  # 默认值为10页
+                
+            # 提取Word最大页数参数
+            if request.HasField('word_max_pages'):
+                node.word_max_pages = request.word_max_pages
+            else:
+                node.word_max_pages = 10  # 默认值为10页
 
             if request.HasField('file_path'):
                 file_path = request.file_path

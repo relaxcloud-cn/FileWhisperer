@@ -5,6 +5,9 @@ import file_whisper_pb2_grpc
 import os
 from concurrent.futures import ThreadPoolExecutor
 import threading
+import argparse
+import sys
+import json
 
 print_lock = threading.Lock()
 
@@ -18,7 +21,7 @@ def safe_print(*args, **kwargs):
     with print_lock:
         print(*args, **kwargs)
 
-def process_file(stub, file_path, binary, password, root_id):
+def process_file(stub, file_path, binary, password, root_id, pdf_max_pages, word_max_pages):
     try:
         request_params = {
             'passwords': list(password)
@@ -26,6 +29,12 @@ def process_file(stub, file_path, binary, password, root_id):
         
         if root_id is not None:
             request_params['root_id'] = root_id
+            
+        if pdf_max_pages is not None:
+            request_params['pdf_max_pages'] = pdf_max_pages
+            
+        if word_max_pages is not None:
+            request_params['word_max_pages'] = word_max_pages
             
         if binary:
             with open(file_path, 'rb') as f:
@@ -89,14 +98,16 @@ def process_file(stub, file_path, binary, password, root_id):
 @click.option('--password', '-p', multiple=True, help='Passwords to try')
 @click.option('--root-id', type=int, help='Root ID for the request')
 @click.option('--max-workers', default=4, help='Maximum number of worker threads')
+@click.option('--pdf-max-pages', type=int, help='Maximum number of pages to process for PDF documents')
+@click.option('--word-max-pages', type=int, help='Maximum number of pages to process for Word documents')
 @click.argument('path', type=click.Path(exists=True))
-def run(host, port, binary, password, root_id, max_workers, path):
+def run(host, port, binary, password, root_id, max_workers, pdf_max_pages, word_max_pages, path):
     channel = grpc.insecure_channel(f'{host}:{port}')
     stub = file_whisper_pb2_grpc.WhisperStub(channel)
     
     try:
         if os.path.isfile(path):
-            process_file(stub, path, binary, password, root_id)
+            process_file(stub, path, binary, password, root_id, pdf_max_pages, word_max_pages)
         else:
             file_paths = []
             for root, _, files in os.walk(path):
@@ -105,7 +116,7 @@ def run(host, port, binary, password, root_id, max_workers, path):
             
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = [
-                    executor.submit(process_file, stub, file_path, binary, password, root_id)
+                    executor.submit(process_file, stub, file_path, binary, password, root_id, pdf_max_pages, word_max_pages)
                     for file_path in file_paths
                 ]
                 

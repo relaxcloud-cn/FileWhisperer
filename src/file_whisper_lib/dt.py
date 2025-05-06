@@ -42,11 +42,21 @@ class Node:
         self.children: List['Node'] = []
         self.content: Union[File, Data] = None
         self.passwords: List[str] = []
+        self.pdf_max_pages: int = 10  # 控制PDF文档解析的最大页数，默认为10
+        self.word_max_pages: int = 10  # 控制Word文档解析的最大页数，默认为10
         self.type: Types = Types.OTHER
         self.meta: Meta = Meta()
 
     def add_child(self, child: 'Node'):
         self.children.append(child)
+
+    def inherit_limits(self, parent: 'Node'):
+        """从父节点继承页数限制"""
+        if parent:
+            self.pdf_max_pages = parent.pdf_max_pages
+            self.word_max_pages = parent.word_max_pages
+            self.passwords = parent.passwords
+        return self
 
     def set_type(self, key: str, ext: str = None):
         # 根据后缀归类
