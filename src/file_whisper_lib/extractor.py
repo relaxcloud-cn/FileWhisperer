@@ -113,7 +113,7 @@ class Extractor:
                 data = node.content.content
                 
                 # Initialize PaddleOCR with Chinese and English language support
-                ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False)
+                ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, model_dir="/root/.paddleocr")
                 
                 # Open the image
                 image = Image.open(BytesIO(data))
