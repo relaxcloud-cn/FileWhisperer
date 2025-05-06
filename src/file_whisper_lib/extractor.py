@@ -113,7 +113,7 @@ class Extractor:
                 data = node.content.content
                 
                 # Initialize PaddleOCR with Chinese and English language support
-                ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, model_dir="/root/.paddleocr")
+                ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, model_dir="/root/.paddleocr", show_log=False)
                 
                 # Open the image
                 image = Image.open(BytesIO(data))
@@ -646,7 +646,7 @@ class Extractor:
             images = page.get_images(full=True)
             text = page.get_text()
             all_text += text
-            print(images)
+            # print(images)
 
             for img_index, img in enumerate(images):
                 xref = img[0]

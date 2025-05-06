@@ -9,6 +9,10 @@ import logging
 from pathlib import Path
 import shutil
 
+os.environ['PADDLEOCR_LOG_LEVEL'] = '3'
+logging.getLogger("paddle").setLevel(logging.ERROR)
+logging.getLogger("paddleocr").setLevel(logging.ERROR)
+
 # Assuming these are generated from your protobuf definitions
 from file_whisper_pb2 import WhisperRequest, WhisperReply, Node, File, Data, Meta
 from file_whisper_pb2_grpc import WhisperServicer, add_WhisperServicer_to_server
