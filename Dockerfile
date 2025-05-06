@@ -21,4 +21,8 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN mkdir -p /root/.paddleocr
+
+COPY ocr/whl /root/.paddleocr/whl
+
 COPY . .
