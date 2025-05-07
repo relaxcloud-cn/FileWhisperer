@@ -9,9 +9,9 @@ import logging
 from pathlib import Path
 import shutil
 
-os.environ['PADDLEOCR_LOG_LEVEL'] = '3'
-logging.getLogger("paddle").setLevel(logging.ERROR)
-logging.getLogger("paddleocr").setLevel(logging.ERROR)
+# os.environ['PADDLEOCR_LOG_LEVEL'] = '3'
+# logging.getLogger("paddle").setLevel(logging.ERROR)
+# logging.getLogger("paddleocr").setLevel(logging.ERROR)
 
 # Assuming these are generated from your protobuf definitions
 from file_whisper_pb2 import WhisperRequest, WhisperReply, Node, File, Data, Meta
@@ -188,24 +188,20 @@ def main():
 
     args = parser.parse_args()
 
-    log_format = "[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(threadName)s] %(message)s"
-    date_format = "%Y-%m-%d %H:%M:%S"
+    from loguru import logger
+    import sys
     
-    level_map = {
-        'trace': logging.DEBUG,
-        'debug': logging.DEBUG,
-        'info': logging.INFO,
-        'warn': logging.WARNING,
-        'error': logging.ERROR,
-        'critical': logging.CRITICAL
-    }
+    logger.remove()
     
-    logging.basicConfig(
-        level=level_map[args.log_level],
-        format=log_format,
-        datefmt=date_format
+    # 添加新的处理器，使用自定义格式
+    logger.add(
+        sys.stderr,
+        # format="[<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>] [<level>{level}</level>] [<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>] <level>{message}</level>",
+        format="[<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>] [<level>{level}</level>] <level>{message}</level>",
+        level=args.log_level.upper()
     )
-
+    
+    logger.info(f"Starting server on port {args.port} with log level {args.log_level}")
     run_server(args.port)
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ import re
 import cv2
 import numpy as np
 from typing import List, Dict
-import logging
+from loguru import logger
 from PIL import Image
 import pytesseract
 from paddleocr import PaddleOCR
@@ -20,6 +20,17 @@ from spire.doc import *
 from spire.doc.common import *
 from .dt import Node, File, Data
 from .types import Types
+import torch
+from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+import logging
+import os
+
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"  
+logging.getLogger("transformers").setLevel(logging.ERROR)
+logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
+logging.getLogger("transformers.configuration_utils").setLevel(logging.ERROR)
+logging.getLogger("PIL.TiffImagePlugin").setLevel(logging.ERROR)
 
 # Helper functions
 def encode_binary(text: str) -> bytes:
@@ -29,6 +40,30 @@ def decode_binary(data: bytes) -> str:
     return data.decode('utf-8')
 
 class Extractor:
+    # 添加类变量来缓存TrOCR模型和处理器
+    trocr_processor = None
+    trocr_model = None
+    gpu_available = None
+    
+    @staticmethod
+    def _initialize_trocr():
+        """初始化OCR模型和处理器（仅在第一次需要时加载）"""
+        if Extractor.gpu_available is None:
+            Extractor.gpu_available = torch.cuda.is_available()
+        
+        if Extractor.gpu_available and Extractor.trocr_processor is None and Extractor.trocr_model is None:
+            try:
+                logger.info("Initializing GPU OCR model (first time only)...")
+                Extractor.trocr_processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
+                Extractor.trocr_model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-handwritten").to("cuda")
+                logger.info("GPU OCR model initialized successfully")
+                return True
+            except Exception as e:
+                logger.warning(f"Failed to initialize GPU OCR: {e}. Will use CPU OCR instead.")
+                Extractor.gpu_available = False
+                return False
+        return Extractor.gpu_available and Extractor.trocr_processor is not None and Extractor.trocr_model is not None
+
     @staticmethod
     def extract_urls(node: Node) -> List[Node]:
         nodes = []
@@ -36,14 +71,14 @@ class Extractor:
         
         try:
             if isinstance(node.content, File):
-                logging.debug(f"Node[{node.id}] file {node.content.mime_type}")
+                logger.debug(f"Node[{node.id}] file {node.content.mime_type}")
                 text = decode_binary(node.content.content)
             elif isinstance(node.content, Data):
-                logging.debug(f"Node[{node.id}] data {node.content.type}")
+                logger.debug(f"Node[{node.id}] data {node.content.type}")
                 text = decode_binary(node.content.content)
             
             urls = Extractor.extract_urls_from_text(text)
-            logging.debug(f"Node[{node.id}] Number of urls: {len(urls)}")
+            logger.debug(f"Node[{node.id}] Number of urls: {len(urls)}")
             
             for url in urls:
                 t_node = Node()
@@ -55,7 +90,7 @@ class Extractor:
                 nodes.append(t_node)
                 
         except Exception as e:
-            logging.error(f"Error extracting URLs: {str(e)}")
+            logger.error(f"Error extracting URLs: {str(e)}")
             
         return nodes
 
@@ -97,10 +132,10 @@ class Extractor:
                     nodes.append(t_node)
                     
             elif isinstance(node.content, Data):
-                logging.debug("extract_qrcode enter Data type")
+                logger.debug("extract_qrcode enter Data type")
                 
         except Exception as e:
-            logging.error(f"Error extracting QR code: {str(e)}")
+            logger.error(f"Error extracting QR code: {str(e)}")
             
         return nodes
 
@@ -112,46 +147,62 @@ class Extractor:
             if isinstance(node.content, File):
                 data = node.content.content
                 
-                # Initialize PaddleOCR with Chinese and English language support
-                ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, model_dir="/root/.paddleocr", show_log=False)
+                # 检查GPU并初始化模型（仅在首次调用时）
+                has_gpu_ocr = Extractor._initialize_trocr()
+                extracted_text = ""
                 
                 # Open the image
                 image = Image.open(BytesIO(data))
-                # Convert PIL Image to numpy array as PaddleOCR needs numpy array
-                image_np = np.array(image)
                 
-                # Check if the image is RGBA and convert to RGB
-                if image_np.shape[-1] == 4:
-                    image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2RGB)
+                if has_gpu_ocr:
+                    try:
+                        pixel_values = Extractor.trocr_processor(images=image, return_tensors="pt").pixel_values.to("cuda")
+                        generated_ids = Extractor.trocr_model.generate(pixel_values)
+                        extracted_text = Extractor.trocr_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+                    except Exception as e:
+                        logger.warning(f"Error when using GPU OCR with GPU: {e}. Falling back to CPU OCR.")
+                        has_gpu_ocr = False
                 
-                # Run OCR
-                result = ocr.ocr(image_np, cls=True)
-                
-                if result:
-                    # Extract text from results
-                    text_results = []
-                    for line in result:
-                        for item in line:
-                            if len(item) >= 2:  # Make sure the result has the expected format
-                                text_results.append(item[1][0])  # item[1][0] contains the recognized text
+                if not has_gpu_ocr:
+                    # Fall back to PaddleOCR on CPU
+                    ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, 
+                                    model_dir="/root/.paddleocr", show_log=False)
                     
-                    # Join all recognized text
-                    extracted_text = '\n'.join(text_results)
+                    # Convert PIL Image to numpy array as PaddleOCR needs numpy array
+                    image_np = np.array(image)
                     
-                    if extracted_text:
-                        t_node = Node()
-                        t_node.id = 0
-                        t_node.content = Data(type="OCR", content=encode_binary(extracted_text))
-                        t_node.prev = node
-                        # 使用inherit_limits方法继承限制
-                        t_node.inherit_limits(node)
-                        nodes.append(t_node)
+                    # Check if the image is RGBA and convert to RGB
+                    if image_np.shape[-1] == 4:
+                        image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2RGB)
+                    
+                    # Run OCR
+                    result = ocr.ocr(image_np, cls=True)
+                    
+                    if result:
+                        # Extract text from results
+                        text_results = []
+                        for line in result:
+                            for item in line:
+                                if len(item) >= 2:  # Make sure the result has the expected format
+                                    text_results.append(item[1][0])  # item[1][0] contains the recognized text
+                        
+                        # Join all recognized text
+                        extracted_text = '\n'.join(text_results)
+                
+                if extracted_text:
+                    t_node = Node()
+                    t_node.id = 0
+                    t_node.content = Data(type="OCR", content=encode_binary(extracted_text))
+                    t_node.prev = node
+                    # 使用inherit_limits方法继承限制
+                    t_node.inherit_limits(node)
+                    nodes.append(t_node)
                     
             elif isinstance(node.content, Data):
-                logging.debug("extract_ocr enter Data type")
+                logger.debug("extract_ocr enter Data type")
                 
         except Exception as e:
-            logging.error(f"OCR processing failed: {str(e)}")
+            logger.error(f"OCR processing failed: {str(e)}")
             
         return nodes
 
@@ -304,10 +355,10 @@ class Extractor:
         
         try:
             if isinstance(node.content, File):
-                logging.debug(f"Node[{node.id}] file {node.content.mime_type}")
+                logger.debug(f"Node[{node.id}] file {node.content.mime_type}")
                 text = decode_binary(node.content.content)
             elif isinstance(node.content, Data):
-                logging.debug(f"Node[{node.id}] data {node.content.type}")
+                logger.debug(f"Node[{node.id}] data {node.content.type}")
                 text = decode_binary(node.content.content)
             
             html_text = Extractor.extract_text_from_html(text)
@@ -347,7 +398,7 @@ class Extractor:
                 nodes.append(t_node)
             
         except Exception as e:
-            logging.error(f"Error extracting HTML: {str(e)}")
+            logger.error(f"Error extracting HTML: {str(e)}")
             
         return nodes
 
@@ -360,7 +411,7 @@ class Extractor:
             if isinstance(node.content, File):
                 data = node.content.content
             elif isinstance(node.content, Data):
-                logging.debug("extract_compressed_file enter Data type")
+                logger.debug("extract_compressed_file enter Data type")
                 return nodes
             
             extracted = False
@@ -385,7 +436,7 @@ class Extractor:
                         break
                     except Exception as e:
                         if "Wrong password" in str(e):
-                            logging.error(f"Password error: {e}")
+                            logger.error(f"Password error: {e}")
                             continue
                         raise e
 
@@ -405,7 +456,7 @@ class Extractor:
                 nodes.append(t_node)
 
         except Exception as e:
-            logging.error(f"Error extracting compressed file: {str(e)}")
+            logger.error(f"Error extracting compressed file: {str(e)}")
             raise e
 
         return nodes
@@ -422,7 +473,7 @@ class Extractor:
                 files_map = extractor.extract(data)
                                 
         except Exception as e:
-            logging.error(f"Error in extract_files_from_data: {str(e)}")
+            logger.error(f"Error in extract_files_from_data: {str(e)}")
             raise e
             
         return files_map
@@ -435,7 +486,7 @@ class Extractor:
         if isinstance(node.content, File):
             file = node.content
         elif isinstance(node.content, Data):
-            logging.error("extract_word_file enter Data type")
+            logger.error("extract_word_file enter Data type")
             return nodes
         
         def analyze_docx_file(analyzed_path:str):
@@ -620,7 +671,7 @@ class Extractor:
         if isinstance(node.content, File):
             file = node.content
         elif isinstance(node.content, Data):
-            logging.error("extract_pdf_file enter Data type")
+            logger.error("extract_pdf_file enter Data type")
             return nodes
         
         all_text = ""
