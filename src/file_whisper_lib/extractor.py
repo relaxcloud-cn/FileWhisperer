@@ -376,7 +376,7 @@ class Extractor:
             for url in html_urls:
                     t_node = Node()
                     t_node.id = 0
-                    t_node.content = Data(type="HTML", content=encode_binary(url))
+                    t_node.content = Data(type="URL", content=encode_binary(url))
                     t_node.prev = node
                     # 继承父节点的页数限制
                     t_node.pdf_max_pages = node.pdf_max_pages

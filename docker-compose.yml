@@ -10,6 +10,7 @@ services:
       FILE_WHISPERER_OUTPUT_DIR: /opt/docker/filewhisperer/output
     volumes:
       - ./output:/opt/docker/filewhisperer/output
+      - /root/.cache/huggingface/hub:/root/.cache/huggingface/hub
     restart: always
     logging:
       driver: fluentd
