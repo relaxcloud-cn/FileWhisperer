@@ -78,3 +78,18 @@ Commands:
 ```sh
 python py/client.py run tests/fixtures/test_with_pwd_abcd.zip --binary -p123 -pabcd
 ```
+
+```
+# 安装存储库
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | \
+  sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+
+# 安装包
+sudo yum install -y nvidia-container-toolkit
+
+# 配置Docker使用NVIDIA运行时
+sudo nvidia-ctk runtime configure --runtime=docker
+
+# 重启Docker服务
+sudo systemctl restart docker
+```

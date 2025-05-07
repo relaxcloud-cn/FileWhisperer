@@ -156,6 +156,11 @@ class Extractor:
                 
                 if has_gpu_ocr:
                     try:
+                        if image.mode == 'RGBA':
+                            image = image.convert('RGB')
+                        elif image.mode not in ['RGB', 'L']:
+                            image = image.convert('RGB')
+                            
                         pixel_values = Extractor.trocr_processor(images=image, return_tensors="pt").pixel_values.to("cuda")
                         generated_ids = Extractor.trocr_model.generate(pixel_values)
                         extracted_text = Extractor.trocr_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
