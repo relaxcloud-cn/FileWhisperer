@@ -23,7 +23,7 @@ zipp==3.17.0
 zxing-cpp==2.1.0
 Spire.Doc==13.1.0
 paddleocr==2.7.0.2
-paddlepaddle==2.5.2
+paddlepaddle-gpu==2.5.2
 loguru==0.7.3
 torch==2.7.0
 transformers==4.51.3

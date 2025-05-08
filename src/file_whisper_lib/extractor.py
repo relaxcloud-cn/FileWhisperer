@@ -21,9 +21,9 @@ from spire.doc.common import *
 from .dt import Node, File, Data
 from .types import Types
 import torch
-from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 import logging
 import os
+import paddle
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  
@@ -40,29 +40,61 @@ def decode_binary(data: bytes) -> str:
     return data.decode('utf-8')
 
 class Extractor:
-    # 添加类变量来缓存TrOCR模型和处理器
-    trocr_processor = None
-    trocr_model = None
+    # 替换类变量，缓存PaddleOCR模型而不是TrOCR
+    paddle_ocr_gpu = None
+    paddle_ocr_cpu = None
     gpu_available = None
     
     @staticmethod
-    def _initialize_trocr():
-        """初始化OCR模型和处理器（仅在第一次需要时加载）"""
+    def _initialize_paddle_ocr():
+        """初始化OCR模型（仅在第一次需要时加载）"""
         if Extractor.gpu_available is None:
-            Extractor.gpu_available = torch.cuda.is_available()
-        
-        if Extractor.gpu_available and Extractor.trocr_processor is None and Extractor.trocr_model is None:
+            # 使用paddle自己的API检查GPU是否可用
             try:
-                logger.info("Initializing GPU OCR model (first time only)...")
-                Extractor.trocr_processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
-                Extractor.trocr_model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-handwritten").to("cuda")
-                logger.info("GPU OCR model initialized successfully")
-                return True
+                # 获取可用的GPU数量
+                gpu_count = paddle.device.get_device_count("gpu")
+                Extractor.gpu_available = gpu_count > 0
+                logger.info(f"PaddlePaddle detected {gpu_count} GPU(s), gpu_available={Extractor.gpu_available}")
+                
+                # 打印CUDA设备信息以便调试
+                if Extractor.gpu_available:
+                    device_info = paddle.device.get_device()
+                    logger.info(f"PaddlePaddle using device: {device_info}")
             except Exception as e:
-                logger.warning(f"Failed to initialize GPU OCR: {e}. Will use CPU OCR instead.")
+                logger.warning(f"Error checking GPU availability with Paddle: {e}")
+                # 降级到PyTorch检测
+                Extractor.gpu_available = torch.cuda.is_available()
+                logger.info(f"Falling back to PyTorch for GPU detection: {Extractor.gpu_available}")
+        
+        # 初始化GPU版本的PaddleOCR
+        if Extractor.gpu_available and Extractor.paddle_ocr_gpu is None:
+            try:
+                logger.info("Initializing GPU PaddleOCR model (first time only)...")
+                # 显式设置Paddle使用GPU
+                paddle.device.set_device('gpu:0')
+                Extractor.paddle_ocr_gpu = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=True, 
+                                               model_dir="/root/.paddleocr", show_log=True)
+                logger.info("GPU PaddleOCR model initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize GPU PaddleOCR: {e}. Will use CPU version instead.")
+                logger.error(traceback.format_exc())
                 Extractor.gpu_available = False
+        
+        # 初始化CPU版本的PaddleOCR
+        if Extractor.paddle_ocr_cpu is None:
+            try:
+                logger.info("Initializing CPU PaddleOCR model (first time only)...")
+                # 显式设置Paddle使用CPU
+                paddle.device.set_device('cpu')
+                Extractor.paddle_ocr_cpu = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, 
+                                              model_dir="/root/.paddleocr", show_log=False)
+                logger.info("CPU PaddleOCR model initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize CPU PaddleOCR: {e}")
+                logger.error(traceback.format_exc())
                 return False
-        return Extractor.gpu_available and Extractor.trocr_processor is not None and Extractor.trocr_model is not None
+        
+        return True
 
     @staticmethod
     def extract_urls(node: Node) -> List[Node]:
@@ -147,52 +179,69 @@ class Extractor:
             if isinstance(node.content, File):
                 data = node.content.content
                 
-                # 检查GPU并初始化模型（仅在首次调用时）
-                has_gpu_ocr = Extractor._initialize_trocr()
+                # 初始化PaddleOCR模型（仅在首次调用时）
+                initialization_success = Extractor._initialize_paddle_ocr()
+                if not initialization_success:
+                    logger.error("Failed to initialize any OCR models")
+                    return nodes
+                
                 extracted_text = ""
                 
-                # Open the image
+                # 打开图像
                 image = Image.open(BytesIO(data))
                 
-                if has_gpu_ocr:
-                    try:
-                        if image.mode == 'RGBA':
-                            image = image.convert('RGB')
-                        elif image.mode not in ['RGB', 'L']:
-                            image = image.convert('RGB')
-                            
-                        pixel_values = Extractor.trocr_processor(images=image, return_tensors="pt").pixel_values.to("cuda")
-                        generated_ids = Extractor.trocr_model.generate(pixel_values)
-                        extracted_text = Extractor.trocr_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-                    except Exception as e:
-                        logger.warning(f"Error when using GPU OCR with GPU: {e}. Falling back to CPU OCR.")
-                        has_gpu_ocr = False
+                # 转换图像为numpy数组，PaddleOCR需要numpy数组
+                image_np = np.array(image)
                 
-                if not has_gpu_ocr:
-                    # Fall back to PaddleOCR on CPU
-                    ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, 
-                                    model_dir="/root/.paddleocr", show_log=False)
-                    
-                    # Convert PIL Image to numpy array as PaddleOCR needs numpy array
-                    image_np = np.array(image)
-                    
-                    # Check if the image is RGBA and convert to RGB
-                    if image_np.shape[-1] == 4:
-                        image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2RGB)
-                    
-                    # Run OCR
-                    result = ocr.ocr(image_np, cls=True)
-                    
-                    if result:
-                        # Extract text from results
-                        text_results = []
-                        for line in result:
-                            for item in line:
-                                if len(item) >= 2:  # Make sure the result has the expected format
-                                    text_results.append(item[1][0])  # item[1][0] contains the recognized text
+                # 检查图像是否为RGBA并转换为RGB
+                if len(image_np.shape) == 3 and image_np.shape[-1] == 4:
+                    image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2RGB)
+                
+                # 尝试使用GPU版本的PaddleOCR
+                if Extractor.gpu_available and Extractor.paddle_ocr_gpu is not None:
+                    try:
+                        # 确保Paddle使用GPU
+                        paddle.device.set_device('gpu:0')
+                        logger.info("Using GPU PaddleOCR")
+                        result = Extractor.paddle_ocr_gpu.ocr(image_np, cls=True)
                         
-                        # Join all recognized text
-                        extracted_text = '\n'.join(text_results)
+                        if result:
+                            # 提取识别结果
+                            text_results = []
+                            for line in result:
+                                for item in line:
+                                    if len(item) >= 2:  # 确保结果具有预期格式
+                                        text_results.append(item[1][0])  # item[1][0]包含识别的文本
+                            
+                            # 连接所有识别的文本
+                            extracted_text = '\n'.join(text_results)
+                            logger.info(f"GPU OCR completed successfully, extracted {len(text_results)} text items")
+                    except Exception as e:
+                        logger.warning(f"Error when using GPU PaddleOCR: {e}. Falling back to CPU PaddleOCR.")
+                        logger.error(traceback.format_exc())
+                
+                # 如果GPU OCR失败或不可用，回退到CPU版本的PaddleOCR
+                if not extracted_text and Extractor.paddle_ocr_cpu is not None:
+                    try:
+                        # 确保Paddle使用CPU
+                        paddle.device.set_device('cpu')
+                        logger.info("Using CPU PaddleOCR")
+                        result = Extractor.paddle_ocr_cpu.ocr(image_np, cls=True)
+                        
+                        if result:
+                            # 提取识别结果
+                            text_results = []
+                            for line in result:
+                                for item in line:
+                                    if len(item) >= 2:  # 确保结果具有预期格式
+                                        text_results.append(item[1][0])  # item[1][0]包含识别的文本
+                            
+                            # 连接所有识别的文本
+                            extracted_text = '\n'.join(text_results)
+                            logger.info(f"CPU OCR completed successfully, extracted {len(text_results)} text items")
+                    except Exception as e:
+                        logger.error(f"CPU PaddleOCR processing failed: {e}")
+                        logger.error(traceback.format_exc())
                 
                 if extracted_text:
                     t_node = Node()
@@ -208,6 +257,7 @@ class Extractor:
                 
         except Exception as e:
             logger.error(f"OCR processing failed: {str(e)}")
+            logger.error(traceback.format_exc())
             
         return nodes
 
