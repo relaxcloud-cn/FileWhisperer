@@ -217,15 +217,16 @@ class Extractor:
                             extracted_text = '\n'.join(text_results)
                             logger.info(f"GPU OCR completed successfully, extracted {len(text_results)} text items")
                     except Exception as e:
-                        logger.warning(f"Error when using GPU PaddleOCR: {e}. Falling back to CPU PaddleOCR.")
-                        logger.error(traceback.format_exc())
+                        # logger.warning(f"Error when using GPU PaddleOCR: {e}. Falling back to CPU PaddleOCR.")
+                        # logger.error(traceback.format_exc())
+                        pass
                 
                 # 如果GPU OCR失败或不可用，回退到CPU版本的PaddleOCR
                 if not extracted_text and Extractor.paddle_ocr_cpu is not None:
                     try:
                         # 确保Paddle使用CPU
                         paddle.device.set_device('cpu')
-                        logger.info("Using CPU PaddleOCR")
+                        logger.debug("Using CPU PaddleOCR")
                         result = Extractor.paddle_ocr_cpu.ocr(image_np, cls=True)
                         
                         if result:
@@ -238,7 +239,7 @@ class Extractor:
                             
                             # 连接所有识别的文本
                             extracted_text = '\n'.join(text_results)
-                            logger.info(f"CPU OCR completed successfully, extracted {len(text_results)} text items")
+                            logger.info(f"OCR completed successfully, extracted {len(text_results)} text items")
                     except Exception as e:
                         logger.error(f"CPU PaddleOCR processing failed: {e}")
                         logger.error(traceback.format_exc())
