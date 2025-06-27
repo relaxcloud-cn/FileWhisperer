@@ -1,15 +1,19 @@
-version: '3.7'
 services:
   filewhisperer:
-    image: ghcr.io/relaxcloud-cn/filewhisperer:main
+    image: filewhisperer:latest
     container_name: filewhisperer
     network_mode: "host"
-    command: python3 /app/src/server.py -p 50098 -l info
-    environment: 
-      TESSDATA_PREFIX: /app/fixtures/tesseract
-      FILE_WHISPERER_OUTPUT_DIR: /opt/docker/filewhisperer/output
+    command: python3 /app/src/server.py -p 50098 -l debug
+    runtime: nvidia
+    environment:
+       TESSDATA_PREFIX: /app/fixtures/tesseract
+       FILE_WHISPERER_OUTPUT_DIR: /files
+       NVIDIA_VISIBLE_DEVICES: "0"
+       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+       LD_LIBRARY_PATH: "/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+       CUDA_HOME: "/usr/local/cuda"
     volumes:
-      - ./output:/opt/docker/filewhisperer/output
+      - /mnt/zfs/files:/files
       - /root/.cache/huggingface/hub:/root/.cache/huggingface/hub
     restart: always
     logging:
@@ -25,3 +29,8 @@ services:
       resources:
         limits:
           memory: 20G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
