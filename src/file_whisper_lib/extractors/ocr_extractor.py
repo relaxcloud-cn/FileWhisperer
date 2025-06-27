@@ -122,7 +122,8 @@ class OCRExtractor:
                         logger.error(traceback.format_exc())
                 
                 # 如果GPU OCR失败或不可用，回退到CPU版本的PaddleOCR
-                if not extracted_text and OCRExtractor.paddle_ocr_cpu is not None:
+                # if not extracted_text and OCRExtractor.paddle_ocr_cpu is not None:
+                if OCRExtractor.paddle_ocr_cpu is not None:
                     try:
                         paddle.device.set_device('cpu')
                         logger.info("Using CPU PaddleOCR")

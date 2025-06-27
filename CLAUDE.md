@@ -6,6 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 FileWhisperer is a gRPC-based document parsing service that extracts structured data from various file types (ZIP archives, PDFs, Word documents, HTML, etc.) in an LLM-friendly format. The system supports OCR, password-protected archives, and outputs hierarchical tree structures with metadata.
 
+## Python Environment
+conda filewhisperer
+
 ## Architecture
 
 - **gRPC Service**: Core service defined in `proto/file_whisper.proto` with single `Whispering` RPC endpoint
@@ -13,10 +16,11 @@ FileWhisperer is a gRPC-based document parsing service that extracts structured 
 - **Client**: CLI client (`src/client.py`) for testing and interacting with the service
 - **File Processing Library**: `src/file_whisper_lib/` contains core extraction and analysis logic
   - `analyzer.py`: Archive analysis (currently commented out pybit7z implementation)
-  - `extractor.py`: Main file extraction logic
+  - `extractor.py`: Main file extraction logic with unified interface
   - `dt.py`: Data type definitions (Node, File, Data)
-  - `tree.py`: Tree structure management
-  - `flavors.py`: File type detection and handling
+  - `tree.py`: Tree structure management and file processing
+  - `flavors.py`: File type detection and routing to appropriate extractors
+  - `extractors/`: Specialized extractors for different file types
 - **OCR Support**: PaddleOCR integration with Chinese/English language models in `ocr/` directory
 - **Docker**: Containerized deployment with GPU support for OCR processing
 
