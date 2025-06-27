@@ -61,7 +61,7 @@ class OCRExtractor:
                 OCRExtractor.gpu_available = False
         
         # 初始化CPU版本的PaddleOCR
-        if OCRExtractor.paddle_ocr_cpu is None:
+        if OCRExtractor.paddle_ocr_cpu is None and not OCRExtractor.gpu_available:
             try:
                 logger.info("Initializing CPU PaddleOCR model (first time only)...")
                 paddle.device.set_device('cpu')
@@ -104,7 +104,7 @@ class OCRExtractor:
                 # 尝试使用GPU版本的PaddleOCR
                 if OCRExtractor.gpu_available and OCRExtractor.paddle_ocr_gpu is not None:
                     try:
-                        paddle.device.set_device('gpu:0')
+                        # paddle.device.set_device('gpu:0')
                         logger.info("Using GPU PaddleOCR")
                         result = OCRExtractor.paddle_ocr_gpu.ocr(image_np, cls=True)
                         
@@ -125,7 +125,7 @@ class OCRExtractor:
                 # if not extracted_text and OCRExtractor.paddle_ocr_cpu is not None:
                 if OCRExtractor.paddle_ocr_gpu is None and OCRExtractor.paddle_ocr_cpu is not None:
                     try:
-                        paddle.device.set_device('cpu')
+                        # paddle.device.set_device('cpu')
                         logger.info("Using CPU PaddleOCR")
                         result = OCRExtractor.paddle_ocr_cpu.ocr(image_np, cls=True)
                         

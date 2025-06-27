@@ -76,7 +76,8 @@ Commands:
 示例命令：
 
 ```sh
-python py/client.py run tests/fixtures/test_with_pwd_abcd.zip --binary -p123 -pabcd
+python src/client.py run tests/fixtures/test_with_pwd_abcd.zip --binary -p123 -pabcd
+python src/client.py run tests/fixtures/image_cn.png --binary -p123 -pabcd --port 50098 --host 192.168.2.225
 ```
 
 ```
