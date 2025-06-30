@@ -63,25 +63,27 @@ python src/client.py run tests/fixtures/test_with_pwd_abcd.zip --binary -p123 -p
 
 ### Testing
 ```bash
-# Run all tests (using unittest framework)
-python -m pytest tests/
+# Run all tests using Makefile (recommended)
+make test
 
-# Run specific test files
+# Run tests with coverage report
+make test-coverage
+
+# Run specific test suites
+make test-ocr     # OCR extractor tests only
+make test-html    # HTML extractor tests only
+
+# Manual pytest commands
+python -m pytest tests/                    # All tests
 python -m pytest tests/test_extract_html.py
-python -m pytest tests/test_extract_html2.py
-python -m pytest tests/test_extract_html3.py
-
-# Run tests for specific extractor modules
 python -m pytest tests/extractors/test_ocr_extractor.py
-python -m pytest tests/extractors/test_pdf_extractor.py
-python -m pytest tests/extractors/test_word_extractor.py
 python -m pytest tests/extractors/test_archive_extractor.py
 
 # Test GPU functionality
 python src/test_gpu.py
 
-# Run single test class or method (unittest style)
-python -m unittest tests.extractors.test_ocr_extractor.TestOCRExtractor.test_extract_text
+# Install test dependencies if needed
+make install-test-deps
 ```
 
 ### Docker Operations

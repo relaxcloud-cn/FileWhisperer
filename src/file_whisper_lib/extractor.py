@@ -10,6 +10,7 @@ from .extractors.html_extractor import HTMLExtractor
 from .extractors.archive_extractor import ArchiveExtractor
 from .extractors.word_extractor import WordExtractor
 from .extractors.pdf_extractor import PDFExtractor
+from .extractors.email_extractor import EmailExtractor
 from .dt import Node
 
 
@@ -72,3 +73,8 @@ class Extractor:
     @staticmethod
     def extract_pdf_file(node: Node) -> List[Node]:
         return PDFExtractor.extract_pdf_file(node)
+    
+    # 邮件处理
+    @staticmethod
+    def extract_email_file(node: Node) -> List[Node]:
+        return EmailExtractor.extract_email_file(node)

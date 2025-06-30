@@ -29,6 +29,9 @@ class Flavors:
         ],
         Types.PDF: [
             ("pdf_extractor", Extractor.extract_pdf_file) 
+        ],
+        Types.EMAIL: [
+            ("email_extractor", Extractor.extract_email_file)
         ]
     }
 

@@ -9,10 +9,12 @@ class Types(Enum):
     DOCX = 5
     OTHER = 6
     PDF = 7
+    EMAIL = 8
 
 Extension_Types = {
     'doc': Types.DOC,
-    'docx': Types.DOCX 
+    'docx': Types.DOCX,
+    'eml': Types.EMAIL
 }
 
 Types__1 = {
@@ -113,5 +115,6 @@ Types__1 = {
     "image/webp": Types.IMAGE,
     "image/wmf": Types.IMAGE,
     "image/x-emf": Types.IMAGE,
-    "image/x-wmf": Types.IMAGE
+    "image/x-wmf": Types.IMAGE,
+    "message/rfc822": Types.EMAIL
 }
