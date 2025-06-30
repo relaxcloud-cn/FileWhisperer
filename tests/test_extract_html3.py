@@ -4,6 +4,11 @@ from bs4 import BeautifulSoup
 
 class Extractor:
     @staticmethod
+    def extract_text_from_html(html: str) -> str:
+        soup = BeautifulSoup(html, 'html.parser')
+        return soup.get_text(separator=' ', strip=True)
+    
+    @staticmethod
     def extract_img_from_html(html: str) -> str:
                 soup_t = BeautifulSoup(html, 'html.parser')
                 # 查找所有的 img 标签
