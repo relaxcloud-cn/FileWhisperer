@@ -22,7 +22,7 @@ conda filewhisperer
   - `flavors.py`: File type detection and routing to appropriate extractors
   - `extractors/`: Specialized extractors for different file types
 - **OCR Support**: PaddleOCR integration with Chinese/English language models in `ocr/` directory
-- **Docker**: Containerized deployment with GPU support for OCR processing
+- **Docker**: Containerized deployment for OCR processing
 
 ## Development Commands
 
@@ -63,13 +63,25 @@ python src/client.py run tests/fixtures/test_with_pwd_abcd.zip --binary -p123 -p
 
 ### Testing
 ```bash
+# Run all tests (using unittest framework)
+python -m pytest tests/
+
 # Run specific test files
 python -m pytest tests/test_extract_html.py
 python -m pytest tests/test_extract_html2.py
 python -m pytest tests/test_extract_html3.py
 
+# Run tests for specific extractor modules
+python -m pytest tests/extractors/test_ocr_extractor.py
+python -m pytest tests/extractors/test_pdf_extractor.py
+python -m pytest tests/extractors/test_word_extractor.py
+python -m pytest tests/extractors/test_archive_extractor.py
+
 # Test GPU functionality
 python src/test_gpu.py
+
+# Run single test class or method (unittest style)
+python -m unittest tests.extractors.test_ocr_extractor.TestOCRExtractor.test_extract_text
 ```
 
 ### Docker Operations
@@ -105,9 +117,31 @@ docker-compose up -d
 
 Follow this merge flow: `doc` → `dev` → `main`
 
+## Code Architecture Details
+
+### Core Data Flow
+1. **Request Processing**: `WhisperRequest` can contain either file path or binary content, plus optional passwords and page limits
+2. **File Type Detection**: `flavors.py` determines file type and routes to appropriate extractor 
+3. **Tree Construction**: `tree.py` manages hierarchical Node structures with parent-child relationships
+4. **Content Extraction**: Each extractor in `extractors/` handles specific file types and returns structured data
+
+### Key Extractors
+- `ocr_extractor.py`: PaddleOCR integration for text recognition, supports Chinese/English
+- `pdf_extractor.py`: PyMuPDF-based PDF text and metadata extraction with page limits
+- `word_extractor.py`: python-docx for Word document processing
+- `archive_extractor.py`: ZIP/7z archive handling with password support via pybit7z
+- `html_extractor.py`: BeautifulSoup-based HTML parsing and URL extraction
+- `qrcode_extractor.py`: QR code detection and decoding from images
+
+### Node Structure
+- Each `Node` has unique ID, parent/child relationships, and either `File` or `Data` content
+- `Meta` provides key-value storage for file metadata and processing parameters
+- Tree structures preserve original file hierarchy for archives and nested documents
+
 ## Important Notes
 
 - The service processes password-protected archives - use `passwords` field in `WhisperRequest`
 - PDF and Word document processing can be limited via `pdf_max_pages` and `word_max_pages` parameters
-- OCR processing requires GPU support for optimal performance
+- OCR processing uses PaddleOCR for text recognition from images
 - All file processing returns hierarchical tree structures with unique node IDs
+- OCR extractor uses static class variables to maintain model instances across requests for efficiency

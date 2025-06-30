@@ -11,8 +11,8 @@ packaging==23.2
 pillow==10.2.0
 plum-dispatch==1.7.4
 protobuf==5.29.3
-pybit7z==0.3.2
-PyMuPDF<1.21.0
+pybit7z==0.4.0
+PyMuPDF>=1.26.0,<1.27.0
 pytesseract==0.3.10
 python-docx==1.1.0
 python-magic==0.4.27
@@ -22,8 +22,8 @@ typing_extensions>=4.10.0
 zipp==3.17.0
 zxing-cpp==2.1.0
 Spire.Doc==13.1.0
-paddleocr==2.7.0.2
-paddlepaddle-gpu==2.5.2
+paddleocr==3.1.0
+paddlepaddle==3.1.0
 loguru==0.7.3
-torch==2.7.0
-transformers==4.51.3
+pytest==8.3.4
+pytest-cov==6.0.0
