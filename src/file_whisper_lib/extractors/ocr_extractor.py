@@ -1,16 +1,14 @@
 """
 OCR文字识别模块
 """
-from io import BytesIO
-import cv2
-import numpy as np
 from typing import List
 from loguru import logger
-from PIL import Image
 from paddleocr import PaddleOCR
 import traceback
 import os
 import logging
+import tempfile
+import uuid
 
 from ..dt import Node, File, Data
 from .utils import encode_binary
@@ -32,8 +30,10 @@ class OCRExtractor:
         if OCRExtractor.paddle_ocr is None:
             try:
                 logger.info("Initializing PaddleOCR model (first time only)...")
-                OCRExtractor.paddle_ocr = PaddleOCR(use_textline_orientation=True, lang='ch', use_gpu=False, 
-                                          model_dir="/root/.paddleocr")
+                OCRExtractor.paddle_ocr = PaddleOCR(
+                                use_doc_orientation_classify=False,
+                                use_doc_unwarping=False,
+                                use_textline_orientation=False)
                 logger.info("PaddleOCR model initialized successfully")
             except Exception as e:
                 logger.error(f"Failed to initialize PaddleOCR: {e}")
@@ -45,6 +45,7 @@ class OCRExtractor:
     @staticmethod
     def _recognize_text_from_image(image_data: bytes) -> str:
         """从图像数据中识别文本"""
+        temp_file_path = None
         try:
             # 初始化PaddleOCR模型（仅在首次调用时）
             initialization_success = OCRExtractor._initialize_paddle_ocr()
@@ -52,26 +53,26 @@ class OCRExtractor:
                 logger.error("Failed to initialize OCR model")
                 return ""
             
-            # 打开图像
-            image = Image.open(BytesIO(image_data))
+            # 生成临时文件路径
+            temp_file_name = f"ocr_temp_{uuid.uuid4().hex}.png"
+            temp_file_path = os.path.join(tempfile.gettempdir(), temp_file_name)
             
-            # 转换图像为numpy数组，PaddleOCR需要numpy数组
-            image_np = np.array(image)
+            # 保存图像数据到临时文件
+            with open(temp_file_path, 'wb') as f:
+                f.write(image_data)
             
-            # 检查图像是否为RGBA并转换为RGB
-            if len(image_np.shape) == 3 and image_np.shape[-1] == 4:
-                image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2RGB)
+            logger.debug(f"Temporary image saved to: {temp_file_path}")
             
-            # 执行OCR识别
-            result = OCRExtractor.paddle_ocr.ocr(image_np, cls=True)
+            # 使用PaddleOCR的predict方法处理图像文件
+            result = OCRExtractor.paddle_ocr.predict(input=temp_file_path)
             
             if result:
                 text_results = []
-                for line in result:
-                    if line:  # 检查line不为None
-                        for item in line:
-                            if len(item) >= 2:
-                                text_results.append(item[1][0])
+                for res in result:
+                    # OCRResult对象可以像字典一样访问
+                    if 'rec_texts' in res:
+                        ocr_texts = res['rec_texts']
+                        text_results.extend(ocr_texts)
                 
                 if text_results:
                     extracted_text = '\n'.join(text_results)
@@ -84,6 +85,14 @@ class OCRExtractor:
             logger.error(f"OCR text recognition failed: {str(e)}")
             logger.error(traceback.format_exc())
             return ""
+        finally:
+            # 清理临时文件
+            if temp_file_path and os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                    logger.debug(f"Temporary file cleaned up: {temp_file_path}")
+                except Exception as e:
+                    logger.warning(f"Failed to cleanup temporary file {temp_file_path}: {e}")
 
     @staticmethod
     def _create_ocr_node(extracted_text: str, parent_node: Node) -> Node:

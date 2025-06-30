@@ -70,7 +70,15 @@ def process_file(stub, file_path, binary, password, root_id, pdf_max_pages, word
             elif node.HasField('data'):
                 data = node.data
                 safe_print(f"Data type: {data.type}")
-                safe_print(f"Content length: {data.content[:100]}")
+                if data.type == 'OCR':
+                    try:
+                        decoded_content = data.content.decode('utf-8')
+                        safe_print(f"OCR Content: {decoded_content}")
+                    except Exception as e:
+                        safe_print(f"OCR Content (decode error): {data.content}")
+                        safe_print(f"Decode error: {e}")
+                else:
+                    safe_print(f"Content length: {data.content[:100]}")
             
             if node.HasField('meta'):
                 meta = node.meta
