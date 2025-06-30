@@ -10,11 +10,11 @@ services:
        FILE_WHISPERER_OUTPUT_DIR: /files
        NVIDIA_VISIBLE_DEVICES: "0"
        NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
-       LD_LIBRARY_PATH: "/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+      #  LD_LIBRARY_PATH: "/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
        CUDA_HOME: "/usr/local/cuda"
     volumes:
       - /mnt/zfs/files:/files
-      - /root/.cache/huggingface/hub:/root/.cache/huggingface/hub
+      - /root/.paddlex:/root/.paddlex
     restart: always
     logging:
       driver: fluentd
@@ -28,7 +28,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 20G
+          memory: 60G
         reservations:
           devices:
             - driver: nvidia
