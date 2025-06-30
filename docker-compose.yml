@@ -12,6 +12,17 @@ services:
        NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       #  LD_LIBRARY_PATH: "/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
        CUDA_HOME: "/usr/local/cuda"
+       # 进程池配置
+       FILEWHISPERER_OCR_POOL_ENABLED: "true"
+       FILEWHISPERER_OCR_POOL_WORKERS: "3"
+       FILEWHISPERER_WORD_POOL_ENABLED: "false"
+       FILEWHISPERER_WORD_POOL_WORKERS: "2"
+       FILEWHISPERER_PDF_POOL_ENABLED: "false"
+       FILEWHISPERER_PDF_POOL_WORKERS: "2"
+       FILEWHISPERER_HTML_POOL_ENABLED: "false"
+       FILEWHISPERER_HTML_POOL_WORKERS: "1"
+       FILEWHISPERER_ARCHIVE_POOL_ENABLED: "false"
+       FILEWHISPERER_ARCHIVE_POOL_WORKERS: "1"
     volumes:
       - /mnt/zfs/files:/files
       - /root/.paddlex:/root/.paddlex

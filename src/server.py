@@ -141,6 +141,15 @@ def bfs_process_whisper_reply_node(reply: WhisperReply, root: DataNode):
 def signal_handler(signum, frame):
     if server:
         logging.info(f"Received signal {signum}. Shutting down...")
+        
+        # 关闭进程池
+        try:
+            from file_whisper_lib.process_pool import shutdown_process_pools
+            shutdown_process_pools()
+            logging.info("Process pools shutdown completed")
+        except Exception as e:
+            logging.error(f"Error shutting down process pools: {e}")
+        
         server.stop(0)
 
 def write_content_to_file(file_path: str, content: bytes):
