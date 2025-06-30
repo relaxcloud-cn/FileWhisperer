@@ -10,6 +10,7 @@ from concurrent.futures import ProcessPoolExecutor, Future
 from loguru import logger
 from threading import Lock
 import time
+import concurrent.futures
 
 
 class ExtractorProcessPool:
@@ -87,14 +88,26 @@ class ExtractorProcessPool:
                 max_tasks_per_child = config.get("max_tasks_per_child", 50)
                 
                 try:
-                    pool = ProcessPoolExecutor(
-                        max_workers=workers,
-                        mp_context=mp.get_context('spawn')  # 使用spawn context避免问题
-                    )
-                    self._pools[pool_name] = pool
-                    logger.info(f"Initialized {pool_name} process pool with {workers} workers")
+                    # 为OCR进程池添加初始化器
+                    if pool_name == "ocr":
+                        # 对于OCR，使用标准ProcessPoolExecutor但在任务函数中处理初始化
+                        pool = ProcessPoolExecutor(
+                            max_workers=workers,
+                            mp_context=mp.get_context('spawn')
+                        )
+                        self._pools[pool_name] = pool
+                        logger.info(f"Initialized {pool_name} process pool with {workers} workers (OCR model will be loaded on first use)")
+                    else:
+                        # 其他进程池使用标准ProcessPoolExecutor
+                        pool = ProcessPoolExecutor(
+                            max_workers=workers,
+                            mp_context=mp.get_context('spawn')
+                        )
+                        self._pools[pool_name] = pool
+                        logger.info(f"Initialized {pool_name} process pool with {workers} workers")
                 except Exception as e:
                     logger.error(f"Failed to initialize {pool_name} process pool: {e}")
+    
     
     def is_pool_enabled(self, pool_name: str) -> bool:
         """检查指定的进程池是否启用"""
@@ -106,9 +119,11 @@ class ExtractorProcessPool:
             return None
         
         try:
-            # 序列化参数用于进程间传递
-            serialized_args = pickle.dumps((func, args, kwargs))
-            future = self._pools[pool_name].submit(_execute_in_process, serialized_args)
+            pool = self._pools[pool_name]
+            
+            # 所有进程池现在都使用标准的ProcessPoolExecutor
+            # 直接提交函数调用
+            future = pool.submit(func, *args, **kwargs)
             return future
         except Exception as e:
             logger.error(f"Failed to submit task to {pool_name} pool: {e}")
@@ -137,6 +152,7 @@ class ExtractorProcessPool:
         logger.info("Shutting down process pools...")
         for pool_name, pool in self._pools.items():
             try:
+                # 所有进程池现在都是ProcessPoolExecutor
                 pool.shutdown(wait=True, cancel_futures=True)
                 logger.info(f"Shutdown {pool_name} process pool")
             except Exception as e:
@@ -146,6 +162,8 @@ class ExtractorProcessPool:
     
     def __del__(self):
         self.shutdown()
+
+
 
 
 def _execute_in_process(serialized_data: bytes) -> Any:

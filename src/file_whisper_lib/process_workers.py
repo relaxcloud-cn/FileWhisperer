@@ -9,6 +9,43 @@ from loguru import logger
 # 全局工作器计数器
 _worker_counters = {}
 
+# OCR模型实例（进程级别）
+_ocr_model = None
+
+def initialize_ocr_worker():
+    """OCR工作进程初始化函数 - 预加载模型"""
+    global _ocr_model
+    worker_id = _get_worker_id("ocr_init")
+    
+    try:
+        logger.info(f"[{worker_id}] Process {os.getpid()}: Initializing OCR model...")
+        
+        # 设置环境变量
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        
+        # 初始化PaddleOCR模型
+        from paddleocr import PaddleOCR
+        import logging
+        
+        # 设置日志级别
+        logging.getLogger("transformers").setLevel(logging.ERROR)
+        logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
+        logging.getLogger("transformers.configuration_utils").setLevel(logging.ERROR)
+        logging.getLogger("PIL.TiffImagePlugin").setLevel(logging.ERROR)
+        
+        _ocr_model = PaddleOCR(
+            use_doc_orientation_classify=False,
+            use_doc_unwarping=False,
+            use_textline_orientation=False
+        )
+        
+        logger.info(f"[{worker_id}] Process {os.getpid()}: OCR model initialized successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"[{worker_id}] Process {os.getpid()}: Failed to initialize OCR model: {e}")
+        return False
+
 def _get_worker_id(worker_type: str) -> str:
     """获取工作器ID"""
     global _worker_counters
@@ -22,32 +59,49 @@ def _get_worker_id(worker_type: str) -> str:
 
 
 def process_ocr_task(image_data: bytes) -> str:
-    """OCR进程任务入口 - 重用现有OCRExtractor代码"""
+    """OCR进程任务入口 - 使用预加载的模型"""
+    global _ocr_model
     worker_id = _get_worker_id("ocr")
+    temp_file_path = None
     
     try:
         logger.info(f"[{worker_id}] Process {os.getpid()}: Starting OCR processing")
         
-        # 创建临时文件保存图片
-        temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        temp_file.write(image_data)
-        temp_file.close()
+        # 确保模型已初始化
+        if _ocr_model is None:
+            logger.warning(f"[{worker_id}] Process {os.getpid()}: OCR model not initialized, initializing now...")
+            if not initialize_ocr_worker():
+                logger.error(f"[{worker_id}] Process {os.getpid()}: Failed to initialize OCR model")
+                return ""
         
-        # 创建模拟的File节点
-        from file_whisper_lib.dt import Node, File
-        node = Node()
-        node.content = File(
-            path=temp_file.name,
-            name=os.path.basename(temp_file.name),
-            content=image_data
-        )
+        # 生成临时文件路径
+        import uuid
+        temp_file_name = f"ocr_temp_{uuid.uuid4().hex}.png"
+        temp_file_path = os.path.join(tempfile.gettempdir(), temp_file_name)
         
-        # 使用现有的OCRExtractor
-        from file_whisper_lib.extractors.ocr_extractor import OCRExtractor
-        result = OCRExtractor._recognize_text_from_image(image_data)
+        # 保存图像数据到临时文件
+        with open(temp_file_path, 'wb') as f:
+            f.write(image_data)
         
-        logger.info(f"[{worker_id}] Process {os.getpid()}: OCR processing completed")
-        return result
+        logger.debug(f"[{worker_id}] Temporary image saved to: {temp_file_path}")
+        
+        # 使用预加载的模型进行OCR处理
+        result = _ocr_model.predict(input=temp_file_path)
+        
+        extracted_text = ""
+        if result:
+            text_results = []
+            for res in result:
+                # OCRResult对象可以像字典一样访问
+                if 'rec_texts' in res:
+                    ocr_texts = res['rec_texts']
+                    text_results.extend(ocr_texts)
+            
+            if text_results:
+                extracted_text = '\n'.join(text_results)
+                logger.info(f"[{worker_id}] Process {os.getpid()}: OCR completed successfully, extracted {len(text_results)} text items")
+        
+        return extracted_text
         
     except Exception as e:
         logger.error(f"[{worker_id}] Process {os.getpid()}: OCR processing failed: {e}")
@@ -55,8 +109,9 @@ def process_ocr_task(image_data: bytes) -> str:
     finally:
         # 清理临时文件
         try:
-            if 'temp_file' in locals() and os.path.exists(temp_file.name):
-                os.unlink(temp_file.name)
+            if temp_file_path and os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+                logger.debug(f"[{worker_id}] Temporary file cleaned up: {temp_file_path}")
         except Exception as e:
             logger.warning(f"[{worker_id}] Process {os.getpid()}: Failed to cleanup temp file: {e}")
 
