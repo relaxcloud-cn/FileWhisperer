@@ -8,6 +8,7 @@ import threading
 import argparse
 import sys
 import json
+import time
 
 print_lock = threading.Lock()
 
@@ -44,10 +45,14 @@ def process_file(stub, file_path, binary, password, root_id, pdf_max_pages, word
             request_params['file_path'] = file_path
             
         request = file_whisper_pb2.WhisperRequest(**request_params)
-            
+        
+        start_time = time.time()
         response = stub.Whispering(request)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
         
         safe_print(f"\nProcessing: {file_path}")
+        safe_print(f"总耗时: {elapsed_time:.3f} 秒")
         safe_print("=" * 50)
         
         for node in response.tree:
@@ -113,6 +118,8 @@ def run(host, port, binary, password, root_id, max_workers, pdf_max_pages, word_
     channel = grpc.insecure_channel(f'{host}:{port}')
     stub = file_whisper_pb2_grpc.WhisperStub(channel)
     
+    overall_start_time = time.time()
+    
     try:
         if os.path.isfile(path):
             process_file(stub, path, binary, password, root_id, pdf_max_pages, word_max_pages)
@@ -121,6 +128,8 @@ def run(host, port, binary, password, root_id, max_workers, pdf_max_pages, word_
             for root, _, files in os.walk(path):
                 for file in files:
                     file_paths.append(os.path.join(root, file))
+            
+            print(f"发现 {len(file_paths)} 个文件，开始批量处理...")
             
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = [
@@ -132,6 +141,9 @@ def run(host, port, binary, password, root_id, max_workers, pdf_max_pages, word_
                     future.result()
     
     finally:
+        overall_end_time = time.time()
+        overall_elapsed_time = overall_end_time - overall_start_time
+        print(f"\n所有任务完成，总耗时: {overall_elapsed_time:.3f} 秒")
         channel.close()
 
 if __name__ == "__main__":
