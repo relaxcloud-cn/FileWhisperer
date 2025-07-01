@@ -17,6 +17,10 @@ class Tree:
         self.root: Optional[Node] = None
         self.extractor = Extractor()
         self.flavors = Flavors(self.extractor)
+    
+    def clear_state(self):
+        """清除Tree的状态，用于在处理完一个请求后重置"""
+        self.root = None
 
     def meta_detect_encoding(self, meta: Meta, data: bytes):
         if not isinstance(data, bytes):

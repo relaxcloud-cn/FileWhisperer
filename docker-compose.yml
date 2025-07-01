@@ -8,6 +8,7 @@ services:
     environment:
        TESSDATA_PREFIX: /app/fixtures/tesseract
        FILE_WHISPERER_OUTPUT_DIR: /files
+       TREE_POOL_ACQUIRE_TIMEOUT: "10"
        NVIDIA_VISIBLE_DEVICES: "0"
        NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       #  LD_LIBRARY_PATH: "/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"

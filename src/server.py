@@ -8,6 +8,8 @@ from typing import List, Optional
 import logging
 from pathlib import Path
 import shutil
+import threading
+import queue
 
 # os.environ['PADDLEOCR_LOG_LEVEL'] = '3'
 # logging.getLogger("paddle").setLevel(logging.ERROR)
@@ -21,15 +23,50 @@ from file_whisper_lib.tree import Tree
 
 server = None
 
+class TreePool:
+    """Tree实例池，管理多个Tree实例用于并发处理"""
+    
+    def __init__(self, pool_size: int = None):
+        if pool_size is None:
+            pool_size = os.cpu_count() or 1
+        
+        self.pool_size = pool_size
+        self.pool = queue.Queue()
+        self._lock = threading.Lock()
+        
+        # 初始化Tree实例池
+        for _ in range(pool_size):
+            tree = Tree()
+            self.pool.put(tree)
+        
+        from loguru import logger
+        logger.info(f"TreePool initialized with {pool_size} Tree instances")
+    
+    def acquire(self, timeout: float = None) -> Tree:
+        """获取一个空闲的Tree实例，超时则抛出异常"""
+        if timeout is None:
+            timeout = float(os.environ.get('TREE_POOL_ACQUIRE_TIMEOUT', '3'))
+        
+        try:
+            return self.pool.get(block=True, timeout=timeout)
+        except queue.Empty:
+            raise RuntimeError(f"No available Tree instances in pool (pool_size={self.pool_size}), timeout after {timeout}s")
+    
+    def release(self, tree: Tree):
+        """归还Tree实例到池中，并清除其状态"""
+        tree.clear_state()
+        self.pool.put(tree)
+
 class GreeterServiceImpl(WhisperServicer):
-    def __init__(self):
-        # 在服务启动时初始化Tree实例，预加载OCR模型
-        self.tree = Tree()
+    def __init__(self, tree_pool: TreePool):
+        # 使用Tree实例池而不是单个Tree实例
+        self.tree_pool = tree_pool
     
     def Whispering(self, request: WhisperRequest, context) -> WhisperReply:
+        tree = None
         try:
-            # 使用预初始化的tree实例
-            tree = self.tree
+            # 从池中获取一个空闲的Tree实例
+            tree = self.tree_pool.acquire()
             node = DataNode()
             node.content = DataFile()
 
@@ -84,6 +121,10 @@ class GreeterServiceImpl(WhisperServicer):
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(error_msg)
             return WhisperReply()
+        finally:
+            # 确保Tree实例被归还到池中
+            if tree is not None:
+                self.tree_pool.release(tree)
 
 def make_whisper_reply(reply: WhisperReply, tree: Tree):
     bfs(reply, tree.root)
@@ -174,6 +215,11 @@ def run_server(port: int):
     logger.info(f"系统CPU逻辑核数: {cpu_count}")
     logger.info(f"ThreadPoolExecutor 线程数设置为: {max_workers} (CPU核数的1/4)")
     
+    # 创建Tree实例池，池大小等于CPU核数的1/2
+    tree_pool_size = max(1, cpu_count // 2)
+    tree_pool = TreePool(pool_size=tree_pool_size)
+    logger.info(f"TreePool 实例数设置为: {tree_pool_size} (CPU核数的1/2)")
+    
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=max_workers),
         options=[
@@ -182,7 +228,7 @@ def run_server(port: int):
         ]
     )
     
-    add_WhisperServicer_to_server(GreeterServiceImpl(), server)
+    add_WhisperServicer_to_server(GreeterServiceImpl(tree_pool), server)
     server.add_insecure_port(server_address)
     server.start()
     
