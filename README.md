@@ -94,3 +94,17 @@ sudo nvidia-ctk runtime configure --runtime=docker
 # 重启Docker服务
 sudo systemctl restart docker
 ```
+
+```
+# 测试指定目录下所有文件，10个并发线程，每个文件测试3次
+python tests/test_concurrent.py --dir /root/eml/5.0/100封钓鱼/ --workers 10 --repeat 3
+
+# 运行60秒压力测试，20个并发线程
+python tests/test_concurrent.py --dir /path/to/files --workers 20 --duration 60
+
+# 测试特定文件类型，带密码
+python tests/test_concurrent.py --dir /path/to/files --pattern "*.zip" --workers 5 -p password1 -p password2
+
+# 连接远程服务器测试
+python tests/test_concurrent.py --dir /path/to/files --host 192.168.1.100 --port 50098 --workers 15
+```
