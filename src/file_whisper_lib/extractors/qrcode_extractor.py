@@ -24,6 +24,9 @@ class QRCodeExtractor:
                 bytes_io = BytesIO(data)
                 file_bytes = np.asarray(bytearray(bytes_io.read()), dtype=np.uint8)
                 img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+                if img is None:
+                    logger.warning("Failed to decode image for QR code extraction")
+                    return nodes
                 barcodes = zxingcpp.read_barcodes(img)
                 for barcode in barcodes:
                     t_node = Node()
