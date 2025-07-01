@@ -8,7 +8,12 @@ services:
     environment:
        TESSDATA_PREFIX: /app/fixtures/tesseract
        FILE_WHISPERER_OUTPUT_DIR: /files
+       # Tree池获取实例的超时时间(秒)
        TREE_POOL_ACQUIRE_TIMEOUT: "10"
+       # gRPC线程池大小配置: 负数=CPU核数倍数, 0~1小数=CPU核数百分比, 正整数=具体数量
+       GRPC_MAX_WORKERS: "-1"
+       # Tree实例池大小配置: 负数=CPU核数倍数, 0~1小数=CPU核数百分比, 正整数=具体数量
+       TREE_POOL_SIZE: "-1"
        NVIDIA_VISIBLE_DEVICES: "0"
        NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       #  LD_LIBRARY_PATH: "/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"

@@ -23,6 +23,38 @@ from file_whisper_lib.tree import Tree
 
 server = None
 
+def calculate_worker_count(env_var: str, default_value: str, cpu_count: int) -> int:
+    """
+    根据环境变量计算worker数量
+    - 负整数：逻辑核数的倍数 (如 -2 表示 cpu_count * 2)
+    - 正整数：具体的个数
+    - 0~1的小数：逻辑核数乘以这个数
+    """
+    value_str = os.environ.get(env_var, default_value)
+    
+    try:
+        value = float(value_str)
+        
+        if value < 0:
+            # 负数：逻辑核数的倍数
+            result = int(cpu_count * abs(value))
+        elif 0 < value < 1:
+            # 0~1小数：逻辑核数乘以这个数
+            result = int(cpu_count * value)
+        elif value >= 1:
+            # 正整数：具体个数
+            result = int(value)
+        else:
+            # value == 0
+            result = 1
+            
+        return max(1, result)  # 至少1个
+        
+    except ValueError:
+        from loguru import logger
+        logger.warning(f"Invalid {env_var} value: {value_str}, using default")
+        return max(1, int(float(default_value)) if float(default_value) >= 1 else int(cpu_count * float(default_value)))
+
 class TreePool:
     """Tree实例池，管理多个Tree实例用于并发处理"""
     
@@ -210,15 +242,18 @@ def run_server(port: int):
     
     # 计算CPU逻辑核数和线程池大小
     cpu_count = os.cpu_count()
-    max_workers = max(1, cpu_count // 4)  # 使用逻辑核数的1/4，最少1个线程
+    
+    # 通过环境变量配置gRPC线程池大小
+    max_workers = calculate_worker_count('GRPC_MAX_WORKERS', '0.5', cpu_count)
+    
+    # 通过环境变量配置Tree实例池大小
+    tree_pool_size = calculate_worker_count('TREE_POOL_SIZE', '0.5', cpu_count)
     
     logger.info(f"系统CPU逻辑核数: {cpu_count}")
-    logger.info(f"ThreadPoolExecutor 线程数设置为: {max_workers} (CPU核数的1/4)")
+    logger.info(f"ThreadPoolExecutor 线程数设置为: {max_workers} (环境变量 GRPC_MAX_WORKERS)")
+    logger.info(f"TreePool 实例数设置为: {tree_pool_size} (环境变量 TREE_POOL_SIZE)")
     
-    # 创建Tree实例池，池大小等于CPU核数的1/2
-    tree_pool_size = max(1, cpu_count // 2)
     tree_pool = TreePool(pool_size=tree_pool_size)
-    logger.info(f"TreePool 实例数设置为: {tree_pool_size} (CPU核数的1/2)")
     
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=max_workers),
