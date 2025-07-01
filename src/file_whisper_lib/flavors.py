@@ -7,48 +7,50 @@ from .extractor import Extractor
 from .analyzer import Analyzer
 
 class Flavors:
-    flavor_extractors = {
-        Types.TEXT_PLAIN: [
-            ("url_extractor", Extractor.extract_urls)
-        ],
-        Types.IMAGE: [
-            ("qrcode_extractor", Extractor.extract_qrcode),
-            ("ocr_extractor", Extractor.extract_ocr)
-        ],
-        Types.TEXT_HTML: [
-            ("html_extractor", Extractor.extract_html)
-        ],
-        Types.COMPRESSED_FILE: [
-            ("compressed_file_extractor", Extractor.extract_compressed_file) 
-        ],
-        Types.DOC: [
-            ("word_file_extractor", Extractor.extract_word_file) 
-        ],
-        Types.DOCX: [
-            ("word_file_extractor", Extractor.extract_word_file) 
-        ],
-        Types.PDF: [
-            ("pdf_extractor", Extractor.extract_pdf_file) 
-        ],
-        Types.EMAIL: [
-            ("email_extractor", Extractor.extract_email_file)
-        ]
-    }
+    def __init__(self, extractor: Extractor):
+        self.extractor = extractor
+        
+        self.flavor_extractors = {
+            Types.TEXT_PLAIN: [
+                ("url_extractor", self.extractor.extract_urls)
+            ],
+            Types.IMAGE: [
+                ("qrcode_extractor", self.extractor.extract_qrcode),
+                ("ocr_extractor", self.extractor.extract_ocr)
+            ],
+            Types.TEXT_HTML: [
+                ("html_extractor", self.extractor.extract_html)
+            ],
+            Types.COMPRESSED_FILE: [
+                ("compressed_file_extractor", self.extractor.extract_compressed_file) 
+            ],
+            Types.DOC: [
+                ("word_file_extractor", self.extractor.extract_word_file) 
+            ],
+            Types.DOCX: [
+                ("word_file_extractor", self.extractor.extract_word_file) 
+            ],
+            Types.PDF: [
+                ("pdf_extractor", self.extractor.extract_pdf_file) 
+            ],
+            Types.EMAIL: [
+                ("email_extractor", self.extractor.extract_email_file)
+            ]
+        }
 
-    flavor_analyzers = {
-        Types.COMPRESSED_FILE: [
-            ("compressed_file_analyzer", Analyzer.analyze_compressed_file)
-        ]
-    }
+        self.flavor_analyzers = {
+            Types.COMPRESSED_FILE: [
+                ("compressed_file_analyzer", Analyzer.analyze_compressed_file)
+            ]
+        }
     
-    @staticmethod
-    def extract(node: Node) -> List[Node]:
+    def extract(self, node: Node) -> List[Node]:
         nodes = []
         
         if not node:
             return nodes
             
-        extractors = Flavors.flavor_extractors.get(node.type, [])
+        extractors = self.flavor_extractors.get(node.type, [])
         
         for name, extractor in extractors:
             start = time.time()
@@ -63,12 +65,11 @@ class Flavors:
             
         return nodes
     
-    @staticmethod
-    def analyze(node: Node):
+    def analyze(self, node: Node):
         if not node:
             return
             
-        analyzers = Flavors.flavor_analyzers.get(node.type, [])
+        analyzers = self.flavor_analyzers.get(node.type, [])
         
         for name, analyzer in analyzers:
             start = time.time()

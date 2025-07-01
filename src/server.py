@@ -22,9 +22,14 @@ from file_whisper_lib.tree import Tree
 server = None
 
 class GreeterServiceImpl(WhisperServicer):
+    def __init__(self):
+        # 在服务启动时初始化Tree实例，预加载OCR模型
+        self.tree = Tree()
+    
     def Whispering(self, request: WhisperRequest, context) -> WhisperReply:
         try:
-            tree = Tree()
+            # 使用预初始化的tree实例
+            tree = self.tree
             node = DataNode()
             node.content = DataFile()
 

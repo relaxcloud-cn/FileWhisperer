@@ -7,6 +7,7 @@ from typing import Optional
 from .dt import Node, Meta, File, Data
 
 from .flavors import Flavors
+from .extractor import Extractor
 
 from snowflake import SnowflakeGenerator
 snowflakegen = SnowflakeGenerator(42)
@@ -14,6 +15,8 @@ snowflakegen = SnowflakeGenerator(42)
 class Tree:
     def __init__(self):
         self.root: Optional[Node] = None
+        self.extractor = Extractor()
+        self.flavors = Flavors(self.extractor)
 
     def meta_detect_encoding(self, meta: Meta, data: bytes):
         if not isinstance(data, bytes):
@@ -88,8 +91,8 @@ class Tree:
 
         # Implement these functions as needed
         node.meta.map_string["error_message"] = ""
-        Flavors.analyze(node)
-        nodes = Flavors.extract(node)
+        self.flavors.analyze(node)
+        nodes = self.flavors.extract(node)
         extracted_nodes.extend(nodes)
 
         node.children = extracted_nodes

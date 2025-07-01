@@ -22,15 +22,16 @@ logging.getLogger("PIL.TiffImagePlugin").setLevel(logging.ERROR)
 
 
 class OCRExtractor:
-    paddle_ocr = None
+    def __init__(self):
+        self.paddle_ocr = None
+        self._initialize_paddle_ocr()
     
-    @staticmethod
-    def _initialize_paddle_ocr():
+    def _initialize_paddle_ocr(self):
         """初始化OCR模型（仅在第一次需要时加载）"""
-        if OCRExtractor.paddle_ocr is None:
+        if self.paddle_ocr is None:
             try:
                 logger.info("Initializing PaddleOCR model (first time only)...")
-                OCRExtractor.paddle_ocr = PaddleOCR(
+                self.paddle_ocr = PaddleOCR(
                                 use_doc_orientation_classify=False,
                                 use_doc_unwarping=False,
                                 use_textline_orientation=False)
@@ -42,13 +43,12 @@ class OCRExtractor:
         
         return True
 
-    @staticmethod
-    def _recognize_text_from_image(image_data: bytes) -> str:
+    def _recognize_text_from_image(self, image_data: bytes) -> str:
         """从图像数据中识别文本"""
         temp_file_path = None
         try:
             # 初始化PaddleOCR模型（仅在首次调用时）
-            initialization_success = OCRExtractor._initialize_paddle_ocr()
+            initialization_success = self._initialize_paddle_ocr()
             if not initialization_success:
                 logger.error("Failed to initialize OCR model")
                 return ""
@@ -64,7 +64,7 @@ class OCRExtractor:
             logger.debug(f"Temporary image saved to: {temp_file_path}")
             
             # 使用PaddleOCR的predict方法处理图像文件
-            result = OCRExtractor.paddle_ocr.predict(input=temp_file_path)
+            result = self.paddle_ocr.predict(input=temp_file_path)
             
             if result:
                 text_results = []
@@ -94,8 +94,7 @@ class OCRExtractor:
                 except Exception as e:
                     logger.warning(f"Failed to cleanup temporary file {temp_file_path}: {e}")
 
-    @staticmethod
-    def _create_ocr_node(extracted_text: str, parent_node: Node) -> Node:
+    def _create_ocr_node(self, extracted_text: str, parent_node: Node) -> Node:
         """创建包含OCR结果的节点"""
         t_node = Node()
         t_node.id = 0
@@ -104,8 +103,7 @@ class OCRExtractor:
         t_node.inherit_limits(parent_node)
         return t_node
 
-    @staticmethod
-    def extract_ocr(node: Node) -> List[Node]:
+    def extract_ocr(self, node: Node) -> List[Node]:
         """从节点中提取OCR文本并创建新节点"""
         nodes = []
         
@@ -114,11 +112,11 @@ class OCRExtractor:
                 data = node.content.content
                 
                 # 识别图像中的文本
-                extracted_text = OCRExtractor._recognize_text_from_image(data)
+                extracted_text = self._recognize_text_from_image(data)
                 
                 if extracted_text:
                     # 创建包含OCR结果的节点
-                    ocr_node = OCRExtractor._create_ocr_node(extracted_text, node)
+                    ocr_node = self._create_ocr_node(extracted_text, node)
                     nodes.append(ocr_node)
                     
             elif isinstance(node.content, Data):
