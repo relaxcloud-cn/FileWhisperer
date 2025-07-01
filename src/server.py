@@ -157,10 +157,20 @@ def write_content_to_file(file_path: str, content: bytes):
         f.write(content)
 
 def run_server(port: int):
+    from loguru import logger
+    
     global server
     server_address = f'0.0.0.0:{port}'
+    
+    # 计算CPU逻辑核数和线程池大小
+    cpu_count = os.cpu_count()
+    max_workers = max(1, cpu_count // 4)  # 使用逻辑核数的1/4，最少1个线程
+    
+    logger.info(f"系统CPU逻辑核数: {cpu_count}")
+    logger.info(f"ThreadPoolExecutor 线程数设置为: {max_workers} (CPU核数的1/4)")
+    
     server = grpc.server(
-        futures.ThreadPoolExecutor(max_workers=10),
+        futures.ThreadPoolExecutor(max_workers=max_workers),
         options=[
             ('grpc.max_receive_message_length', 50 * 1024 * 1024),
             ('grpc.max_send_message_length', 50 * 1024 * 1024),
@@ -171,7 +181,7 @@ def run_server(port: int):
     server.add_insecure_port(server_address)
     server.start()
     
-    logging.info(f"Server listening on {server_address}")
+    logger.info(f"Server listening on {server_address}")
     
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
