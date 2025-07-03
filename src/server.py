@@ -94,6 +94,33 @@ class GreeterServiceImpl(WhisperServicer):
         # 使用Tree实例池而不是单个Tree实例
         self.tree_pool = tree_pool
     
+    def _backup_request_file(self, file_content: bytes, file_path: str, backup_dir: str):
+        """
+        将WhisperRequest传输的文件备份到指定目录
+        """
+        import datetime
+        from loguru import logger
+        
+        try:
+            # 确保备份目录存在
+            backup_path = Path(backup_dir)
+            backup_path.mkdir(parents=True, exist_ok=True)
+            
+            # 生成唯一的备份文件名
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            original_name = os.path.basename(file_path)
+            backup_filename = f"{timestamp}_{original_name}"
+            backup_file_path = backup_path / backup_filename
+            
+            # 写入备份文件
+            with open(backup_file_path, 'wb') as f:
+                f.write(file_content)
+            
+            logger.debug(f"Debug backup saved: {backup_file_path}")
+            
+        except Exception as e:
+            logger.error(f"Failed to backup request file: {e}")
+    
     def Whispering(self, request: WhisperRequest, context) -> WhisperReply:
         tree = None
         try:
@@ -137,6 +164,11 @@ class GreeterServiceImpl(WhisperServicer):
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details(error_msg)
                 return WhisperReply()
+
+            # Debug备份功能：如果设置了FILE_WHISPERER_DEBUG_BACKUP_DIR环境变量，则保存文件
+            backup_dir = os.environ.get('FILE_WHISPERER_DEBUG_BACKUP_DIR')
+            if backup_dir:
+                self._backup_request_file(file_content, file_path, backup_dir)
 
             file = node.content
             file.path = file_path

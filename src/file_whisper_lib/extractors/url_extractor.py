@@ -42,5 +42,6 @@ class URLExtractor:
 
     @staticmethod
     def extract_urls_from_text(text: str) -> List[str]:
-        url_pattern = r"(https?://[^\s\"<>{}]+)"
-        return re.findall(url_pattern, text)
+        url_pattern = r"https?://(?:[-\w.])+(?::[0-9]+)?(?:/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:[\w.])*)?)?(?:[\w?=&%#])*"
+        urls = re.findall(url_pattern, text)
+        return list(set(urls))

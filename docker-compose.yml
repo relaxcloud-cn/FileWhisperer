@@ -8,6 +8,8 @@ services:
     environment:
        TESSDATA_PREFIX: /app/fixtures/tesseract
        FILE_WHISPERER_OUTPUT_DIR: /files
+       # Debug备份目录，如果设置则将输入文件保存到此目录用于调试
+      #  FILE_WHISPERER_DEBUG_BACKUP_DIR: /tmp/filewhisperer_debug_backup
        # Tree池获取实例的超时时间(秒)
        TREE_POOL_ACQUIRE_TIMEOUT: "10"
        # gRPC线程池大小配置: 负数=CPU核数倍数, 0~1小数=CPU核数百分比, 正整数=具体数量
@@ -21,6 +23,7 @@ services:
     volumes:
       - /mnt/zfs/files:/files
       - /root/.paddlex:/root/.paddlex
+      - /tmp:/tmp
     restart: always
     logging:
       driver: fluentd
