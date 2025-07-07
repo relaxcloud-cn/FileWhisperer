@@ -3,12 +3,20 @@ OCR文字识别模块
 """
 from typing import List
 from loguru import logger
-from paddleocr import PaddleOCR
+import easyocr
 import traceback
 import os
 import logging
 import tempfile
 import uuid
+
+# 修复 Pillow 10.0.0+ 兼容性问题
+try:
+    from PIL import Image
+    if not hasattr(Image, 'ANTIALIAS'):
+        Image.ANTIALIAS = Image.LANCZOS
+except ImportError:
+    pass
 
 from ..dt import Node, File, Data
 from .utils import encode_binary
@@ -23,21 +31,19 @@ logging.getLogger("PIL.TiffImagePlugin").setLevel(logging.ERROR)
 
 class OCRExtractor:
     def __init__(self):
-        self.paddle_ocr = None
-        self._initialize_paddle_ocr()
+        self.easy_ocr = None
+        self._initialize_easy_ocr()
     
-    def _initialize_paddle_ocr(self):
-        """初始化OCR模型（仅在第一次需要时加载）"""
-        if self.paddle_ocr is None:
+    def _initialize_easy_ocr(self):
+        """初始化EasyOCR模型（仅在第一次需要时加载）"""
+        if self.easy_ocr is None:
             try:
-                logger.info("Initializing PaddleOCR model (first time only)...")
-                self.paddle_ocr = PaddleOCR(
-                                use_doc_orientation_classify=False,
-                                use_doc_unwarping=False,
-                                use_textline_orientation=False)
-                logger.info("PaddleOCR model initialized successfully")
+                logger.info("Initializing EasyOCR model (first time only)...")
+                # 支持中文和英文识别
+                self.easy_ocr = easyocr.Reader(['ch_sim', 'en'])
+                logger.info("EasyOCR model initialized successfully")
             except Exception as e:
-                logger.error(f"Failed to initialize PaddleOCR: {e}")
+                logger.error(f"Failed to initialize EasyOCR: {e}")
                 logger.error(traceback.format_exc())
                 return False
         
@@ -47,8 +53,8 @@ class OCRExtractor:
         """从图像数据中识别文本"""
         temp_file_path = None
         try:
-            # 初始化PaddleOCR模型（仅在首次调用时）
-            initialization_success = self._initialize_paddle_ocr()
+            # 初始化EasyOCR模型（仅在首次调用时）
+            initialization_success = self._initialize_easy_ocr()
             if not initialization_success:
                 logger.error("Failed to initialize OCR model")
                 return ""
@@ -63,16 +69,18 @@ class OCRExtractor:
             
             logger.debug(f"Temporary image saved to: {temp_file_path}")
             
-            # 使用PaddleOCR的predict方法处理图像文件
-            result = self.paddle_ocr.predict(input=temp_file_path)
+            # 使用EasyOCR的readtext方法处理图像文件
+            result = self.easy_ocr.readtext(temp_file_path)
             
             if result:
                 text_results = []
-                for res in result:
-                    # OCRResult对象可以像字典一样访问
-                    if 'rec_texts' in res:
-                        ocr_texts = res['rec_texts']
-                        text_results.extend(ocr_texts)
+                for detection in result:
+                    # EasyOCR返回格式: [bbox, text, confidence]
+                    # 我们只需要文本部分（索引1）
+                    if len(detection) >= 2:
+                        text = detection[1]
+                        if text.strip():  # 只添加非空文本
+                            text_results.append(text.strip())
                 
                 if text_results:
                     extracted_text = '\n'.join(text_results)

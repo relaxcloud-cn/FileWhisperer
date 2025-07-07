@@ -24,23 +24,22 @@ class TestOCRExtractor(unittest.TestCase):
     
     def setUp(self):
         """每个测试前重置OCR模型实例"""
-        OCRExtractor.paddle_ocr = None
+        self.ocr_extractor = OCRExtractor()
+        self.ocr_extractor.easy_ocr = None
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.PaddleOCR')
-    def test_recognize_text_from_english_image(self, mock_paddle_ocr_class):
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.easyocr.Reader')
+    def test_recognize_text_from_english_image(self, mock_easy_ocr_class):
         """测试从英文图片中识别文本"""
-        # 模拟PaddleOCR实例和识别结果
-        mock_paddle_ocr_instance = mock_paddle_ocr_class.return_value
+        # 模拟EasyOCR实例和识别结果
+        mock_easy_ocr_instance = mock_easy_ocr_class.return_value
         mock_ocr_result = [
-            [
-                [[[0, 0], [100, 0], [100, 30], [0, 30]], ('Basics:', 0.95)],
-                [[[0, 40], [200, 40], [200, 70], [0, 70]], ('anatomy of a URL', 0.90)],
-                [[[0, 80], [150, 80], [150, 110], [0, 110]], ('Here are some', 0.85)]
-            ]
+            [[[0, 0], [100, 0], [100, 30], [0, 30]], 'Basics:', 0.95],
+            [[[0, 40], [200, 40], [200, 70], [0, 70]], 'anatomy of a URL', 0.90],
+            [[[0, 80], [150, 80], [150, 110], [0, 110]], 'Here are some', 0.85]
         ]
-        mock_paddle_ocr_instance.ocr.return_value = mock_ocr_result
+        mock_easy_ocr_instance.readtext.return_value = mock_ocr_result
         
-        result = OCRExtractor._recognize_text_from_image(self.english_image_data)
+        result = self.ocr_extractor._recognize_text_from_image(self.english_image_data)
         
         # 验证返回的是字符串
         self.assertIsInstance(result, str)
@@ -51,20 +50,18 @@ class TestOCRExtractor(unittest.TestCase):
         self.assertIn("anatomy of a URL", result)
         self.assertIn("Here are some", result)
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.PaddleOCR')
-    def test_recognize_text_from_chinese_image(self, mock_paddle_ocr_class):
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.easyocr.Reader')
+    def test_recognize_text_from_chinese_image(self, mock_easy_ocr_class):
         """测试从中文图片中识别文本"""
-        # 模拟PaddleOCR实例和识别结果
-        mock_paddle_ocr_instance = mock_paddle_ocr_class.return_value
+        # 模拟EasyOCR实例和识别结果
+        mock_easy_ocr_instance = mock_easy_ocr_class.return_value
         mock_ocr_result = [
-            [
-                [[[0, 0], [100, 0], [100, 30], [0, 30]], ('第二部分', 0.95)],
-                [[[100, 0], [300, 0], [300, 30], [100, 30]], ('AI赋能网络安全思想与实践', 0.90)]
-            ]
+            [[[0, 0], [100, 0], [100, 30], [0, 30]], '第二部分', 0.95],
+            [[[100, 0], [300, 0], [300, 30], [100, 30]], 'AI赋能网络安全思想与实践', 0.90]
         ]
-        mock_paddle_ocr_instance.ocr.return_value = mock_ocr_result
+        mock_easy_ocr_instance.readtext.return_value = mock_ocr_result
         
-        result = OCRExtractor._recognize_text_from_image(self.chinese_image_data)
+        result = self.ocr_extractor._recognize_text_from_image(self.chinese_image_data)
         
         # 验证返回的是字符串
         self.assertIsInstance(result, str)
@@ -74,81 +71,76 @@ class TestOCRExtractor(unittest.TestCase):
         self.assertIn("第二部分", result)
         self.assertIn("AI", result)
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.PaddleOCR')
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.easyocr.Reader')
     def test_recognize_text_with_empty_data(self, _):
         """测试传入空数据时的处理"""
-        result = OCRExtractor._recognize_text_from_image(b'')
+        result = self.ocr_extractor._recognize_text_from_image(b'')
         
         # 验证返回空字符串（因为无法创建图片对象）
         self.assertEqual(result, "")
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.PaddleOCR')
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.easyocr.Reader')
     def test_recognize_text_with_invalid_image_data(self, _):
         """测试传入无效图片数据时的处理"""
         invalid_data = b'not an image'
-        result = OCRExtractor._recognize_text_from_image(invalid_data)
+        result = self.ocr_extractor._recognize_text_from_image(invalid_data)
         
         # 验证返回空字符串（因为无法解析图片）
         self.assertEqual(result, "")
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_paddle_ocr')
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_easy_ocr')
     def test_recognize_text_when_ocr_initialization_fails(self, mock_init):
         """测试OCR初始化失败时的处理"""
         # 模拟初始化失败
         mock_init.return_value = False
         
-        result = OCRExtractor._recognize_text_from_image(self.english_image_data)
+        result = self.ocr_extractor._recognize_text_from_image(self.english_image_data)
         
         # 验证返回空字符串
         self.assertEqual(result, "")
         # 验证初始化方法被调用
         mock_init.assert_called_once()
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor.paddle_ocr')
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_paddle_ocr')
-    def test_recognize_text_when_ocr_returns_none(self, mock_init, mock_paddle_ocr):
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_easy_ocr')
+    def test_recognize_text_when_ocr_returns_none(self, mock_init):
         """测试OCR识别返回None时的处理"""
         # 模拟初始化成功
         mock_init.return_value = True
-        # 模拟OCR返回None
-        mock_paddle_ocr.ocr.return_value = None
+        # 模拟EasyOCR返回None
+        self.ocr_extractor.easy_ocr = type('MockEasyOCR', (), {'readtext': lambda x: None})()
         
-        result = OCRExtractor._recognize_text_from_image(self.english_image_data)
+        result = self.ocr_extractor._recognize_text_from_image(self.english_image_data)
         
         # 验证返回空字符串
         self.assertEqual(result, "")
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor.paddle_ocr')
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_paddle_ocr')
-    def test_recognize_text_with_empty_ocr_result(self, mock_init, mock_paddle_ocr):
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_easy_ocr')
+    def test_recognize_text_with_empty_ocr_result(self, mock_init):
         """测试OCR识别返回空结果时的处理"""
         # 模拟初始化成功
         mock_init.return_value = True
-        # 模拟OCR返回空列表
-        mock_paddle_ocr.ocr.return_value = [[]]
+        # 模拟EasyOCR返回空列表
+        self.ocr_extractor.easy_ocr = type('MockEasyOCR', (), {'readtext': lambda x: []})()
         
-        result = OCRExtractor._recognize_text_from_image(self.english_image_data)
+        result = self.ocr_extractor._recognize_text_from_image(self.english_image_data)
         
         # 验证返回空字符串
         self.assertEqual(result, "")
 
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor.paddle_ocr')
-    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_paddle_ocr')
-    def test_recognize_text_with_mock_ocr_result(self, mock_init, mock_paddle_ocr):
+    @patch('src.file_whisper_lib.extractors.ocr_extractor.OCRExtractor._initialize_easy_ocr')
+    def test_recognize_text_with_mock_ocr_result(self, mock_init):
         """测试使用模拟OCR结果的正常流程"""
         # 模拟初始化成功
         mock_init.return_value = True
         
-        # 模拟OCR返回结果的格式
+        # 模拟EasyOCR返回结果的格式
         mock_ocr_result = [
-            [
-                [[[0, 0], [100, 0], [100, 30], [0, 30]], ('Hello', 0.95)],
-                [[[0, 40], [100, 40], [100, 70], [0, 70]], ('World', 0.90)]
-            ]
+            [[[0, 0], [100, 0], [100, 30], [0, 30]], 'Hello', 0.95],
+            [[[0, 40], [100, 40], [100, 70], [0, 70]], 'World', 0.90]
         ]
-        mock_paddle_ocr.ocr.return_value = mock_ocr_result
+        self.ocr_extractor.easy_ocr = type('MockEasyOCR', (), {'readtext': lambda x: mock_ocr_result})()
         
-        result = OCRExtractor._recognize_text_from_image(self.english_image_data)
+        result = self.ocr_extractor._recognize_text_from_image(self.english_image_data)
         
         # 验证返回预期的文本
         self.assertEqual(result, "Hello\nWorld")

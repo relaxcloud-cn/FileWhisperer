@@ -1,8 +1,5 @@
 services:
   filewhisperer-arm64:
-    build:
-      context: .
-      dockerfile: Dockerfile.arm64
     image: filewhisperer:arm64
     platform: linux/arm64
     container_name: filewhisperer-arm64
@@ -24,8 +21,8 @@ services:
       # 文件处理输出目录
       - ./output:/files
       # PaddleOCR模型缓存
-      - paddleocr_cache:/root/.paddleocr
-      - paddlex_cache:/root/.paddlex
+      # - paddleocr_cache:/root/.paddleocr
+      - /Users/somnambulatory/.paddlex:/root/.paddlex
       # 临时文件目录
       - /tmp:/tmp
     restart: unless-stopped
