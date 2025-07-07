@@ -41,5 +41,7 @@ RUN mkdir -p /root/.paddleocr
 # Copy OCR models
 COPY ocr/whl /root/.paddleocr/whl
 
+COPY .EasyOCR /root/.EasyOCR
+
 # Copy application code
 COPY . .

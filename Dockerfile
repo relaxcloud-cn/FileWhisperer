@@ -33,7 +33,9 @@ COPY requirements.txt .
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /root/.paddleocr
+RUN mkdir -p /root/.EasyOCR
 
 COPY ocr/whl /root/.paddleocr/whl
+COPY .EasyOCR /root/.EasyOCR
 
 COPY . .
