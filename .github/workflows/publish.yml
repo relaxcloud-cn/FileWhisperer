@@ -53,6 +53,6 @@ jobs:
         run: |
           docker manifest rm relaxcloud/filewhisperer:4.0.0 || true
           docker manifest create relaxcloud/filewhisperer:4.0.0 \
-            relaxcloud/filewhisperer:4.0.0-amd64 \
-            relaxcloud/filewhisperer:4.0.0-arm64
+            --amend relaxcloud/filewhisperer:4.0.0-amd64 \
+            --amend relaxcloud/filewhisperer:4.0.0-arm64
           docker manifest push relaxcloud/filewhisperer:4.0.0
