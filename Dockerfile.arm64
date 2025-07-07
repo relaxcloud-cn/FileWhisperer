@@ -43,9 +43,3 @@ COPY ocr/whl /root/.paddleocr/whl
 
 # Copy application code
 COPY . .
-
-# Expose the default gRPC port
-EXPOSE 50051
-
-# Default command
-CMD ["python", "src/server.py", "-p", "50051", "-l", "info"]
