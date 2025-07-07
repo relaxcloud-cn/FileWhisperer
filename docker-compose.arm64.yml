@@ -1,0 +1,53 @@
+services:
+  filewhisperer-arm64:
+    image: filewhisperer:arm64
+    platform: linux/arm64
+    container_name: filewhisperer-arm64
+    ports:
+      - "50051:50051"
+    command: python3 /app/src/server.py -p 50051 -l info
+    environment:
+      TESSDATA_PREFIX: /app/fixtures/tesseract
+      FILE_WHISPERER_OUTPUT_DIR: /files
+      # Tree池获取实例的超时时间(秒)
+      TREE_POOL_ACQUIRE_TIMEOUT: "10"
+      # gRPC线程池大小配置: 负数=CPU核数倍数, 0~1小数=CPU核数百分比, 正整数=具体数量
+      GRPC_MAX_WORKERS: "-1"
+      # Tree实例池大小配置: 负数=CPU核数倍数, 0~1小数=CPU核数百分比, 正整数=具体数量
+      TREE_POOL_SIZE: "-1"
+      # PaddleOCR日志级别
+      PADDLEOCR_LOG_LEVEL: "INFO"
+    volumes:
+      # 文件处理输出目录
+      - ./output:/files
+      # PaddleOCR模型缓存
+      # - paddleocr_cache:/root/.paddleocr
+      - /Users/somnambulatory/.paddlex:/root/.paddlex
+      # 临时文件目录
+      - /tmp:/tmp
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '4.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import grpc; import sys; sys.path.insert(0, '/app/src'); from file_whisper_pb2_grpc import *; channel = grpc.insecure_channel('localhost:50051'); stub = WhisperServiceStub(channel); stub.Whispering"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  paddleocr_cache:
+    driver: local
+  paddlex_cache:
+    driver: local

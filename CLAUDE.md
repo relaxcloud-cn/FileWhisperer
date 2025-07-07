@@ -7,7 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 FileWhisperer is a gRPC-based document parsing service that extracts structured data from various file types (ZIP archives, PDFs, Word documents, HTML, etc.) in an LLM-friendly format. The system supports OCR, password-protected archives, and outputs hierarchical tree structures with metadata.
 
 ## Python Environment
-conda filewhisperer
+```bash
+# Use the virtual environment
+source env/bin/activate
+# or directly use the python interpreter
+/Users/somnambulatory/opt/FileWhisperer/env/bin/python
+```
 
 ## Architecture
 
@@ -47,6 +52,15 @@ pip install -r requirements.txt
 
 # Install gRPC tools for protocol buffer generation
 make install_deps
+
+# Install LibreOffice for DOC file conversion (macOS)
+brew install --cask libreoffice
+
+# Install LibreOffice for DOC file conversion (Ubuntu/Debian)
+sudo apt-get update && sudo apt-get install -y libreoffice libreoffice-writer
+
+# Install LibreOffice for DOC file conversion (CentOS/RHEL)
+sudo yum install -y libreoffice libreoffice-writer
 ```
 
 ### Running the Service
@@ -84,6 +98,10 @@ python src/test_gpu.py
 
 # Install test dependencies if needed
 make install-test-deps
+
+# Concurrent performance testing
+python tests/test_concurrent.py --dir /path/to/files --workers 10 --repeat 3
+python tests/test_concurrent.py --dir /path/to/files --workers 20 --duration 60
 ```
 
 ### Docker Operations
@@ -147,3 +165,5 @@ Follow this merge flow: `doc` → `dev` → `main`
 - OCR processing uses PaddleOCR for text recognition from images
 - All file processing returns hierarchical tree structures with unique node IDs
 - OCR extractor uses static class variables to maintain model instances across requests for efficiency
+- Service supports both file path and binary content input via gRPC `oneof` field
+- Use `tests/test_concurrent.py` for performance testing with configurable workers and patterns

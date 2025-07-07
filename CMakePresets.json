@@ -1,0 +1,43 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "vcpkg",
+            "displayName": "Vcpkg Preset for macOS",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_MAKE_PROGRAM": "/opt/homebrew/bin/ninja"
+            }
+        },
+        {
+            "name": "vcpkg-linux",
+            "displayName": "Vcpkg Preset for Linux",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "/usr/local",
+                "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+            },
+            "environment": {
+                "VCPKG_ROOT": "/opt/vcpkg"
+            }
+        },
+        {
+            "name": "linux-dev",
+            "displayName": "Linux Development Build",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
+                "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+            }
+        }
+    ]
+}

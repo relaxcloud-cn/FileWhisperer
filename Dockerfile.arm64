@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM --platform=linux/arm64 python:3.11-slim
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies optimized for ARM64
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     libgomp1 \
     swig \
+    libopenblas-dev \
+    liblapack-dev \
     libreoffice \
     libreoffice-writer \
     && rm -rf /var/lib/apt/lists/*
@@ -30,10 +32,20 @@ RUN python -m pip install --upgrade pip
 
 COPY requirements.txt .
 
+# Install Python dependencies with ARM64 optimizations
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
+# Create PaddleOCR directory
 RUN mkdir -p /root/.paddleocr
 
+# Copy OCR models
 COPY ocr/whl /root/.paddleocr/whl
 
+# Copy application code
 COPY . .
+
+# Expose the default gRPC port
+EXPOSE 50051
+
+# Default command
+CMD ["python", "src/server.py", "-p", "50051", "-l", "info"]

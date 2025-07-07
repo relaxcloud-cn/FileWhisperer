@@ -47,6 +47,7 @@ class ArchiveExtractor:
         """尝试使用密码解压缩文件"""
         extracted = False
         files = {}
+        last_error = None
         
         # 首先尝试无密码解压
         if not node.passwords:
@@ -54,7 +55,8 @@ class ArchiveExtractor:
                 files = ArchiveExtractor.extract_files_from_data(data)
                 extracted = True
             except Exception as e:
-                raise e
+                last_error = e
+                logger.debug(f"Failed to extract without password: {str(e)}")
         
         # 如果无密码解压失败或存在密码列表，尝试使用密码
         if not extracted and node.passwords:
@@ -63,15 +65,18 @@ class ArchiveExtractor:
                     files = ArchiveExtractor.extract_files_from_data(data, password)
                     extracted = True
                     node.meta.map_string["correct_password"] = password
+                    logger.info(f"Successfully extracted with password: {password}")
                     break
                 except Exception as e:
-                    if "Wrong password" in str(e):
-                        logger.error(f"Password error: {e}")
-                        continue
-                    raise e
+                    last_error = e
+                    logger.debug(f"Failed to extract with password '{password}': {str(e)}")
+                    # 继续尝试下一个密码，不要重新抛出异常
+                    continue
         
         if not extracted:
-            raise RuntimeError("Failed to extract compressed file")
+            error_msg = f"Failed to extract compressed file. Last error: {str(last_error) if last_error else 'Unknown error'}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
         
         return files
     
@@ -105,7 +110,12 @@ class ArchiveExtractor:
                 files_map = extractor.extract(data)
                                 
         except Exception as e:
-            logger.error(f"Error in extract_files_from_data: {str(e)}")
-            raise e
+            error_msg = str(e)
+            logger.debug(f"Extraction failed: {error_msg}")
+            # 将 C++ 异常包装成 Python 异常，以便上层代码可以正确处理
+            if "Wrong password" in error_msg or "password" in error_msg.lower():
+                raise RuntimeError(f"Password error: {error_msg}")
+            else:
+                raise RuntimeError(f"Extraction error: {error_msg}")
             
         return files_map
