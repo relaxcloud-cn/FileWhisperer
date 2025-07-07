@@ -22,7 +22,8 @@ services:
       - ./output:/files
       # PaddleOCR模型缓存
       # - paddleocr_cache:/root/.paddleocr
-      - /Users/somnambulatory/.paddlex:/root/.paddlex
+      # - /Users/somnambulatory/.paddlex:/root/.paddlex
+      - /Users/somnambulatory/.EasyOCR:/root/.EasyOCR
       # 临时文件目录
       - /tmp:/tmp
     restart: unless-stopped
