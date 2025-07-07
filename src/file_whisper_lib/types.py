@@ -1,0 +1,120 @@
+from enum import Enum
+
+class Types(Enum):
+    TEXT_PLAIN = 0  
+    COMPRESSED_FILE = 1
+    IMAGE = 2
+    TEXT_HTML = 3
+    DOC = 4
+    DOCX = 5
+    OTHER = 6
+    PDF = 7
+    EMAIL = 8
+
+Extension_Types = {
+    'doc': Types.DOC,
+    'docx': Types.DOCX,
+    'eml': Types.EMAIL
+}
+
+Types__1 = {
+    # DATA
+    "TEXT": Types.TEXT_PLAIN,
+    "OCR": Types.TEXT_PLAIN, 
+    "QRCODE": Types.TEXT_PLAIN,
+
+    # FILE
+    "application/pdf": Types.PDF,
+    "text/plain": Types.TEXT_PLAIN,
+    "text/html": Types.TEXT_HTML,
+    "application/zip": Types.COMPRESSED_FILE,
+    "application/x-rar-compressed": Types.COMPRESSED_FILE,
+    "application/vnd.rar": Types.COMPRESSED_FILE,
+    "application/x-7z-compressed": Types.COMPRESSED_FILE,
+    "application/x-tar": Types.COMPRESSED_FILE,
+    "application/gzip": Types.COMPRESSED_FILE,
+    "application/x-gzip": Types.COMPRESSED_FILE,
+    "application/x-bzip2": Types.COMPRESSED_FILE,
+    "application/x-xz": Types.COMPRESSED_FILE,
+    "image/aces": Types.IMAGE,
+    "image/apng": Types.IMAGE,
+    "image/avci": Types.IMAGE,
+    "image/avcs": Types.IMAGE,
+    "image/avif": Types.IMAGE,
+    "image/bmp": Types.IMAGE,
+    "image/cgm": Types.IMAGE,
+    "image/dicom-rle": Types.IMAGE,
+    "image/dpx": Types.IMAGE,
+    "image/emf": Types.IMAGE,
+    "image/fits": Types.IMAGE,
+    "image/g3fax": Types.IMAGE,
+    "image/gif": Types.IMAGE,
+    "image/heic": Types.IMAGE,
+    "image/heic-sequence": Types.IMAGE,
+    "image/heif": Types.IMAGE,
+    "image/heif-sequence": Types.IMAGE,
+    "image/hej2k": Types.IMAGE,
+    "image/ief": Types.IMAGE,
+    "image/j2c": Types.IMAGE,
+    "image/jls": Types.IMAGE,
+    "image/jp2": Types.IMAGE,
+    "image/jpeg": Types.IMAGE,
+    "image/jph": Types.IMAGE,
+    "image/jphc": Types.IMAGE,
+    "image/jpm": Types.IMAGE,
+    "image/jpx": Types.IMAGE,
+    "image/jxl": Types.IMAGE,
+    "image/jxr": Types.IMAGE,
+    "image/jxrA": Types.IMAGE,
+    "image/jxrS": Types.IMAGE,
+    "image/jxs": Types.IMAGE,
+    "image/jxsc": Types.IMAGE,
+    "image/jxsi": Types.IMAGE,
+    "image/jxss": Types.IMAGE,
+    "image/ktx": Types.IMAGE,
+    "image/ktx2": Types.IMAGE,
+    "image/naplps": Types.IMAGE,
+    "image/png": Types.IMAGE,
+    "image/prs.btif": Types.IMAGE,
+    "image/prs.pti": Types.IMAGE,
+    "image/pwg-raster": Types.IMAGE,
+    "image/svg+xml": Types.IMAGE,
+    "image/t38": Types.IMAGE,
+    "image/tiff": Types.IMAGE,
+    "image/tiff-fx": Types.IMAGE,
+    "image/vnd.adobe.photoshop": Types.IMAGE,
+    "image/vnd.airzip.accelerator.azv": Types.IMAGE,
+    "image/vnd.cns.inf2": Types.IMAGE,
+    "image/vnd.dece.graphic": Types.IMAGE,
+    "image/vnd.djvu": Types.IMAGE,
+    "image/vnd.dwg": Types.IMAGE,
+    "image/vnd.dxf": Types.IMAGE,
+    "image/vnd.dvb.subtitle": Types.IMAGE,
+    "image/vnd.fastbidsheet": Types.IMAGE,
+    "image/vnd.fpx": Types.IMAGE,
+    "image/vnd.fst": Types.IMAGE,
+    "image/vnd.fujixerox.edmics-mmr": Types.IMAGE,
+    "image/vnd.fujixerox.edmics-rlc": Types.IMAGE,
+    "image/vnd.globalgraphics.pgb": Types.IMAGE,
+    "image/vnd.microsoft.icon": Types.IMAGE,
+    "image/vnd.mix": Types.IMAGE,
+    "image/vnd.ms-modi": Types.IMAGE,
+    "image/vnd.mozilla.apng": Types.IMAGE,
+    "image/vnd.net-fpx": Types.IMAGE,
+    "image/vnd.pco.b16": Types.IMAGE,
+    "image/vnd.radiance": Types.IMAGE,
+    "image/vnd.sealed.png": Types.IMAGE,
+    "image/vnd.sealedmedia.softseal.gif": Types.IMAGE,
+    "image/vnd.sealedmedia.softseal.jpg": Types.IMAGE,
+    "image/vnd.svf": Types.IMAGE,
+    "image/vnd.tencent.tap": Types.IMAGE,
+    "image/vnd.valve.source.texture": Types.IMAGE,
+    "image/vnd.wap.wbmp": Types.IMAGE,
+    "image/vnd.xiff": Types.IMAGE,
+    "image/vnd.zbrush.pcx": Types.IMAGE,
+    "image/webp": Types.IMAGE,
+    "image/wmf": Types.IMAGE,
+    "image/x-emf": Types.IMAGE,
+    "image/x-wmf": Types.IMAGE,
+    "message/rfc822": Types.EMAIL
+}

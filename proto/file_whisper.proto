@@ -13,6 +13,8 @@ message WhisperRequest {
   }
   repeated string passwords = 3;
   optional int64 root_id = 4;
+  optional int32 pdf_max_pages = 5;  // 控制PDF文档解析的最大页数
+  optional int32 word_max_pages = 6; // 控制Word文档解析的最大页数
 }
 
 message WhisperReply {

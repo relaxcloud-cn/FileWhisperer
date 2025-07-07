@@ -1,0 +1,15 @@
+tar -xzf Python-3.11.11.tgz
+cd Python-3.11.11
+
+./configure --prefix=$(pwd)/../python --enable-optimizations --with-ensurepip=install
+
+make -j$(nproc)
+make install
+
+./python/bin/python3 -m venv env
+source env/bin/activate
+
+pip install grpcio grpcio-tools -i https://pypi.tuna.tsinghua.edu.cn/simple
+make gen_python
+
+pip install click -i https://pypi.tuna.tsinghua.edu.cn/simple

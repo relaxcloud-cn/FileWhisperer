@@ -4,13 +4,14 @@
 PROTO_DIR = ./proto
 
 # Output directories for generated code
-PYTHON_CODE_DIR = ./py
+PYTHON_CODE_DIR = ./src
 CPP_CODE_DIR = ./cpp
 
 # Docker configuration
 DOCKER_IMAGE_NAME = filewhisperer
 DOCKER_IMAGE_TAG = latest
 DOCKER_BUILD_FLAGS = --progress=plain
+DOCKER_ARM64_TAG = arm64
 
 # Find all .proto files in the proto directory
 PROTO_FILES = $(wildcard $(PROTO_DIR)/*.proto)
@@ -34,7 +35,7 @@ CORES = $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 MEMORY = $(shell free -g 2>/dev/null | awk '/^Mem:/{print $$2}' || echo 4)
 
 # Phony targets
-.PHONY: all clean generate_proto install_deps gen_python gen_cpp list docker-build docker-clean docker-rebuild
+.PHONY: all clean generate_proto install_deps gen_python gen_cpp list docker-build docker-clean docker-rebuild docker-build-arm64 docker-clean-arm64 docker-rebuild-arm64 docker-compose-up docker-compose-down docker-compose-up-arm64 docker-compose-down-arm64 test test-install check-pytest install-test-deps
 
 # Default target to install dependencies and generate code
 all: install_deps generate_proto
@@ -115,18 +116,110 @@ docker-clean:
 
 docker-rebuild: docker-clean docker-build
 
+# ARM64 Docker targets
+docker-build-arm64:
+	@echo "Building ARM64 Docker image using $(CORES) cores..."
+	DOCKER_BUILDKIT=$(DOCKER_BUILDKIT) docker build \
+		$(DOCKER_BUILD_FLAGS) \
+		--platform=linux/arm64 \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--build-arg MAKEFLAGS="-j$(CORES)" \
+		-f Dockerfile.arm64 \
+		-t $(DOCKER_IMAGE_NAME):$(DOCKER_ARM64_TAG) \
+		.
+
+docker-clean-arm64:
+	@echo "Removing ARM64 Docker image $(DOCKER_IMAGE_NAME):$(DOCKER_ARM64_TAG)..."
+	docker rmi -f $(DOCKER_IMAGE_NAME):$(DOCKER_ARM64_TAG)
+
+docker-rebuild-arm64: docker-clean-arm64 docker-build-arm64
+
+# Docker Compose targets
+docker-compose-up:
+	@echo "Starting services with docker-compose..."
+	docker-compose up -d
+
+docker-compose-down:
+	@echo "Stopping services with docker-compose..."
+	docker-compose down
+
+docker-compose-up-arm64:
+	@echo "Starting ARM64 services with docker-compose..."
+	docker-compose -f docker-compose.arm64.yml up -d
+
+docker-compose-down-arm64:
+	@echo "Stopping ARM64 services with docker-compose..."
+	docker-compose -f docker-compose.arm64.yml down
+
+docker-compose-logs-arm64:
+	@echo "Viewing ARM64 services logs..."
+	docker-compose -f docker-compose.arm64.yml logs -f
+
+docker-compose-build-arm64:
+	@echo "Building and starting ARM64 services..."
+	docker-compose -f docker-compose.arm64.yml up --build -d
+
+# Testing targets
+check-pytest:
+	@echo "Checking if pytest is installed..."
+	@python -c "import pytest" 2>/dev/null || { \
+		echo "pytest is not installed. Installing pytest..."; \
+		pip install pytest pytest-cov; \
+	}
+	@echo "pytest is available."
+
+install-test-deps: check-pytest
+	@echo "Installing additional test dependencies..."
+	@pip install pytest pytest-cov
+
+test: check-pytest
+	@echo "Running all tests with pytest..."
+	python -m pytest tests/ -v || true
+
+test-install: install-test-deps test
+	@echo "Test dependencies installed and tests completed."
+
+test-coverage: check-pytest
+	@echo "Running tests with coverage report..."
+	python -m pytest tests/ --cov=src --cov-report=html --cov-report=term -v
+	@echo "Coverage report generated in htmlcov/ directory"
+
+test-ocr:
+	@echo "Running OCR extractor tests only..."
+	python -m pytest tests/extractors/test_ocr_extractor.py -v
+
+test-html:
+	@echo "Running HTML extractor tests only..."
+	python -m pytest tests/test_extract_html*.py -v
+
 # Help target
 help:
 	@echo "Available targets:"
-	@echo "  all            : Install dependencies and generate code (default)"
-	@echo "  generate_proto : Generate both Python and C++ code"
-	@echo "  gen            : Shortcut for generate_proto"
-	@echo "  install_deps   : Install required dependencies"
-	@echo "  gen_python     : Generate Python code only"
-	@echo "  gen_cpp        : Generate C++ code only"
-	@echo "  clean          : Clean generated files"
-	@echo "  list           : List all .proto files"
-	@echo "  docker-build   : Build Docker image"
-	@echo "  docker-clean   : Remove Docker image"
-	@echo "  docker-rebuild : Clean and rebuild Docker image"
-	@echo "  help           : Show this help message"
+	@echo "  all              : Install dependencies and generate code (default)"
+	@echo "  generate_proto   : Generate both Python and C++ code"
+	@echo "  gen              : Shortcut for generate_proto"
+	@echo "  install_deps     : Install required dependencies"
+	@echo "  gen_python       : Generate Python code only"
+	@echo "  gen_cpp          : Generate C++ code only"
+	@echo "  clean            : Clean generated files"
+	@echo "  list             : List all .proto files"
+	@echo "  docker-build     : Build Docker image"
+	@echo "  docker-clean     : Remove Docker image"
+	@echo "  docker-rebuild   : Clean and rebuild Docker image"
+	@echo "  docker-build-arm64     : Build ARM64 Docker image"
+	@echo "  docker-clean-arm64     : Remove ARM64 Docker image"
+	@echo "  docker-rebuild-arm64   : Clean and rebuild ARM64 Docker image"
+	@echo "  docker-compose-up      : Start services with docker-compose"
+	@echo "  docker-compose-down    : Stop services with docker-compose"
+	@echo "  docker-compose-up-arm64      : Start ARM64 services with docker-compose"
+	@echo "  docker-compose-down-arm64    : Stop ARM64 services with docker-compose"
+	@echo "  docker-compose-logs-arm64    : View ARM64 services logs"
+	@echo "  docker-compose-build-arm64   : Build and start ARM64 services"
+	@echo "  test             : Run all tests (installs pytest if needed)"
+	@echo "  test-install     : Install test dependencies and run tests"
+	@echo "  test-coverage    : Run tests with coverage report"
+	@echo "  test-ocr         : Run OCR extractor tests only"
+	@echo "  test-html        : Run HTML extractor tests only"
+	@echo "  check-pytest     : Check if pytest is installed"
+	@echo "  install-test-deps: Install pytest and test dependencies"
+	@echo "  help             : Show this help message"
