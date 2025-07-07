@@ -20,9 +20,6 @@ services:
     volumes:
       # 文件处理输出目录
       - ./output:/files
-      # PaddleOCR模型缓存
-      # - paddleocr_cache:/root/.paddleocr
-      - /Users/somnambulatory/.paddlex:/root/.paddlex
       # 临时文件目录
       - /tmp:/tmp
     restart: unless-stopped
