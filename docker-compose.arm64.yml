@@ -17,6 +17,9 @@ services:
       TREE_POOL_SIZE: "-1"
       # PaddleOCR日志级别
       PADDLEOCR_LOG_LEVEL: "INFO"
+      # OCR GPU/CPU 控制配置 (ARM64 通常使用 CPU)
+      OCR_GPU_ENABLED: "false"
+      OCR_FORCE_CPU: "true"
     volumes:
       # 文件处理输出目录
       - ./output:/files

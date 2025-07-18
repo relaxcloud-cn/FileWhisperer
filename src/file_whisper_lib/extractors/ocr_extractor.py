@@ -9,6 +9,7 @@ import os
 import logging
 import tempfile
 import uuid
+import hashlib
 
 # 修复 Pillow 10.0.0+ 兼容性问题
 try:
@@ -29,23 +30,79 @@ logging.getLogger("transformers.configuration_utils").setLevel(logging.ERROR)
 logging.getLogger("PIL.TiffImagePlugin").setLevel(logging.ERROR)
 
 
+def _should_use_gpu() -> bool:
+    """
+    根据环境变量决定是否使用GPU
+    支持完全控制和基于进程百分比的部分控制
+    """
+    # 检查是否强制使用CPU
+    if os.environ.get("OCR_FORCE_CPU", "false").lower() == "true":
+        return False
+    
+    # 检查是否启用GPU
+    gpu_enabled = os.environ.get("OCR_GPU_ENABLED", "false").lower() == "true"
+    if not gpu_enabled:
+        return False
+    
+    # 检查GPU百分比设置
+    gpu_percentage = float(os.environ.get("OCR_GPU_PERCENTAGE", "0"))
+    if gpu_percentage <= 0:
+        return False
+    elif gpu_percentage >= 100:
+        return True
+    
+    # 基于进程ID和TREE_POOL_SIZE进行百分比分配
+    tree_pool_size = int(os.environ.get("TREE_POOL_SIZE", "1"))
+    
+    # 使用进程ID的哈希值来确定性地分配GPU/CPU
+    process_id = os.getpid()
+    process_hash = hashlib.md5(str(process_id).encode()).hexdigest()
+    process_hash_int = int(process_hash[:8], 16)
+    
+    # 计算应该使用GPU的进程数量
+    gpu_process_count = max(1, int(tree_pool_size * gpu_percentage / 100))
+    
+    # 基于哈希值确定当前进程是否应该使用GPU
+    process_index = process_hash_int % tree_pool_size
+    should_use_gpu = process_index < gpu_process_count
+    
+    return should_use_gpu
+
+
 class OCRExtractor:
     def __init__(self):
         self.easy_ocr = None
+        self.use_gpu = _should_use_gpu()
         self._initialize_easy_ocr()
     
     def _initialize_easy_ocr(self):
         """初始化EasyOCR模型（仅在第一次需要时加载）"""
         if self.easy_ocr is None:
             try:
-                logger.info("Initializing EasyOCR model (first time only)...")
-                # 支持中文和英文识别
-                self.easy_ocr = easyocr.Reader(['ch_sim', 'en'])
-                logger.info("EasyOCR model initialized successfully")
+                device_type = "GPU" if self.use_gpu else "CPU"
+                logger.info(f"Initializing EasyOCR model using {device_type} (PID: {os.getpid()})...")
+                
+                # 支持中文和英文识别，根据use_gpu标志决定是否使用GPU
+                self.easy_ocr = easyocr.Reader(['ch_sim', 'en'], gpu=self.use_gpu)
+                
+                logger.info(f"EasyOCR model initialized successfully using {device_type}")
             except Exception as e:
-                logger.error(f"Failed to initialize EasyOCR: {e}")
+                logger.error(f"Failed to initialize EasyOCR with {device_type}: {e}")
                 logger.error(traceback.format_exc())
-                return False
+                
+                # 如果GPU初始化失败，尝试使用CPU
+                if self.use_gpu:
+                    logger.warning("GPU initialization failed, falling back to CPU...")
+                    try:
+                        self.use_gpu = False
+                        self.easy_ocr = easyocr.Reader(['ch_sim', 'en'], gpu=False)
+                        logger.info("EasyOCR model initialized successfully using CPU (fallback)")
+                    except Exception as fallback_e:
+                        logger.error(f"Failed to initialize EasyOCR with CPU fallback: {fallback_e}")
+                        logger.error(traceback.format_exc())
+                        return False
+                else:
+                    return False
         
         return True
 
@@ -70,6 +127,8 @@ class OCRExtractor:
             logger.debug(f"Temporary image saved to: {temp_file_path}")
             
             # 使用EasyOCR的readtext方法处理图像文件
+            device_type = "GPU" if self.use_gpu else "CPU"
+            logger.debug(f"Running OCR text recognition using {device_type}...")
             result = self.easy_ocr.readtext(temp_file_path)
             
             if result:
@@ -84,7 +143,7 @@ class OCRExtractor:
                 
                 if text_results:
                     extracted_text = '\n'.join(text_results)
-                    logger.info(f"OCR completed successfully, extracted {len(text_results)} text items")
+                    logger.info(f"OCR completed successfully using {device_type}, extracted {len(text_results)} text items")
                     return extracted_text
             
             return ""

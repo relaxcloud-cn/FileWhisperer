@@ -20,9 +20,12 @@ services:
        NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       #  LD_LIBRARY_PATH: "/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
        CUDA_HOME: "/usr/local/cuda"
+       # OCR GPU/CPU 控制配置
+       OCR_GPU_ENABLED: "true"
+       OCR_GPU_PERCENTAGE: "50"
+       # OCR_FORCE_CPU: "false"
     volumes:
       - /mnt/zfs/files:/files
-      - /root/.paddlex:/root/.paddlex
       - /tmp:/tmp
     restart: always
     logging:

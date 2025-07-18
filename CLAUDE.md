@@ -8,10 +8,8 @@ FileWhisperer is a gRPC-based document parsing service that extracts structured 
 
 ## Python Environment
 ```bash
-# Use the virtual environment
-source env/bin/activate
-# or directly use the python interpreter
-/Users/somnambulatory/opt/FileWhisperer/env/bin/python
+# Install Python dependencies
+pip install -r requirements.txt
 ```
 
 ## Architecture
@@ -26,7 +24,7 @@ source env/bin/activate
   - `tree.py`: Tree structure management and file processing
   - `flavors.py`: File type detection and routing to appropriate extractors
   - `extractors/`: Specialized extractors for different file types
-- **OCR Support**: PaddleOCR integration with Chinese/English language models in `ocr/` directory
+- **OCR Support**: Multiple OCR engines including PaddleOCR and EasyOCR for text recognition
 - **Docker**: Containerized deployment for OCR processing
 
 ## Development Commands
@@ -130,8 +128,8 @@ docker-compose up -d
 - Protocol definitions: `proto/file_whisper.proto`
 - Generated gRPC code: `src/file_whisper_pb2.py` and `src/file_whisper_pb2_grpc.py`
 - Test fixtures: `tests/fixtures/` (includes various file types for testing)
-- OCR models: `ocr/whl/` (PaddleOCR Chinese and English models)
 - Documentation: `doc/` (requirements, gRPC message specs, environment setup)
+- Temporary files: `tmp/` (temporary processing directory)
 
 ## Branching Strategy
 
@@ -146,12 +144,14 @@ Follow this merge flow: `doc` → `dev` → `main`
 4. **Content Extraction**: Each extractor in `extractors/` handles specific file types and returns structured data
 
 ### Key Extractors
-- `ocr_extractor.py`: PaddleOCR integration for text recognition, supports Chinese/English
+- `ocr_extractor.py`: Multiple OCR engines (PaddleOCR, EasyOCR) for text recognition, supports Chinese/English
 - `pdf_extractor.py`: PyMuPDF-based PDF text and metadata extraction with page limits
-- `word_extractor.py`: python-docx for Word document processing
+- `word_extractor.py`: python-docx for Word document processing with password support
 - `archive_extractor.py`: ZIP/7z archive handling with password support via pybit7z
 - `html_extractor.py`: BeautifulSoup-based HTML parsing and URL extraction
-- `qrcode_extractor.py`: QR code detection and decoding from images
+- `qrcode_extractor.py`: QR code detection and decoding from images using zxing-cpp
+- `email_extractor.py`: Email (.eml) file parsing and content extraction
+- `url_extractor.py`: URL content fetching and processing
 
 ### Node Structure
 - Each `Node` has unique ID, parent/child relationships, and either `File` or `Data` content
@@ -162,8 +162,11 @@ Follow this merge flow: `doc` → `dev` → `main`
 
 - The service processes password-protected archives - use `passwords` field in `WhisperRequest`
 - PDF and Word document processing can be limited via `pdf_max_pages` and `word_max_pages` parameters
-- OCR processing uses PaddleOCR for text recognition from images
+- OCR processing supports multiple engines (PaddleOCR, EasyOCR) for text recognition from images
 - All file processing returns hierarchical tree structures with unique node IDs
 - OCR extractor uses static class variables to maintain model instances across requests for efficiency
 - Service supports both file path and binary content input via gRPC `oneof` field
 - Use `tests/test_concurrent.py` for performance testing with configurable workers and patterns
+- Word documents with password protection are supported via `msoffcrypto-tool`
+- QR code detection uses `zxing-cpp` for high-performance processing
+- Email file (.eml) processing extracts attachments and content hierarchically
