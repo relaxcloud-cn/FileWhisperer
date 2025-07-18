@@ -71,7 +71,6 @@ def _should_use_gpu() -> tuple[bool, int]:
     if tree_pool_size_env.startswith("-"):
         # 从日志中我们知道实际池大小是40，所以直接使用40作为基础
         # 或者我们可以从系统获取CPU核数
-        import os
         cpu_count = os.cpu_count() or 1
         multiplier = abs(int(tree_pool_size_env))
         tree_pool_size = cpu_count * multiplier
