@@ -65,13 +65,28 @@ def _should_use_gpu() -> tuple[bool, int]:
         return True, current_instance
     
     # 基于实例编号和TREE_POOL_SIZE进行百分比分配
-    tree_pool_size = int(os.environ.get("TREE_POOL_SIZE", "1"))
+    tree_pool_size_env = os.environ.get("TREE_POOL_SIZE", "1")
+    
+    # 处理TREE_POOL_SIZE的特殊值（负数表示CPU核数倍数）
+    if tree_pool_size_env.startswith("-"):
+        # 从日志中我们知道实际池大小是40，所以直接使用40作为基础
+        # 或者我们可以从系统获取CPU核数
+        import os
+        cpu_count = os.cpu_count() or 1
+        multiplier = abs(int(tree_pool_size_env))
+        tree_pool_size = cpu_count * multiplier
+    else:
+        tree_pool_size = int(tree_pool_size_env)
     
     # 计算应该使用GPU的实例数量
     gpu_instance_count = max(1, int(tree_pool_size * gpu_percentage / 100))
     
     # 基于实例编号确定当前实例是否应该使用GPU
     should_use_gpu = current_instance < gpu_instance_count
+    
+    # 添加调试日志（只为前几个实例打印，避免日志过多）
+    if current_instance < 5:
+        logger.debug(f"GPU allocation debug - Instance: {current_instance}, Pool size: {tree_pool_size}, GPU percentage: {gpu_percentage}%, GPU instances: {gpu_instance_count}, Should use GPU: {should_use_gpu}")
     
     return should_use_gpu, current_instance
 
