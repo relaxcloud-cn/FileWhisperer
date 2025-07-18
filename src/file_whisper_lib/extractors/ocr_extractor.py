@@ -10,6 +10,7 @@ import logging
 import tempfile
 import uuid
 import hashlib
+import threading
 
 # 修复 Pillow 10.0.0+ 兼容性问题
 try:
@@ -22,6 +23,10 @@ except ImportError:
 from ..dt import Node, File, Data
 from .utils import encode_binary
 
+# 全局实例计数器，用于在同一进程中分配不同的GPU/CPU
+_instance_counter = 0
+_counter_lock = threading.Lock()
+
 # 环境变量和日志设置
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  
 logging.getLogger("transformers").setLevel(logging.ERROR)
@@ -30,49 +35,51 @@ logging.getLogger("transformers.configuration_utils").setLevel(logging.ERROR)
 logging.getLogger("PIL.TiffImagePlugin").setLevel(logging.ERROR)
 
 
-def _should_use_gpu() -> bool:
+def _should_use_gpu() -> tuple[bool, int]:
     """
     根据环境变量决定是否使用GPU
     支持完全控制和基于进程百分比的部分控制
+    返回 (是否使用GPU, 实例编号)
     """
+    global _instance_counter
+    
+    # 获取当前实例编号
+    with _counter_lock:
+        current_instance = _instance_counter
+        _instance_counter += 1
+    
     # 检查是否强制使用CPU
     if os.environ.get("OCR_FORCE_CPU", "false").lower() == "true":
-        return False
+        return False, current_instance
     
     # 检查是否启用GPU
     gpu_enabled = os.environ.get("OCR_GPU_ENABLED", "false").lower() == "true"
     if not gpu_enabled:
-        return False
+        return False, current_instance
     
     # 检查GPU百分比设置
     gpu_percentage = float(os.environ.get("OCR_GPU_PERCENTAGE", "0"))
     if gpu_percentage <= 0:
-        return False
+        return False, current_instance
     elif gpu_percentage >= 100:
-        return True
+        return True, current_instance
     
-    # 基于进程ID和TREE_POOL_SIZE进行百分比分配
+    # 基于实例编号和TREE_POOL_SIZE进行百分比分配
     tree_pool_size = int(os.environ.get("TREE_POOL_SIZE", "1"))
     
-    # 使用进程ID的哈希值来确定性地分配GPU/CPU
-    process_id = os.getpid()
-    process_hash = hashlib.md5(str(process_id).encode()).hexdigest()
-    process_hash_int = int(process_hash[:8], 16)
+    # 计算应该使用GPU的实例数量
+    gpu_instance_count = max(1, int(tree_pool_size * gpu_percentage / 100))
     
-    # 计算应该使用GPU的进程数量
-    gpu_process_count = max(1, int(tree_pool_size * gpu_percentage / 100))
+    # 基于实例编号确定当前实例是否应该使用GPU
+    should_use_gpu = current_instance < gpu_instance_count
     
-    # 基于哈希值确定当前进程是否应该使用GPU
-    process_index = process_hash_int % tree_pool_size
-    should_use_gpu = process_index < gpu_process_count
-    
-    return should_use_gpu
+    return should_use_gpu, current_instance
 
 
 class OCRExtractor:
     def __init__(self):
         self.easy_ocr = None
-        self.use_gpu = _should_use_gpu()
+        self.use_gpu, self.instance_id = _should_use_gpu()
         self._initialize_easy_ocr()
     
     def _initialize_easy_ocr(self):
@@ -80,25 +87,25 @@ class OCRExtractor:
         if self.easy_ocr is None:
             try:
                 device_type = "GPU" if self.use_gpu else "CPU"
-                logger.info(f"Initializing EasyOCR model using {device_type} (PID: {os.getpid()})...")
+                logger.info(f"Initializing EasyOCR model using {device_type} (Instance: {self.instance_id}, PID: {os.getpid()})...")
                 
                 # 支持中文和英文识别，根据use_gpu标志决定是否使用GPU
                 self.easy_ocr = easyocr.Reader(['ch_sim', 'en'], gpu=self.use_gpu)
                 
-                logger.info(f"EasyOCR model initialized successfully using {device_type}")
+                logger.info(f"EasyOCR model initialized successfully using {device_type} (Instance: {self.instance_id})")
             except Exception as e:
-                logger.error(f"Failed to initialize EasyOCR with {device_type}: {e}")
+                logger.error(f"Failed to initialize EasyOCR with {device_type} (Instance: {self.instance_id}): {e}")
                 logger.error(traceback.format_exc())
                 
                 # 如果GPU初始化失败，尝试使用CPU
                 if self.use_gpu:
-                    logger.warning("GPU initialization failed, falling back to CPU...")
+                    logger.warning(f"GPU initialization failed for Instance {self.instance_id}, falling back to CPU...")
                     try:
                         self.use_gpu = False
                         self.easy_ocr = easyocr.Reader(['ch_sim', 'en'], gpu=False)
-                        logger.info("EasyOCR model initialized successfully using CPU (fallback)")
+                        logger.info(f"EasyOCR model initialized successfully using CPU (fallback, Instance: {self.instance_id})")
                     except Exception as fallback_e:
-                        logger.error(f"Failed to initialize EasyOCR with CPU fallback: {fallback_e}")
+                        logger.error(f"Failed to initialize EasyOCR with CPU fallback (Instance: {self.instance_id}): {fallback_e}")
                         logger.error(traceback.format_exc())
                         return False
                 else:
@@ -128,7 +135,7 @@ class OCRExtractor:
             
             # 使用EasyOCR的readtext方法处理图像文件
             device_type = "GPU" if self.use_gpu else "CPU"
-            logger.debug(f"Running OCR text recognition using {device_type}...")
+            logger.debug(f"Running OCR text recognition using {device_type} (Instance: {self.instance_id})...")
             result = self.easy_ocr.readtext(temp_file_path)
             
             if result:
@@ -143,7 +150,7 @@ class OCRExtractor:
                 
                 if text_results:
                     extracted_text = '\n'.join(text_results)
-                    logger.info(f"OCR completed successfully using {device_type}, extracted {len(text_results)} text items")
+                    logger.info(f"OCR completed successfully using {device_type} (Instance: {self.instance_id}), extracted {len(text_results)} text items")
                     return extracted_text
             
             return ""
